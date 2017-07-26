@@ -336,17 +336,17 @@ def plot_mcmc_chain_with_prior(directory, use_prior = False, only_first_star = T
 
 	import corner
 	plt.clf()
-	text_size = 16
-	cor_text = 22
+	text_size = 5
+	cor_text = 8
 	plt.rc('font', family='serif',size = text_size)
 	plt.rc('xtick', labelsize=text_size)
 	plt.rc('ytick', labelsize=text_size)
-	plt.rc('axes', labelsize=text_size, lw=1.0)
-	plt.rc('lines', linewidth = 1)
+	plt.rc('axes', labelsize=text_size, lw=0.3)
+	plt.rc('lines', linewidth = 0.5)
 	plt.rcParams['ytick.major.pad']='8'
 	plt.rcParams['text.latex.preamble']=[r"\usepackage{libertine}"]
 	params = {'text.usetex' : True,
-	          'font.size' : 10,
+	          'font.size' : 6,
 	          'font.family' : 'libertine',
 	          'text.latex.unicode': True,
 	          }
@@ -387,7 +387,7 @@ def plot_mcmc_chain_with_prior(directory, use_prior = False, only_first_star = T
 	alpha=0.5
 	alpha_more = 0.8
 	alpha_less = 0.1
-	lw = 2
+	lw = 0.5
 
 	for i in range(nparameter):
 		for j in range(nparameter):
