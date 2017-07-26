@@ -336,7 +336,7 @@ def plot_mcmc_chain_with_prior(directory, use_prior = False, only_first_star = T
 
 	import corner
 	plt.clf()
-	text_size = 5
+	text_size = 4
 	cor_text = 8
 	plt.rc('font', family='serif',size = text_size)
 	plt.rc('xtick', labelsize=text_size)
