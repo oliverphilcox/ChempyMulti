@@ -337,7 +337,6 @@ def cem_real2(a):
 	basic_solar = solar_abundances()
 	getattr(basic_solar, a.solar_abundance_name)()
 	elements_to_trace = list(a.elements_to_trace)
-		
 	directory = 'model_temp/'
 	### Model is calculated
 	if a.calculate_model:
