@@ -157,7 +157,6 @@ def Chempy(a):
 	for element in elements:
 		if element != 'Fe':
 			abundances[element] -= abundances['Fe']
-	
 	#TEST output
 	#print('Chempy output')
 	#print(abundances[:][-1])

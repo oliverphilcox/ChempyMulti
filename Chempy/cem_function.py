@@ -928,7 +928,7 @@ def posterior_function_many_stars_real(changing_parameter,error_list,error_eleme
 	if not a.error_marginalization:
 		error_elements_decoded = []
 		for item in error_element_list:
-			error_elements_decoded.append(item.decode('utf8'))
+			error_elements_decoded.append(item)#.decode('utf8')) # DECODING NOT NEEDED IN PYTHON 3
 		error_element_list = np.hstack(error_elements_decoded)
 
 
