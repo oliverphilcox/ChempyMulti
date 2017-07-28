@@ -154,9 +154,12 @@ def Chempy(a):
 	abundances = append_fields(abundances,'time', cube.cube['time'])
 	abundances = np.array(abundances)
 	
-	for element in elements:
+	for element in elements:		
 		if element != 'Fe':
-			abundances[element] -= abundances['Fe']
+			try:
+				abundances[element] -= abundances['Fe']
+			except RuntimeWarning: # Remove error from first Fe abundance = -inf
+				pass
 	#TEST output
 	#print('Chempy output')
 	#print(abundances[:][-1])
