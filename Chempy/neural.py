@@ -7,6 +7,7 @@ def training_data():
 	from Chempy.cem_function import posterior_function_returning_predictions
 	import numpy as np
 	from scipy.stats import norm
+	import os
 	
 	# FOR TESTING	
 	import warnings
