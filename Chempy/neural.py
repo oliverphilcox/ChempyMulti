@@ -27,7 +27,11 @@ def training_data():
 	
 	## Now combine lists to make list of all possible combinations (test_size^len(a.p0) = 7^6 ~ 10,000)
 	grid = np.array(np.meshgrid(grid1d[0],grid1d[1],grid1d[2],grid1d[3],grid1d[4],grid1d[5])).T.reshape(-1,6)
-	np.save('Neural/training_grid.npy',grid) # Save for future use
+	
+	directory = 'Neural/'	
+	if not os.path.exists(directory):
+		os.makedirs(directory)
+	np.save(directory+'training_grid.npy',grid) # Save for future use
 	
 	# USING Karakas 10 yields for now
 	#grid = grid[:6] # USE THIS FOR TESTING
