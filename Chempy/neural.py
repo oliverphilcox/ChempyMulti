@@ -76,28 +76,27 @@ def verification_and_testing():
 		
 	a = ModelParameters()
 	names = ['verif','test'] # Two datasets
-	widths = a.test_widths # Gaussian prior widths
 	
-	for i,name in enumerate(names): # Create for both verification and testing datasets
+	for i,name in enumerate(names): # Create two identically distributed datasets
 		length = a.verif_test_sizes[i]
-		norm_grid = []
-		for _ in range(length):
-			norm_grid.append(np.random.normal(size = len(a.p0)))
-			np.save("Neural/"+name+"_norm_grid.npy",norm_grid)
-    
- 	   # Find the actual abundance grid
-		param_grid = [item*widths+a.p0 for item in norm_grid]
+		param_grid = []
 		
-		# Calculate abundances
+		# Distribute data with prior widths
+		for _ in range(length):
+			param_grid.append(np.random.normal(size = len(a.p0), loc = a.p0,
+									scale = a.test_widths))
+			np.save("Neural/"+name+"_param_grid.npy",param_grid)
+    
 		model_abundances = []
 		for j,jtem in enumerate(param_grid):
 			abundances,_ = posterior_function_returning_predictions((jtem,a))
 			model_abundances.append(abundances)
 			if j%100 == 0:
-				print("Calculating %s abundance set %d of %d" %(name,j,length))      
-	
+				print("Calculating %s abundance set %d of %d" %(name,j,length))
+ 		
+ 		# Save abundance table
+		np.save("Neural/"+name+"_abundances.npy",model_abundances)
+		
 	return 0
-	
-
 
 
