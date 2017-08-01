@@ -99,4 +99,110 @@ def verification_and_testing():
 		
 	return 0
 
+def create_network():
+	""" Function to create and train the neural network - this overwrites any previous network.
+	
+	Outputs:
+		epochs - Training epoch number (outputted each 10 epochs)
+		losslog - loss value for each 10 epochs
+		
+		Neural/neural_model.npz - Saved .npz file with model weights
+	"""
+	
+	import torch
+	from torch.autograd import Variable
 
+	# Load parameters
+	a = ModelParameters()
+	n_train = a.training_size**len(a.p0) # No. data points in training set
+	
+	# Load pre-processed training data
+	tr_input = np.load('Neural/training_norm_grid.npy')
+	tr_output = np.load('Neural/training_abundances.npy')	
+	
+	# Calculate the model dimensions
+	dim_in = tr_input.shape[1]
+	dim_out = tr_output.shape[1]
+
+	# Convert to torch variables
+	tr_input = Variable(torch.from_numpy(tr_input)).type(torch.FloatTensor)
+	tr_output = Variable(torch.from_numpy(tr_output), requires_grad=False).type(torch.FloatTensor)
+	
+	# Set up the neural network, with one hidden layer
+	model = [] # Remove any previous network
+	
+	model = torch.nn.Sequential(
+				torch.nn.Linear(dim_in,a.neurons),
+				torch.nn.ReLU(),
+				torch.nn.Linear(a.neurons,dim_out)
+				)
+	loss_fn = torch.nn.L1Loss(size_average=True)
+	
+	# Use Adam optimizer with learning rate specified in parameter.py
+	optimizer = torch.optim.Adam(model.parameters(), lr = a.learning_rate)
+	
+	# For loss records
+	losslog = []
+	epoch = []
+	
+	# Train neural network
+	for i in range(a.epochs):
+		pred_output = model(tr_input)
+		loss = loss_fn(pred_output, tr_output)
+		optimizer.zero_grad() # Initially zero gradient
+		loss.backward() # Backpropagation
+		optimizer.step() # Update via Adam 
+		
+		# Output loss
+		if i % 10 ==0:
+			losslog.append(loss.data[0])
+			epoch.append(i)
+		if i % 100==0:
+			print("Training epoch %d of %d complete" %(i,a.epochs))
+		
+	# Convert weights to numpy arrays	
+	model_numpy = []
+	for param in model.parameters():
+		model_numpy.append(param.data.numpy())
+		
+	np.savez("Neural/neural_model.npz",
+				w_array_0=model_numpy[0],
+				b_array_0=model_numpy[1],
+				w_array_1=model_numpy[2],
+				b_array_1=model_numpy[3])
+				
+	return epoch, losslog
+
+
+def neural_output(test_input):
+	""" This calculates the neural network predicted output for a trained network.
+	
+	Inputs:
+		test_input - Array containing unnormalized parameter values
+		(coeffs - loaded automatically from Neural/neural_model.npz)
+	
+	Output:
+		Neural network abundance prediction
+	"""
+	
+	a = ModelParameters()	
+	
+	# Load in model coefficients
+	coeffs = np.load('Neural/neural_model.npz')
+	w_array_0 = coeffs['w_array_0']
+	w_array_1 = coeffs['w_array_1']
+	b_array_0 = coeffs['b_array_0']
+	b_array_1 = coeffs['b_array_1']
+		
+	# Normalize data for input into network
+	norm_data = (test_input - a.p0)/np.array(a.training_widths)
+	
+	# Calculate neural network output
+	hidden = np.maximum(0,np.dot(w_array_0,norm_data)+b_array_0)
+	output = np.dot(w_array_1, hidden)+b_array_1
+	
+	return output
+	
+
+	
+	
