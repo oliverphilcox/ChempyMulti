@@ -1,3 +1,8 @@
+from Chempy.parameter import ModelParameters
+from Chempy.cem_function import posterior_function_returning_predictions
+import numpy as 
+import os
+
 def training_data():
 	""" Function to create neural network training dataset for Chempy data. 
 
@@ -13,12 +18,8 @@ def training_data():
 		
 	"""
 
-	from Chempy.parameter import ModelParameters
-	from Chempy.cem_function import posterior_function_returning_predictions
-	import numpy as np
 	from scipy.stats import norm as gaussian
-	import os
-	
+		
 	# FOR TESTING	
 	import warnings
 	warnings.filterwarnings("ignore")
@@ -26,11 +27,11 @@ def training_data():
 	a = ModelParameters()
 	
 	N = a.training_size # No. data points per parameter
-	widths = a.neural_widths # Gaussian widths for parameters	
+	widths = a.training_widths # Gaussian widths for parameters	
 	
 	# Create 1d grid of data points equally spaced in probability space 
 	prob = np.linspace(1/(N+1), 1-1/(N+1), N)
-	grids = [gaussian.ppf(prob) for _ in range(N+1)] # Normalize to unit Gaussian
+	grids = [gaussian.ppf(prob) for _ in range(len(a.p0))] # Normalize to unit Gaussian
 	norm_grid = np.array(np.meshgrid(*grids)).T.reshape(-1,N+1)
 	
 	# Create grid in parameter space
@@ -57,3 +58,42 @@ def training_data():
 
 	return 0
 	
+def verification_and_testing():
+	""" This will create the verification and testing data-sets for use with the neural network.
+	The data-sets are created randomly from the Gaussian prior distribution
+	
+	Outputs (saved as .npy files in the Neural/ folder):
+		verif_input - Normalized verification input data
+		verif_abundances - Verification dataset abundances
+		test_input - Normalized test input data
+		test_abundances - Test dataset abundances
+		
+	"""
+	
+	a = ModelParameters()
+	names = ['verif','test'] # Two datasets
+	widths = a.test_widths # Gaussian prior widths
+	
+	for i,name in enumerate(names): # Create for both verification and testing datasets
+		length = a.verif_test_sizes[i]
+		norm_grid = []
+		for _ in range(length):
+			norm_grid.append(np.random.normal(size = len(a.p0)))
+			np.save("Neural/"+name+"_norm_grid.npy",norm_grid)
+    
+ 	   # Find the actual abundance grid
+		param_grid = [item*widths+a.p0 for item in norm_grid]
+		
+		# Calculate abundances
+		model_abundances = []
+		for j,jtem in enumerate(param_grid[:10]):
+			abundances,_ = posterior_function_returning_predictions((jtem,a))
+			model_abundances.append(abundances)
+			if j%100 == 0:
+				print("Calculating %s abundance set %d of %d" %(name,j,length))      
+	
+	return 0
+	
+
+
+

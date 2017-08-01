@@ -322,4 +322,8 @@ class ModelParameters(object):
 	
 	## Neural network parameters
 	training_size = 5 # no. values per parameter in training set
-	neural_widths = np.array([0.6,0.3,0.3,0.3,0.2,0.2]) # Gaussian widths for training set
+	training_widths = [0.6,0.3,0.3,0.3,0.2,0.2] # Gaussian widths for training set
+	verif_test_sizes = [1000,1000] # Size of array for [verification, test] datasets
+	test_widths = [0.3,0.3,0.3,0.3,0.1,0.1] # Narrower widths for testing/verification
+	
+	
