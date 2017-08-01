@@ -63,9 +63,9 @@ def verification_and_testing():
 	The data-sets are created randomly from the Gaussian prior distribution
 	
 	Outputs (saved as .npy files in the Neural/ folder):
-		verif_input - Normalized verification input data
+		verif_param_grid - Verification parameter data
 		verif_abundances - Verification dataset abundances
-		test_input - Normalized test input data
+		test_param_grid - Test parameter data
 		test_abundances - Test dataset abundances
 		
 	"""

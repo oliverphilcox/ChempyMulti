@@ -63,9 +63,9 @@ def verification_and_testing():
 	The data-sets are created randomly from the Gaussian prior distribution
 	
 	Outputs (saved as .npy files in the Neural/ folder):
-		verif_input - Normalized verification input data
+		verif_param_grid - Verification parameter data
 		verif_abundances - Verification dataset abundances
-		test_input - Normalized test input data
+		test_param_grid - Test parameter data
 		test_abundances - Test dataset abundances
 		
 	"""
@@ -96,31 +96,7 @@ def verification_and_testing():
  		
  		# Save abundance table
 		np.save("Neural/"+name+"_abundances.npy",model_abundances)
-    
-    
-    
-    
-    
-	for i,name in enumerate(names): # Create for both verification and testing datasets
-		length = a.verif_test_sizes[i]
-		norm_grid = []
-		for _ in range(length):
-			norm_grid.append(np.random.normal(size = len(a.p0)))
-			np.save("Neural/"+name+"_norm_grid.npy",norm_grid)
-    
- 	   # Find the actual abundance grid
-		param_grid = [item*widths+a.p0 for item in norm_grid]
 		
-		# Calculate abundances
-		model_abundances = []
-		for j,jtem in enumerate(param_grid):
-			abundances,_ = posterior_function_returning_predictions((jtem,a))
-			model_abundances.append(abundances)
-			if j%100 == 0:
-				print("Calculating %s abundance set %d of %d" %(name,j,length))      
-	
 	return 0
-	
-
 
 
