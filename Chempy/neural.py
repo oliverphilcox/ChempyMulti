@@ -70,6 +70,9 @@ def verification_and_testing():
 		
 	"""
 
+	# FOR TESTING	
+	import warnings
+	warnings.filterwarnings("ignore")
 		
 	a = ModelParameters()
 	names = ['verif','test'] # Two datasets

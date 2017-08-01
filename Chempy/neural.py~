@@ -70,6 +70,9 @@ def verification_and_testing():
 		
 	"""
 
+	# FOR TESTING	
+	import warnings
+	warnings.filterwarnings("ignore")
 		
 	a = ModelParameters()
 	names = ['verif','test'] # Two datasets
@@ -87,7 +90,7 @@ def verification_and_testing():
 		
 		# Calculate abundances
 		model_abundances = []
-		for j,jtem in enumerate(param_grid[:10]):
+		for j,jtem in enumerate(param_grid):
 			abundances,_ = posterior_function_returning_predictions((jtem,a))
 			model_abundances.append(abundances)
 			if j%100 == 0:
