@@ -40,11 +40,11 @@ def training_data():
 	directory = 'Neural/'
 	if not os.path.exists(directory):
 		os.makedirs(directory)
+		
 	np.save(directory+'training_norm_grid.npy',norm_grid)
-	np.save(directory+'training_param_grid.npy')
+	np.save(directory+'training_param_grid.npy',param_grid)
 	
 	## Create abundance output
-	#param_grid = param_grid[:6] # For testing
 	training_abundances = []
 	for i,item in enumerate(param_grid):
 		abundances,_ = posterior_function_returning_predictions((item,a))
@@ -53,7 +53,7 @@ def training_data():
 			print("Calculating abundance set %d of %d" %(i,len(param_grid)))
               
 	# Save abundance table
-	np.save('Neural/training_abundances.npy', training_abundances)
+	np.save(directory+'training_abundances.npy', training_abundances)
 
 	return 0
 	
