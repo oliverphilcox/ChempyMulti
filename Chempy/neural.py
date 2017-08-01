@@ -1,12 +1,22 @@
 def training_data():
-	""" Function to create neural network training dataset for Chempy data
+	""" Function to create neural network training dataset for Chempy data. 
+
+	We calculate a list of 5 trial values for each parameter about the prior, and create an array of all combinations.
+	Trial values are chosen to be uniform in the Gaussian probability space (16.7,33.3, 50 percentile etc.)
+	Gaussian widths (stored in parameter.py) are chosen to fully explore required parameter space
+	Trial values normalized to unit Gaussians are created for neural network input	
 	
-	Output is stored in the Neural/training_abundances.npy file for later use"""
+	Outputs (stored in Neural/ as npy files):
+		training_norm_grid - Input training dataset saved as normalized unit Gaussians
+		training_param_grid - Input training dataset in parameter space
+		training_abundances - Output training abundance data
+		
+	"""
 
 	from Chempy.parameter import ModelParameters
 	from Chempy.cem_function import posterior_function_returning_predictions
 	import numpy as np
-	from scipy.stats import norm
+	from scipy.stats import norm as gaussian
 	import os
 	
 	# FOR TESTING	
@@ -15,32 +25,35 @@ def training_data():
 
 	a = ModelParameters()
 	
-	## This calculates a list of 5 trial values for each parameter around the prior value, as an array of 6 lists which will be combined
-	# Set the desired Gaussian sigma values in the widths parameter (values > prior sigma are used to fully explore parameter space)
-	# Parameter values are chosen that are evenly distributed in the Gaussian probability space (e.g. 16.7, 33, 50 etc. percentile points)
-	grid1d = np.zeros((a.training_size,len(a.p0)))
-	widths = a.neural_widths
-	for i in range(a.training_size):
-		prob = (i+1)/(a.training_size+1)
-		grid1d[i]=  norm.ppf(prob,loc = a.p0, scale = widths)
-	grid1d = grid1d.T 
+	N = a.training_size # No. data points per parameter
+	widths = a.neural_widths # Gaussian widths for parameters	
 	
-	## Now combine lists to make list of all possible combinations (a.training_size^len(a.p0) = 5^6 ~ 10,000)
-	grid = np.array(np.meshgrid(grid1d[0],grid1d[1],grid1d[2],grid1d[3],grid1d[4],grid1d[5])).T.reshape(-1,6)
+	# Create 1d grid of data points equally spaced in probability space 
+	prob = np.linspace(1/(N+1), 1-1/(N+1), N)
+	grids = [gaussian.ppf(prob) for _ in range(N+1)] # Normalize to unit Gaussian
+	norm_grid = np.array(np.meshgrid(*grids)).T.reshape(-1,N+1)
 	
-	directory = 'Neural/'	
+	# Create grid in parameter space
+	param_grid = [item*widths+a.p0 for item in norm_grid]
+
+	# Save grids
+	directory = 'Neural/'
 	if not os.path.exists(directory):
 		os.makedirs(directory)
-	np.save(directory+'training_grid.npy',grid) # Save for future use
+	np.save(directory+'training_norm_grid.npy',norm_grid)
+	np.save(directory+'training_param_grid.npy')
 	
-	# USING Karakas 10 yields for now
-	#grid = grid[:6] # USE THIS FOR TESTING
-	training_abundances = np.zeros((len(grid),22)) # 22 is number of traceable elements - automate this??
-	for i,item in enumerate(grid):
-		abundances,_ = posterior_function_returning_predictions((item,a)) # Send new parameters from grid
-		training_abundances[i] = abundances
+	## Create abundance output
+	#param_grid = param_grid[:6] # For testing
+	training_abundances = []
+	for i,item in enumerate(param_grid):
+		abundances,_ = posterior_function_returning_predictions((item,a))
+		training_abundances.append(abundances)
 		if i%100 == 0:
-			print(i) # For testing
-        
+			print("Calculating abundance set %d of %d" %(i,len(param_grid)))
+              
+	# Save abundance table
 	np.save('Neural/training_abundances.npy', training_abundances)
+
 	return 0
+	
