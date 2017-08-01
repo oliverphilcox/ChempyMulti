@@ -319,3 +319,7 @@ class ModelParameters(object):
 	'gas_at_start' : (0.1,2.,1),
 	'gas_reservoir_mass_factor' : (3.,2.,1),
 	}
+	
+	## Neural network parameters
+	training_size = 5 # no. values per parameter in training set
+	neural_widths = np.array([0.6,0.3,0.3,0.3,0.2,0.2]) # Gaussian widths for training set

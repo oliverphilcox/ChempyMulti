@@ -15,18 +15,17 @@ def training_data():
 
 	a = ModelParameters()
 	
-	## This calculates a list of 7 trial values for each parameter around the prior value, as an array of 6 lists which will be combined
+	## This calculates a list of 5 trial values for each parameter around the prior value, as an array of 6 lists which will be combined
 	# Set the desired Gaussian sigma values in the widths parameter (values > prior sigma are used to fully explore parameter space)
-	# Parameter values are chosen that are evenly distributed in the Gaussian probability space (e.g. 12.5, 25, 37.5 etc. percentile points)
-	test_size = 7
-	grid1d = np.zeros((test_size,len(a.p0)))
-	widths = np.array([0.6,0.3,0.3,0.3,0.2,0.2])
-	for i in range(test_size):
-		prob = (i+1)/(test_size+1)
+	# Parameter values are chosen that are evenly distributed in the Gaussian probability space (e.g. 16.7, 33, 50 etc. percentile points)
+	grid1d = np.zeros((a.training_size,len(a.p0)))
+	widths = a.neural_widths
+	for i in range(a.training_size):
+		prob = (i+1)/(a.training_size+1)
 		grid1d[i]=  norm.ppf(prob,loc = a.p0, scale = widths)
 	grid1d = grid1d.T 
 	
-	## Now combine lists to make list of all possible combinations (test_size^len(a.p0) = 7^6 ~ 10,000)
+	## Now combine lists to make list of all possible combinations (a.training_size^len(a.p0) = 5^6 ~ 10,000)
 	grid = np.array(np.meshgrid(grid1d[0],grid1d[1],grid1d[2],grid1d[3],grid1d[4],grid1d[5])).T.reshape(-1,6)
 	
 	directory = 'Neural/'	

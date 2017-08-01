@@ -117,7 +117,7 @@ class ModelParameters(object):
 
 	##### Karakas2016 needs much more calculational resources (order of magnitude) using 2010 net yields from Karakas are faster and only N is significantly underproduced
 	yield_table_name_agb_list = ['Karakas','Nugrid','Karakas_net_yield','Ventura','Karakas16_net']
-	yield_table_name_agb_index = 4
+	yield_table_name_agb_index = 2
 	yield_table_name_agb = yield_table_name_agb_list[yield_table_name_agb_index]
 
 	yield_table_name_1a_list = ['Iwamoto','Thielemann','Seitenzahl']
@@ -319,3 +319,7 @@ class ModelParameters(object):
 	'gas_at_start' : (0.1,2.,1),
 	'gas_reservoir_mass_factor' : (3.,2.,1),
 	}
+	
+	## Neural network parameters
+	training_size = 5 # no. values per parameter in training set
+	neural_widts = np.array([0.6,0.3,0.3,0.3,0.2,0.2]) # Gaussian widths for training set
