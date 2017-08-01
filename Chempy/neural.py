@@ -1,6 +1,6 @@
 from Chempy.parameter import ModelParameters
 from Chempy.cem_function import posterior_function_returning_predictions
-import numpy as 
+import numpy as np
 import os
 
 def training_data():
@@ -69,7 +69,8 @@ def verification_and_testing():
 		test_abundances - Test dataset abundances
 		
 	"""
-	
+
+		
 	a = ModelParameters()
 	names = ['verif','test'] # Two datasets
 	widths = a.test_widths # Gaussian prior widths
@@ -86,7 +87,7 @@ def verification_and_testing():
 		
 		# Calculate abundances
 		model_abundances = []
-		for j,jtem in enumerate(param_grid[:10]):
+		for j,jtem in enumerate(param_grid):
 			abundances,_ = posterior_function_returning_predictions((jtem,a))
 			model_abundances.append(abundances)
 			if j%100 == 0:
