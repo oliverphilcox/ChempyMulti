@@ -327,6 +327,6 @@ class ModelParameters(object):
 	test_widths = [0.3,0.3,0.3,0.3,0.1,0.1] # Original prior widths for testing/verification
 	
 	neurons = 10 # Number of neurons in layer
-	learning_rate = 0.01 # Adam neural network learning rate
+	learning_rate = 0.001 # Adam neural network learning rate
 	
 	epochs = 1000 # Number of epochs used in testing
