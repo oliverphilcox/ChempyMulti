@@ -4,3 +4,4 @@ emcee
 corner
 multiprocessing
 scipy
+pytorch
