@@ -3,7 +3,8 @@ from Chempy.cem_function import posterior_function_returning_predictions
 import numpy as np
 import os
 import matplotlib.pyplot as plt
-
+a = ModelParameters()
+	
 def training_data():
 	""" Function to create neural network training dataset for Chempy data. 
 
@@ -100,9 +101,11 @@ def verification_and_testing():
 		
 	return None
 
-def create_network(Plot=True):
+def create_network(learning_rate=a.learning_rate,Plot=True):
 	""" Function to create and train the neural network - this overwrites any previous network.
-	
+	Inputs:
+		learning_rate of model (default is in parameter.py)
+		Plot - whether to plot loss curve against epoch
 	Outputs:
 		epochs - Training epoch number (outputted each 10 epochs)
 		losslog - loss value for each 10 epochs
@@ -115,7 +118,6 @@ def create_network(Plot=True):
 	from torch.autograd import Variable
 
 	# Load parameters
-	a = ModelParameters()
 	n_train = a.training_size**len(a.p0) # No. data points in training set
 	
 	# Load pre-processed training data
@@ -141,7 +143,7 @@ def create_network(Plot=True):
 	loss_fn = torch.nn.L1Loss(size_average=True)
 	
 	# Use Adam optimizer with learning rate specified in parameter.py
-	optimizer = torch.optim.Adam(model.parameters(), lr = a.learning_rate)
+	optimizer = torch.optim.Adam(model.parameters(), lr = learning_rate)
 	
 	# For loss records
 	losslog = []
@@ -177,7 +179,7 @@ def create_network(Plot=True):
 		plt.plot(epoch,losslog)
 		plt.ylabel("L1 Loss value")
 		plt.xlabel("Epoch")
-		plt.title("Loss plot for learning rate = %s" %(a.learning_rate))	
+		plt.title("Loss plot for learning rate = %s" %(learning_rate))	
 		plt.savefig('Neural/lossplot.png')
 			
 	return epoch, losslog
@@ -277,7 +279,7 @@ def neural_corner_plot():
 	top = 0.97
 	wspace = 0.0 # blankspace width between subplots
 	hspace = 0.0 # blankspace height between subplots
-	color_max = 0.05
+	color_max = 0.1
 	plt.subplots_adjust(left=left,bottom=bottom,right=right,top=top,wspace=wspace,hspace=hspace)
 
 	# Create plot
@@ -309,8 +311,8 @@ def neural_corner_plot():
 			if i>j:
 				if j !=0:
 					plt.setp(axes[i,j].get_yticklabels(), visible=False)
-				P1 = axes[i,j].scatter(data_v[:,i],data_v[:,j],marker='.',alpha=0.3,
-												c=param_error,vmin=0,vmax=color_max,cmap='plasma',s=1)
+				P1 = axes[i,j].scatter(data_v[:,i],data_v[:,j],marker='x',alpha=0.3,
+												c=param_error,vmin=0,vmax=color_max,cmap='plasma',s=3)
 				P2 = axes[i,j].scatter(data_tr[:,i],data_tr[:,j],c='k',marker='+',s=80)
 				axes[i,j].set_xlim(min(data_tr[:,i])-0.1,max(data_tr[:,i])+0.1)
 				axes[i,j].set_ylim(min(data_tr[:,j])-0.1,max(data_tr[:,j])+0.1)
