@@ -212,7 +212,7 @@ def neural_output(test_input):
 	norm_data = (test_input - a.p0)/np.array(a.training_widths)
 	
 	# Calculate neural network output
-	hidden = np.tanh(np.array(-np.dot(w_array_0,norm_data)+b_array_0))
+	hidden = np.tanh(np.array(np.dot(w_array_0,norm_data)+b_array_0))
 	output = np.dot(w_array_1, hidden)+b_array_1
 	
 	return output

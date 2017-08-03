@@ -330,7 +330,8 @@ def cem2(a):
 
 def cem_real2(a):
 	'''
-	real chempy function. description can be found in cem2
+	real chempy function. description can be found in cem2. \
+	If a.UseNeural==True, then this uses the output from a PRE-TRAINED neural network instead.
 	'''
 	## The time until which Chempy is calculated is cropped to the stellar birth time. Also the SFR should not be below 1/20th of the mean SFR
 	a = shorten_sfr(a)
@@ -339,36 +340,55 @@ def cem_real2(a):
 	elements_to_trace = list(a.elements_to_trace)
 	directory = 'model_temp/'
 	### Model is calculated
-	if a.calculate_model:
-		cube, abundances = Chempy(a)
-		cube1 = cube.cube
-		gas_reservoir = cube.gas_reservoir
-		if a.testing_output:
-			if os.path.exists(directory):
-				if a.verbose:
-					print(directory, ' already exists. Content might be overwritten')
+	if a.UseNeural:
+		# Alternative path using a Neural network to predict the outcome instead of Chempy
+		from Chempy.neural import neural_output
+		neural_abundances = neural_output(a.p0)
+		elements_to_trace.append('Zcorona')
+		elements_to_trace.append('SNratio')
+		abundance_list=[]
+		j=0 # This indexes neural_abundances for ordering
+		for i,name in enumerate(names):
+			if name in a.neural_names:
+				abundance_list.append(neural_abundances[j]) # Required elements for later
+				j = j+1
 			else:
-				os.makedirs(directory)
-			np.save(directory + '%s_elements_to_trace' %(a.name_string), elements_to_trace)
-			np.save(directory + '%s_gas_reservoir' %(a.name_string),gas_reservoir)
-			np.save(directory + '%s_cube' %(a.name_string),cube1)
-			np.save(directory + '%s_abundances' %(a.name_string),abundances)
+				abundance_list.append(0)) # All unwanted elements set to zero
+		# Hack to fix bug
+		del a
+		a=ModelParameters()
+
 	else:
-		cube1 = np.load(directory + '%s_cube.npy' %(a.name_string))
-		abundances = np.load(directory + '%s_abundances.npy' %(a.name_string))
-		gas_reservoir = np.load(directory + '%s_gas_reservoir.npy' %(a.name_string))
-		elements_to_trace = np.load(directory + '%s_elements_to_trace.npy' %(a.name_string))
+		if a.calculate_model:
+			cube, abundances = Chempy(a)
+			cube1 = cube.cube
+			gas_reservoir = cube.gas_reservoir
+			if a.testing_output:
+				if os.path.exists(directory):
+					if a.verbose:
+						print(directory, ' already exists. Content might be overwritten')
+				else:
+					os.makedirs(directory)
+				np.save(directory + '%s_elements_to_trace' %(a.name_string), elements_to_trace)
+				np.save(directory + '%s_gas_reservoir' %(a.name_string),gas_reservoir)
+				np.save(directory + '%s_cube' %(a.name_string),cube1)
+				np.save(directory + '%s_abundances' %(a.name_string),abundances)
+		else:
+			cube1 = np.load(directory + '%s_cube.npy' %(a.name_string))
+			abundances = np.load(directory + '%s_abundances.npy' %(a.name_string))
+			gas_reservoir = np.load(directory + '%s_gas_reservoir.npy' %(a.name_string))
+			elements_to_trace = np.load(directory + '%s_elements_to_trace.npy' %(a.name_string))
 
-	# predicted values are written out and returned together with corona metallicity and SN-ratio
-	abundance_list = []
-	for item in elements_to_trace:
-		abundance_list.append(abundances[item][-1])
+		# predicted values are written out and returned together with corona metallicity and SN-ratio
+		abundance_list = []
+		for item in elements_to_trace:
+			abundance_list.append(abundances[item][-1])
 	
-	abundance_list.append(gas_reservoir['Z'][-1])
-	elements_to_trace.append('Zcorona')
+		abundance_list.append(gas_reservoir['Z'][-1])
+		elements_to_trace.append('Zcorona')
 
-	abundance_list.append(cube1['sn2'][-1]/cube1['sn1a'][-1])
-	elements_to_trace.append('SNratio')
+		abundance_list.append(cube1['sn2'][-1]/cube1['sn1a'][-1])
+		elements_to_trace.append('SNratio')
 
 	return(abundance_list,elements_to_trace)
 
@@ -485,8 +505,10 @@ def posterior_function_predictions(changing_parameter,a):
 	# The endtime is changed for the actual calculation but restored to default afterwards
 	backup = a.end ,a.time_steps, a.total_mass
 	
+	
 	# call Chempy and return the abundances at the end of the simulation = time of star's birth and the corresponding element names as a list
 	abundance_list,elements_to_trace = cem_real2(a)
+	
 	a.end ,a.time_steps, a.total_mass = backup
 	
 	# The last two entries of the abundance list are the Corona metallicity and the SN-ratio

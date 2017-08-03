@@ -321,6 +321,7 @@ class ModelParameters(object):
 	}
 	
 	## Neural network parameters
+	
 	training_size = 5 # no. values per parameter in training set
 	training_widths = [0.6,0.3,0.3,0.3,0.2,0.2] # Gaussian widths for training set
 	verif_test_sizes = [10000,10000] # Size of array for [verification, test] datasets
@@ -330,3 +331,13 @@ class ModelParameters(object):
 	learning_rate = 0.0005 # Default Adam neural network learning rate
 	
 	epochs = 5000 # Number of epochs used in testing
+	
+	# Create list of elements calculated by neural network
+	# (These are common elements between proto-sun and Chempy traced elements)
+	sol_dat=np.load('Chempy/input/stars/Proto-sun.npy')	
+	neural_names = []
+	for item in elements_to_trace:
+		if item in list(sol_dat.dtype.names):
+			neural_names.append(item)
+	
+	UseNeural = False # This defines whether to use trained network in place of Chempy
