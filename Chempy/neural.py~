@@ -117,7 +117,8 @@ def create_network(learning_rate=a.learning_rate,Plot=True):
 	
 	import torch
 	from torch.autograd import Variable
-
+	from torch.optim import lr_scheduler
+	
 	# Load parameters
 	n_train = a.training_size**len(a.p0) # No. data points in training set
 	
@@ -145,6 +146,7 @@ def create_network(learning_rate=a.learning_rate,Plot=True):
 	
 	# Use Adam optimizer with learning rate specified in parameter.py
 	optimizer = torch.optim.Adam(model.parameters(), lr = learning_rate)
+	scheduler = lr_scheduler.ReduceLROnPlateau(optimizer, 'min')
 	
 	# For loss records
 	losslog = []
@@ -157,6 +159,7 @@ def create_network(learning_rate=a.learning_rate,Plot=True):
 		optimizer.zero_grad() # Initially zero gradient
 		loss.backward() # Backpropagation
 		optimizer.step() # Update via optimizer
+		scheduler.step(loss)
 		
 		# Output loss
 		if i % 10 ==0:

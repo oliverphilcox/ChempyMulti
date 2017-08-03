@@ -353,7 +353,7 @@ def cem_real2(a):
 				abundance_list.append(neural_abundances[j]) # Required elements for later
 				j = j+1
 			else:
-				abundance_list.append(0)) # All unwanted elements set to zero
+				abundance_list.append(0) # All unwanted elements set to zero
 		# Hack to fix bug
 		del a
 		a=ModelParameters()
