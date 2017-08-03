@@ -329,4 +329,4 @@ class ModelParameters(object):
 	neurons = 10 # Number of neurons in layer
 	learning_rate = 0.0005 # Adam neural network learning rate
 	
-	epochs = 10000 # Number of epochs used in testing
+	epochs = 5000 # Number of epochs used in testing

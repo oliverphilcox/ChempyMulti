@@ -94,7 +94,8 @@ def verification_and_testing():
 			abundances,_ = posterior_function_returning_predictions((jtem,a))
 			model_abundances.append(abundances)
 			if j%100 == 0:
-				print("Calculating %s abundance set %d of %d" %(name,j,length))
+				#print("Calculating %s abundance set %d of %d" %(name,j,length))
+				continue
  		
  		# Save abundance table
 		np.save("Neural/"+name+"_abundances.npy",model_abundances)
@@ -143,7 +144,7 @@ def create_network(learning_rate=a.learning_rate,Plot=True):
 	loss_fn = torch.nn.L1Loss(size_average=True)
 	
 	# Use Adam optimizer with learning rate specified in parameter.py
-	optimizer = torch.optim.Adam(model.parameters(), lr = learning_rate)
+	optimizer = torch.optim.RMSprop(model.parameters(), lr = learning_rate)
 	
 	# For loss records
 	losslog = []
@@ -155,13 +156,13 @@ def create_network(learning_rate=a.learning_rate,Plot=True):
 		loss = loss_fn(pred_output, tr_output)
 		optimizer.zero_grad() # Initially zero gradient
 		loss.backward() # Backpropagation
-		optimizer.step() # Update via Adam 
+		optimizer.step() # Update via optimizer
 		
 		# Output loss
 		if i % 10 ==0:
 			losslog.append(loss.data[0])
 			epoch.append(i)
-		if i % 100==0:
+		if i % 1000==0:
 			print("Training epoch %d of %d complete" %(i,a.epochs))
 		
 	# Convert weights to numpy arrays	
@@ -176,10 +177,12 @@ def create_network(learning_rate=a.learning_rate,Plot=True):
 				b_array_1=model_numpy[3])
 	
 	if Plot==True:
-		plt.plot(epoch,losslog)
+		plt.plot(epoch,losslog,label=learning_rate)
 		plt.ylabel("L1 Loss value")
 		plt.xlabel("Epoch")
-		plt.title("Loss plot for learning rate = %s" %(learning_rate))	
+		plt.title("Loss plot")	
+		plt.legend()
+		plt.show()
 		plt.savefig('Neural/lossplot.png')
 			
 	return epoch, losslog
@@ -231,9 +234,12 @@ def neural_errors(dataset):
 
 	return np.median(error,axis=1)
 	
-def neural_corner_plot():
+def neural_corner_plot(dataset):
 	""" This function plots a corner plot of the model parameters, with colors showing the median neural network error.
 	The error corresponding to max color can be changed by the color_max parameter.
+	
+	Input:
+		Name of dataset ('verif' or 'test')
 	
 	Output:
 		corner_parameter_plot.png saved in Neural/ directory
@@ -245,9 +251,9 @@ def neural_corner_plot():
 
 	# Load datasets
 	data_tr = np.load('Neural/training_param_grid.npy')
-	data_v = np.load('Neural/verif_param_grid.npy')
+	data_v = np.load('Neural/'+dataset+'_param_grid.npy')
 
-	param_error = neural_errors('verif')
+	param_error = neural_errors(dataset)
 	
 	# Initialize plot
 	plt.clf()
@@ -279,7 +285,7 @@ def neural_corner_plot():
 	top = 0.97
 	wspace = 0.0 # blankspace width between subplots
 	hspace = 0.0 # blankspace height between subplots
-	color_max = 0.1
+	color_max = 0.05
 	plt.subplots_adjust(left=left,bottom=bottom,right=right,top=top,wspace=wspace,hspace=hspace)
 
 	# Create plot
@@ -328,7 +334,7 @@ def neural_corner_plot():
 	cax=fig.add_axes([0.82,0.06,0.02,0.9])
 	plt.colorbar(cplot,cax=cax)
 	plt.show()
-	fig.savefig('Neural/corner_parameter_plot.png',dpi=300,bbox_inches='tight')
+	fig.savefig('Neural/'+dataset+'corner_parameter_plot.png',dpi=300,bbox_inches='tight')
 
 	return None
 
