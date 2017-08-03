@@ -138,13 +138,13 @@ def create_network(learning_rate=a.learning_rate,Plot=True):
 	
 	model = torch.nn.Sequential(
 				torch.nn.Linear(dim_in,a.neurons),
-				torch.nn.ReLU(),
+				torch.nn.Tanh(),
 				torch.nn.Linear(a.neurons,dim_out)
 				)
 	loss_fn = torch.nn.L1Loss(size_average=True)
 	
 	# Use Adam optimizer with learning rate specified in parameter.py
-	optimizer = torch.optim.RMSprop(model.parameters(), lr = learning_rate)
+	optimizer = torch.optim.Adam(model.parameters(), lr = learning_rate)
 	
 	# For loss records
 	losslog = []
@@ -212,7 +212,7 @@ def neural_output(test_input):
 	norm_data = (test_input - a.p0)/np.array(a.training_widths)
 	
 	# Calculate neural network output
-	hidden = np.maximum(0,np.dot(w_array_0,norm_data)+b_array_0)
+	hidden = np.tanh(np.dot(w_array_0,norm_data)+b_array_0)
 	output = np.dot(w_array_1, hidden)+b_array_1
 	
 	return output
