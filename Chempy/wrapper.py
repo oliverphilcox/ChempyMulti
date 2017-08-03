@@ -493,3 +493,4 @@ def send_email(thread_count, iteration_count, posterior_beginning, posterior_end
 	server.login("pythonspeaking@gmail.com", "MPIA_Server_runs")
 	text = msg.as_string()
 	server.sendmail(fromaddr, toaddr, text)	
+	

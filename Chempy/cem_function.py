@@ -468,6 +468,7 @@ def posterior_function_predictions(changing_parameter,a):
 	'''
 	This is like posterior_function_real. But returning the predicted elements as well.
 	'''
+	from Chempy.neural import neural_output
 	
 	start_time = time.time()
 	# the values in a are updated according to changing_parameters and the prior list is appended
@@ -938,6 +939,9 @@ def posterior_function_many_stars_real(changing_parameter,error_list,error_eleme
 			assert element in error_element_list, 'for this element the model error was not given, %s' %(element)
 			model_error.append(error_list[np.where(error_element_list == element)])
 		model_error = np.hstack(model_error)
+
+
+
 
 	## likelihood is calculated (the model error vector is expanded)
 	if a.error_marginalization:
