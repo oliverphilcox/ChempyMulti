@@ -355,8 +355,8 @@ def cem_real2(a):
 			else:
 				abundance_list.append(0) # All unwanted elements set to zero
 		# Hack to fix bug
-		del a
-		a=ModelParameters()
+		#del a
+		#a=ModelParameters()
 
 	else:
 		if a.calculate_model:
