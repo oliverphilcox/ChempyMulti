@@ -186,7 +186,7 @@ def create_network(learning_rate=a.learning_rate,Plot=True):
 		plt.title("Loss plot")	
 		plt.legend()
 		plt.show()
-		plt.savefig('Neural/lossplot.png')
+		plt.savefig('Neural/lossplot')
 			
 	return epoch, losslog
 
@@ -288,7 +288,7 @@ def neural_corner_plot(dataset):
 	top = 0.97
 	wspace = 0.0 # blankspace width between subplots
 	hspace = 0.0 # blankspace height between subplots
-	color_max = 0.05
+	color_max = 0.015
 	plt.subplots_adjust(left=left,bottom=bottom,right=right,top=top,wspace=wspace,hspace=hspace)
 
 	# Create plot
@@ -337,7 +337,7 @@ def neural_corner_plot(dataset):
 	cax=fig.add_axes([0.82,0.06,0.02,0.9])
 	plt.colorbar(cplot,cax=cax)
 	plt.show()
-	fig.savefig('Neural/'+dataset+'corner_parameter_plot.png',dpi=300,bbox_inches='tight')
+	fig.savefig('Neural/'+dataset+'_corner_parameter_plot.png',bbox_inches='tight')
 
 	return None
 
