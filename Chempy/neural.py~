@@ -117,7 +117,7 @@ def create_network(learning_rate=a.learning_rate,Plot=True):
 	
 	import torch
 	from torch.autograd import Variable
-	from torch.optim import lr_scheduler
+	#from torch.optim import lr_scheduler
 	
 	# Load parameters
 	n_train = a.training_size**len(a.p0) # No. data points in training set
@@ -320,11 +320,11 @@ def neural_corner_plot(dataset):
 			if i>j:
 				if j !=0:
 					plt.setp(axes[i,j].get_yticklabels(), visible=False)
-				P1 = axes[i,j].scatter(data_v[:,i],data_v[:,j],marker='x',alpha=0.3,
+				P1 = axes[i,j].scatter(data_v[:,j],data_v[:,i],marker='x',alpha=0.3,
 												c=param_error,vmin=0,vmax=color_max,cmap='plasma',s=3)
-				P2 = axes[i,j].scatter(data_tr[:,i],data_tr[:,j],c='k',marker='+',s=80)
-				axes[i,j].set_xlim(min(data_tr[:,i])-0.1,max(data_tr[:,i])+0.1)
-				axes[i,j].set_ylim(min(data_tr[:,j])-0.1,max(data_tr[:,j])+0.1)
+				P2 = axes[i,j].scatter(data_tr[:,j],data_tr[:,i],c='k',marker='+',s=80)
+				axes[i,j].set_xlim(min(data_tr[:,j])-0.1,max(data_tr[:,j])+0.1)
+				#axes[i,j].set_ylim(min(data_tr[:,j])-0.1,max(data_tr[:,i])+0.1)
 			if j>i:
 				axes[i,j].axis('off')
 			if i == len(a.p0)-1:
@@ -332,10 +332,13 @@ def neural_corner_plot(dataset):
 			if j ==0:
 				axes[i,j].set_ylabel(parameter_names[i])
 			if i==2 and j == 1:
-				cplot = axes[i,j].scatter(data_v[:,i],data_v[:,j],marker='.',alpha=0.3,
-													c=param_error,vmin=0,vmax=color_max,cmap='plasma',s=1)
+				cplot = axes[i,j].scatter(data_v[:,j],data_v[:,i],marker='.',alpha=0.3,
+													c=param_error,vmin=0,vmax=color_max,cmap='plasma',s=3)
+				#axes[i,j].set_xlim(min(data_tr[:,j])-0.1,max(data_tr[:,i])+0.1)
+				#axes[i,j].set_ylim(min(data_tr[:,j])-0.1,max(data_tr[:,i])+0.1)
 	cax=fig.add_axes([0.82,0.06,0.02,0.9])
 	plt.colorbar(cplot,cax=cax)
+	
 	plt.show()
 	fig.savefig('Neural/'+dataset+'_corner_parameter_plot.png',bbox_inches='tight')
 

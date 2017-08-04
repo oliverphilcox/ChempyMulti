@@ -340,4 +340,4 @@ class ModelParameters(object):
 		if item in list(sol_dat.dtype.names):
 			neural_names.append(item)
 	
-	UseNeural = False # This defines whether to use trained network in place of Chempy
+	UseNeural = True # This defines whether to use trained network in place of Chempy

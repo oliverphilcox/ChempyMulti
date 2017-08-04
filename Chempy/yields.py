@@ -812,6 +812,19 @@ class SN2_feedback(object):
 			yield_tables_final_structure[metallicity] = np.load(localpath + 'input/yields/Nomoto2013/nomoto_net_met_ind_%d.npy' %(metallicity_index))
 		self.table = yield_tables_final_structure
 
+	def Frischknecht16(self):
+		"""
+		Yield tables from Frischknecht et al. 2012/2016, calculated for rotating massive stars at solar and low metallicites.
+		This includes s-process elements (not r-process), for stars of mass 15,20,25,40 M_sun
+		"""
+		import numpy.lib.recfunctions as rcfuncs
+
+		dt = np.dtype('a13,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8')
+		yield_tables = {}
+		self.metallicities = [0.0134,0.001,1e-5,1e-7] # First is solar value
+		self.masses=  np.array((15,20,25,40))
+		z = np.genfromtxt(localpath+'input/yields/Frischknecht16/yields_total.txt',skip_header=62,dtype=dt,names=True)
+	## CONTINUE FROM HERE (the above works)
 #######################
 class AGB_feedback(object):
 	def __init__(self):   
