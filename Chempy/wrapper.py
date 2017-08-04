@@ -229,6 +229,10 @@ def multi_star_optimization():
 	from .cem_function import global_optimization_error_returned
 	from .parameter import ModelParameters
 	
+	# For testing
+	import warnings
+	warnings.filterwarnings("ignore")
+		
 	a = ModelParameters()
 	print(a.stellar_identifier_list)
 	start_time = time.time()
