@@ -348,7 +348,7 @@ def cem_real2(a):
 		elements_to_trace.append('SNratio')
 		abundance_list=[]
 		j=0 # This indexes neural_abundances for ordering
-		for i,name in enumerate(names):
+		for i,name in enumerate(elements_to_trace):
 			if name in a.neural_names:
 				abundance_list.append(neural_abundances[j]) # Required elements for later
 				j = j+1
