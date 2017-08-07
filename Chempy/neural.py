@@ -334,7 +334,7 @@ def neural_corner_plot(dataset):
 			if i==2 and j == 1:
 				cplot = axes[i,j].scatter(data_v[:,j],data_v[:,i],marker='.',alpha=0.3,
 													c=param_error,vmin=0,vmax=color_max,cmap='plasma',s=3)
-				axes[i,j].set_xlim(min(data_tr[:,j])-0.1,max(data_tr[:,i])+0.1)
+				axes[i,j].set_xlim(min(data_tr[:,j])-0.1,max(data_tr[:,j])+0.1)
 				axes[i,j].set_ylim(min(data_tr[:,i])-0.1,max(data_tr[:,i])+0.1)
 	cax=fig.add_axes([0.82,0.06,0.02,0.9])
 	plt.colorbar(cplot,cax=cax)
