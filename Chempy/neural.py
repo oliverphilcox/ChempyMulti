@@ -237,6 +237,24 @@ def neural_errors(dataset):
 
 	return np.median(error,axis=1)
 	
+def calculate_errors(dataset):
+	""" Calculate summed absolute error between Chempy and neural network across all elements for each set of parameters.
+	Input is the name of the dataset: 'verif' or 'test'
+	Output is mean and standard deviation of errors across all elements and maximum element error
+	"""
+	
+	# Load abundances
+	model_abundances = np.load('Neural/'+dataset+'_abundances.npy')
+	params = np.load('Neural/'+dataset+'_param_grid.npy')
+	
+	# Calculate absolute model error
+	error=[]
+	for i in range(len(params)):
+		predicted_abundances = neural_output(params[i])
+		error.append(np.absolute(predicted_abundances-model_abundances[i]))
+
+	return np.mean(error,axis=1),np.std(error,axis=1),np.amax(error,axis=1)
+	
 def neural_corner_plot(dataset):
 	""" This function plots a corner plot of the model parameters, with colors showing the median neural network error.
 	The error corresponding to max color can be changed by the color_max parameter.
@@ -346,7 +364,112 @@ def neural_corner_plot(dataset):
 
 
 
+def max_err_corner_plot(dataset):
+	""" This function plots a corner plot of the model parameters, with colors showing the max neural network error across all elements.
+	The error corresponding to max color can be changed by the color_max parameter.
+	
+	Input:
+		Name of dataset ('verif' or 'test')
+	
+	Output:
+		corner_parameter_plot.png saved in Neural/ directory
+	"""
+	
+	from matplotlib import cm
 
+	a=ModelParameters()	
+
+	# Load datasets
+	data_tr = np.load('Neural/training_param_grid.npy')
+	data_v = np.load('Neural/'+dataset+'_param_grid.npy')
+
+	_,_,param_error = calculate_errors(dataset)
+	
+	# Initialize plot
+	plt.clf()
+	text_size = 12
+	plt.rc('font', family='serif',size = text_size)
+	plt.rc('xtick', labelsize=text_size)
+	plt.rc('ytick', labelsize=text_size)
+	plt.rc('axes', labelsize=text_size, lw=1.0)
+	plt.rc('lines', linewidth = 1)
+	plt.rcParams['ytick.major.pad']='8'
+	plt.rcParams['text.latex.preamble']=[r"\usepackage{libertine}"]
+	params = {'text.usetex' : True,
+          'font.family' : 'libertine',
+          'text.latex.unicode': True,
+          }
+	plt.rcParams.update(params)
+	parameter_names = [r'$\alpha_\mathrm{IMF}$',r'$\log_{10}(\mathrm{N_{Ia}})$',
+                   r'$\log_{10}(\tau_\mathrm{Ia})$',r'$\log_{10}(\mathrm{SFE})$',
+                   r'$\log_{10}(\mathrm{SFR_{peak}})$',r'x_{out}']
+
+	
+	# Plot settings
+	fig,axes = plt.subplots(nrows = len(a.p0), ncols = len(a.p0),figsize=(14.69,8.0),dpi=300)
+	alpha = 0.5
+	lw=2 # Linewidth
+	left = 0.1 # Left side of subplots
+	right = 0.8 # Right side
+	bottom = 0.075
+	top = 0.97
+	wspace = 0.0 # blankspace width between subplots
+	hspace = 0.0 # blankspace height between subplots
+	color_max = 0.1
+	plt.subplots_adjust(left=left,bottom=bottom,right=right,top=top,wspace=wspace,hspace=hspace)
+
+	# Create plot
+	for i in range(len(a.p0)):
+		for j in range(len(a.p0)):
+			axes[i,j].locator_params(nbins=4)
+			if j==1:
+				axes[i,j].locator_params(nbins=4)
+			if i==j:
+				counts,edges = np.histogram(np.asarray(data_v[:,j]),bins=10)
+				max_count = float(np.max(counts))
+				counts = np.divide(counts,max_count)
+				median = np.zeros(len(edges)-1)
+				for k in range(len(edges)-1):
+					choice = np.logical_and(np.greater(data_v[:,j],edges[k]),np.less(data_v[:,j],edges[k+1]))
+					error=np.extract(choice,param_error)
+					if len(error) != 0:
+						median[k] = np.median(error)
+				colors = cm.plasma(median/color_max)
+				axes[i,j].bar(left = edges[:-1], height=counts, width = edges[1]-edges[0],
+									color=colors,alpha=alpha, linewidth=0)
+				axes[i,j].set_xlim(min(data_v[:,j]),max(data_v[:,j]))
+				axes[i,j].set_ylim(0,1.05)
+				if j !=0:
+					plt.setp(axes[i,j].get_yticklabels(), visible=False)
+				axes[i,j].vlines(np.percentile(data_v[:,j],15.865),axes[i,j].get_ylim()[0],axes[i,j].get_ylim()[1], color = 'k',alpha=alpha,linewidth = lw,linestyle = 'dashed')    
+				axes[i,j].vlines(np.percentile(data_v[:,j],100-15.865),axes[i,j].get_ylim()[0],axes[i,j].get_ylim()[1], color = 'k',alpha=alpha,linewidth = lw,linestyle = 'dashed')    
+				axes[i,j].vlines(np.percentile(data_v[:,j],50),axes[i,j].get_ylim()[0],axes[i,j].get_ylim()[1], color = 'k',alpha=alpha,linewidth = lw)
+			if i>j:
+				if j !=0:
+					plt.setp(axes[i,j].get_yticklabels(), visible=False)
+				P1 = axes[i,j].scatter(data_v[:,j],data_v[:,i],marker='x',alpha=0.3,
+												c=param_error,vmin=0,vmax=color_max,cmap='plasma',s=3)
+				P2 = axes[i,j].scatter(data_tr[:,j],data_tr[:,i],c='k',marker='+',s=80)
+				axes[i,j].set_xlim(min(data_tr[:,j])-0.1,max(data_tr[:,j])+0.1)
+				axes[i,j].set_ylim(min(data_tr[:,i])-0.1,max(data_tr[:,i])+0.1)
+			if j>i:
+				axes[i,j].axis('off')
+			if i == len(a.p0)-1:
+				axes[i,j].set_xlabel(parameter_names[j])
+			if j ==0:
+				axes[i,j].set_ylabel(parameter_names[i])
+			if i==2 and j == 1:
+				cplot = axes[i,j].scatter(data_v[:,j],data_v[:,i],marker='.',alpha=0.3,
+													c=param_error,vmin=0,vmax=color_max,cmap='plasma',s=3)
+				axes[i,j].set_xlim(min(data_tr[:,j])-0.1,max(data_tr[:,j])+0.1)
+				axes[i,j].set_ylim(min(data_tr[:,i])-0.1,max(data_tr[:,i])+0.1)
+	cax=fig.add_axes([0.82,0.06,0.02,0.9])
+	plt.colorbar(cplot,cax=cax)
+	
+	plt.show()
+	fig.savefig('Neural/'+dataset+'max_err_corner_parameter_plot.png',bbox_inches='tight')
+
+	return None
 
 
 
