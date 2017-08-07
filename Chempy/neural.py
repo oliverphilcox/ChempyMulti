@@ -383,7 +383,7 @@ def max_err_corner_plot(dataset):
 	data_tr = np.load('Neural/training_param_grid.npy')
 	data_v = np.load('Neural/'+dataset+'_param_grid.npy')
 
-	_,_,param_error = calculate_errors(dataset)
+	_,_,param_error = calculate_errors(dataset) # Finds MAX error across all elements
 	
 	# Initialize plot
 	plt.clf()
@@ -415,7 +415,7 @@ def max_err_corner_plot(dataset):
 	top = 0.97
 	wspace = 0.0 # blankspace width between subplots
 	hspace = 0.0 # blankspace height between subplots
-	color_max = 0.1
+	color_max = 0.06
 	plt.subplots_adjust(left=left,bottom=bottom,right=right,top=top,wspace=wspace,hspace=hspace)
 
 	# Create plot
