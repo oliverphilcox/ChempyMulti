@@ -329,8 +329,8 @@ class ModelParameters(object):
 	verif_test_sizes = [10000,10000] # Size of array for [verification, test] datasets
 	test_widths = [0.3,0.3,0.3,0.3,0.1,0.1] # Original prior widths for testing/verification
 	
-	neurons = 20 # Number of neurons in layer
-	learning_rate = 0.003 # Default Adam neural network learning rate
+	neurons = 30 # 20# Number of neurons in layer
+	learning_rate = 0.003 # 0.003 # Default Adam neural network learning rate
 	
 	epochs = 5000 # Number of epochs used in testing
 	
