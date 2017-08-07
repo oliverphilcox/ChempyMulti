@@ -340,7 +340,7 @@ def cem_real2(a):
 	elements_to_trace = list(a.elements_to_trace)
 	directory = 'model_temp/'
 	### Model is calculated
-	if a.UseNeural:
+	if a.UseNeural==True:
 		# Alternative path using a Neural network to predict the outcome instead of Chempy
 		from Chempy.neural import neural_output
 		neural_abundances = neural_output(a.p0)
@@ -353,7 +353,7 @@ def cem_real2(a):
 				abundance_list.append(neural_abundances[j]) # Required elements for later
 				j = j+1
 			else:
-				abundance_list.append(inf) # All unwanted elements set to arbitrary value
+				abundance_list.append(nan) # All unwanted elements set to arbitrary value
 
 	else:
 		if a.calculate_model:
