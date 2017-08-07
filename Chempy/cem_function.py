@@ -353,7 +353,7 @@ def cem_real2(a):
 				abundance_list.append(neural_abundances[j]) # Required elements for later
 				j = j+1
 			else:
-				abundance_list.append(10000) # All unwanted elements set to zero
+				abundance_list.append(10000000) # All unwanted elements set to arbitrary value
 
 	else:
 		if a.calculate_model:
@@ -485,7 +485,6 @@ def posterior_function_predictions(changing_parameter,a):
 	'''
 	This is like posterior_function_real. But returning the predicted elements as well.
 	'''
-	from Chempy.neural import neural_output
 	
 	start_time = time.time()
 	# the values in a are updated according to changing_parameters and the prior list is appended

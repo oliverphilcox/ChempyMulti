@@ -324,7 +324,7 @@ class ModelParameters(object):
 	
 	## Neural network parameters
 	
-	training_size = 4 # no. values per parameter in training set
+	training_size = 5 # no. values per parameter in training set
 	training_widths = [0.6,0.3,0.3,0.3,0.2,0.2] # Gaussian widths for training set
 	verif_test_sizes = [10000,10000] # Size of array for [verification, test] datasets
 	test_widths = [0.3,0.3,0.3,0.3,0.1,0.1] # Original prior widths for testing/verification
