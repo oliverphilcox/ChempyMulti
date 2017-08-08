@@ -343,7 +343,8 @@ def cem_real2(a):
 	if a.UseNeural==True:
 		# Alternative path using a Neural network to predict the outcome instead of Chempy
 		from Chempy.neural import neural_output
-		neural_abundances = neural_output(a.p0)
+		param = [a.high_mass_slope,a.log10_N_0,a.log10_sn1a_time_delay,a.log10_starformation_efficiency,a.log10_sfr_scale,a.outflow_feedback_fraction]
+		neural_abundances = neural_output(param)
 		elements_to_trace.append('Zcorona')
 		elements_to_trace.append('SNratio')
 		abundance_list=[]
