@@ -812,75 +812,75 @@ class SN2_feedback(object):
 			yield_tables_final_structure[metallicity] = np.load(localpath + 'input/yields/Nomoto2013/nomoto_net_met_ind_%d.npy' %(metallicity_index))
 		self.table = yield_tables_final_structure
 
-	def Frischknecht16(self):
-		"""
-		Yield tables from Frischknecht et al. 2012/2016, calculated for rotating massive stars at solar and low metallicites.
-		This includes s-process elements (not r-process), for stars of mass 15,20,25,40 M_sun
-		"""
-		import numpy.lib.recfunctions as rcfuncs
-
-		dt = np.dtype('a13,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8')
-		yield_tables = {}
-		self.metallicities = [0.0134,0.001,1e-5,1e-7] # First is solar value
-		self.masses=  np.array((15,20,25,40))
-		z = np.genfromtxt(localpath+'input/yields/Frischknecht16/yields_total.txt',skip_header=62,dtype=dt,names=True)
-	## CONTINUE FROM HERE (the above works)
-	
-		hydrogen_list = ['p','d']
-		helium_list = ['he3','he4']
-		lithium_list = ['li6','li7']
-		berillium_list = ['be9']
-		boron_list = ['b10','b11']
-		carbon_list = ['c12','c13']
-		nitrogen_list = ['n14','n15']
-		oxygen_list = ['o16','o17','o18']
-		fluorin_list = ['f19']
-		neon_list = ['ne20','ne21','ne22']
-		sodium_list = ['na23']
-		magnesium_list = ['mg24','mg25','mg26']
-		aluminium_list = ['al26','al27']
-		silicon_list = ['si28','si29','si30']
-		phosphorus_list = ['p31']
-		sulfur_list = ['s32','s33','s34','s36']
-		chlorine_list = ['cl35','cl37']
-		argon_list = ['ar36','ar38','ar40']
-		potassium_list = ['k39','k41']
-		calcium_list = ['ca40','ca42','ca43','ca44','ca46','ca48']
-		scandium_list = ['sc45']
-		titanium_list = ['ti46','ti47','ti48','ti49','ti50']
-		vanadium_list = ['v50','v51']
-		chromium_list = ['cr50','cr52','cr53','cr54']
-		manganese_list = ['mn55']
-		iron_list = ['fe54', 'fe56','fe57','fe58','fe60']
-		cobalt_list = ['co59']
-		nickel_list = ['ni58','ni60','ni61','ni62','ni64']
-		copper_list = ['cu63','cu65']
-		zinc_list = ['zn64','zn66','zn67','zn68','zn70']
-		gallium_list = ['ga69','ga71']
-		germanium_list = ['ge70','ge72','ge73','ge74','ge76']
-		arsenic_list =['as75']
-		selenium_list = ['se74','se76','se77','se78','se80','se82']
-		bromine_list = ['br79','br81']
-		krypton_list = ['kr78','kr80','kr82','kr83','kr84','kr86'
-		rubidium_list = ['rb85','rb87']
-		strontium_list = ['sr84','sr86','sr87','sr88']
-		yttrium_list = ['y89']
-		zirconium_list = ['zr90','zr91','zr92','zr94','zr96']
-		niobium_list = ['nb93']
-		molybdenum_list = ['mo92','mo94','mo95','mo96','mo97','mo98','mo100']
-		ruthenium_list = ['ru96','ru98','ru99','ru100','ru101','ru102','ru104']
-		rhodium_list = ['rh103']
-		palladium_list = ['pd102','pd104','pd105','pd106','pd108','pd110']
-		silver_list = ['ag107','ag109']
-		cadmium_list = ['cd106','cd108','cd110','cd111','cd112','cd113','cd114','cd116']
-		indium_list = ['in113','in115']
-		tin_list = ['sn112','sn114','sn115','sn116','sn117','sn118','sn119','sn120','sn122','sn124'
-		antimony_list = ['sb121','sb123']
-		tellurium_list = ['te120','te122','te123','te124','te125','te126']
-		iodine_list = ['i127']
-		xenon_list = ['xe124','xe126','xe128','xe129','xe130','xe131','xe132','xe134','xe136']
-		caesium_list = ['cs133']
-		barium_list = ['ba130','ba132','ba134','ba135','ba136','ba137','ba138']
+	#def Frischknecht16(self):
+#		"""
+#		Yield tables from Frischknecht et al. 2012/2016, calculated for rotating massive stars at solar and low metallicites.
+#		This includes s-process elements (not r-process), for stars of mass 15,20,25,40 M_sun
+#		"""
+#		import numpy.lib.recfunctions as rcfuncs
+#
+#		dt = np.dtype('a13,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8')
+#		yield_tables = {}
+#		self.metallicities = [0.0134,0.001,1e-5,1e-7] # First is solar value
+#		self.masses=  np.array((15,20,25,40))
+#		z = np.genfromtxt(localpath+'input/yields/Frischknecht16/yields_total.txt',skip_header=62,dtype=dt,names=True)
+#	## CONTINUE FROM HERE (the above works)
+#	
+#		hydrogen_list = ['p','d']
+#		helium_list = ['he3','he4']
+#		lithium_list = ['li6','li7']
+#		berillium_list = ['be9']
+#		boron_list = ['b10','b11']
+#		carbon_list = ['c12','c13']
+#		nitrogen_list = ['n14','n15']
+#		oxygen_list = ['o16','o17','o18']
+#		fluorin_list = ['f19']
+#		neon_list = ['ne20','ne21','ne22']
+#		sodium_list = ['na23']
+#		magnesium_list = ['mg24','mg25','mg26']
+#		aluminium_list = ['al26','al27']
+#		silicon_list = ['si28','si29','si30']
+#		phosphorus_list = ['p31']
+#		sulfur_list = ['s32','s33','s34','s36']
+#		chlorine_list = ['cl35','cl37']
+#		argon_list = ['ar36','ar38','ar40']
+#		potassium_list = ['k39','k41']
+#		calcium_list = ['ca40','ca42','ca43','ca44','ca46','ca48']
+#		scandium_list = ['sc45']
+#		titanium_list = ['ti46','ti47','ti48','ti49','ti50']
+#		vanadium_list = ['v50','v51']
+#		chromium_list = ['cr50','cr52','cr53','cr54']
+#		manganese_list = ['mn55']
+#		iron_list = ['fe54', 'fe56','fe57','fe58','fe60']
+#		cobalt_list = ['co59']
+#		nickel_list = ['ni58','ni60','ni61','ni62','ni64']
+#		copper_list = ['cu63','cu65']
+#		zinc_list = ['zn64','zn66','zn67','zn68','zn70']
+#		gallium_list = ['ga69','ga71']
+#		germanium_list = ['ge70','ge72','ge73','ge74','ge76']
+#		arsenic_list =['as75']
+#		selenium_list = ['se74','se76','se77','se78','se80','se82']
+#		bromine_list = ['br79','br81']
+#		krypton_list = ['kr78','kr80','kr82','kr83','kr84','kr86'
+#		rubidium_list = ['rb85','rb87']
+#		strontium_list = ['sr84','sr86','sr87','sr88']
+#		yttrium_list = ['y89']
+#		zirconium_list = ['zr90','zr91','zr92','zr94','zr96']
+#		niobium_list = ['nb93']
+#		molybdenum_list = ['mo92','mo94','mo95','mo96','mo97','mo98','mo100']
+#		ruthenium_list = ['ru96','ru98','ru99','ru100','ru101','ru102','ru104']
+#		rhodium_list = ['rh103']
+#		palladium_list = ['pd102','pd104','pd105','pd106','pd108','pd110']
+#		silver_list = ['ag107','ag109']
+#		cadmium_list = ['cd106','cd108','cd110','cd111','cd112','cd113','cd114','cd116']
+#		indium_list = ['in113','in115']
+#		tin_list = ['sn112','sn114','sn115','sn116','sn117','sn118','sn119','sn120','sn122','sn124'
+#		antimony_list = ['sb121','sb123']
+#		tellurium_list = ['te120','te122','te123','te124','te125','te126']
+#		iodine_list = ['i127']
+#		xenon_list = ['xe124','xe126','xe128','xe129','xe130','xe131','xe132','xe134','xe136']
+#		caesium_list = ['cs133']
+#		barium_list = ['ba130','ba132','ba134','ba135','ba136','ba137','ba138']
 #######################
 class AGB_feedback(object):
 	def __init__(self):   
