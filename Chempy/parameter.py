@@ -175,7 +175,7 @@ class ModelParameters(object):
 	sn2_to_hn = 1.
 
 	sn2mmin = 8.
-	sn2mmax = 100.
+	sn2mmax = 40.
 
 	bhmmin = float(sn2mmax) ## maximum of hypernova
 	bhmmax = float(mmax) ## maximum of the IMF
@@ -219,7 +219,7 @@ class ModelParameters(object):
 	cosmic_accretion_element_fractions = [0.76,0.24]
 	outflow_feedback_fraction = 0.5
 	## various output modes
-	check_processes = False
+	check_processes = True
 	only_net_yields_in_process_tables = True
 	calculate_model = True #just loading the outcome of the last ssp if False
 
