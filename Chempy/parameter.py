@@ -219,7 +219,7 @@ class ModelParameters(object):
 	cosmic_accretion_element_fractions = [0.76,0.24]
 	outflow_feedback_fraction = 0.5
 	## various output modes
-	check_processes = True
+	check_processes = False
 	only_net_yields_in_process_tables = True
 	calculate_model = True #just loading the outcome of the last ssp if False
 

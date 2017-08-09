@@ -786,7 +786,6 @@ class SSP(object):
 		for i,item in enumerate(element_list):
 			self.table[item][1] += (1 - percentage_of_bh_mass)*weight*fractions_in_gas[i]
 			self.bh_table[item][1] += (1-percentage_of_bh_mass)*weight*fractions_in_gas[i]
-			print(self.bh_table[item][1])
 		self.table['bh'][1] = imf_mass_fraction_non_nativ(self.dn,self.x,bhmmin,bhmmax)	
 
 
