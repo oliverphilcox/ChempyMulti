@@ -485,7 +485,7 @@ def send_email(thread_count, iteration_count, posterior_beginning, posterior_end
 
 
 	fromaddr = "pythonspeaking@gmail.com"
-	toaddr = "rybizki@mpia.de"
+	toaddr = "philcox@mpia.de"
 	msg = MIMEMultipart()
 	msg['From'] = fromaddr
 	msg['To'] = toaddr
