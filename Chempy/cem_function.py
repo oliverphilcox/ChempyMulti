@@ -991,3 +991,73 @@ def posterior_function_many_stars_real(changing_parameter,error_list,error_eleme
 		print('prior = ', prior, 'likelihood = ', likelihood)
 
 	return(posterior,model_abundances)
+	
+	
+def posterior_function_for_integration(param):
+	'''
+	This is the posterior function for a single star with beta-error model.
+	This is a cut down version of posterior_function_many_stars_real to cut down integration time.	
+	'''
+	import numpy.ma as ma
+	from .cem_function import get_prior, posterior_function_returning_predictions
+	from .data_to_test import likelihood_evaluation, read_out_wildcard
+	from .parameter import ModelParameters
+
+	## Initialising the model parameters
+	a = ModelParameters()
+	
+	## Chempy is evaluated one after the other for each stellar identifier with the prescribed parameter combination and the element predictions for each star are stored
+	predictions_list = []
+	elements_list = []
+	log_prior_list = []
+
+	for item in a.stellar_identifier_list:
+		abundance_list,element_list = posterior_function_returning_predictions((param,a))
+		predictions_list.append(abundance_list)
+		elements_list.append(element_list)
+		log_prior_list.append(get_prior(param,a))
+
+	## The wildcards are read out so that the predictions can be compared with the observations
+	args = zip(a.stellar_identifier_list, predictions_list, elements_list)
+	list_of_l_input = []
+	for item in args:
+	    list_of_l_input.append(read_out_wildcard(*item))
+	    list_of_l_input[-1] = list(list_of_l_input[-1])
+
+	## Here the predictions and observations are brought into the same array form in order to perform the likelihood calculation fast
+	elements = np.unique(np.hstack(elements_list))
+	# Masking the elements that are not given for specific stars and preparing the likelihood input
+	star_errors = ma.array(np.zeros((len(elements),len(a.stellar_identifier_list))), mask = True)
+	star_abundances = ma.array(np.zeros((len(elements),len(a.stellar_identifier_list))), mask = True)
+	model_abundances = ma.array(np.zeros((len(elements),len(a.stellar_identifier_list))), mask = True)
+
+	for star_index,item in enumerate(list_of_l_input):
+	    for element_index,element in enumerate(item[0]):
+	        assert element in elements, 'observed element is not predicted by Chempy'
+	        new_element_index = np.where(elements == element)[0][0]
+	        star_errors[new_element_index,star_index] = item[1][element_index]
+	        model_abundances[new_element_index,star_index] = item[2][element_index]
+	        star_abundances[new_element_index,star_index] = item[3][element_index]
+
+
+	## likelihood is calculated (the model error vector is expanded)
+	from scipy.stats import beta
+	likelihood_list = []
+	model_errors = np.linspace(a.flat_model_error_prior[0],a.flat_model_error_prior[1],a.flat_model_error_prior[2])
+	if a.beta_error_distribution[0]:
+		error_weight = beta.pdf(model_errors, a = a.beta_error_distribution[1], b = a.beta_error_distribution[2])
+		error_weight/= sum(error_weight)
+	else:
+		error_weight = np.ones_like(model_errors) * 1./float(flat_model_error_prior[2])
+	for i, item in enumerate(model_errors):
+		error_temp = np.ones(len(elements)) * item 
+		likelihood_list.append(likelihood_evaluation(error_temp[:,None], star_errors , model_abundances, star_abundances))
+	likelihood = logsumexp(likelihood_list, b = error_weight)	
+	
+	## Prior from all stars is added
+	prior = sum(log_prior_list)
+	
+	return(prior+likelihood,model_abundances)
+
+	
+	

@@ -101,7 +101,7 @@ def verification_and_testing():
 			if k%100==0 :
 				print("Calculating %s abundance set %d of %d" %(name,k,a.verif_test_sizes[j]))
 		np.save("Neural/"+name+"_param_grid.npy",param_grid)
-   	np.save("Neural/"+name+"_abundances.npy",model_abundances)
+		np.save("Neural/"+name+"_abundances.npy",model_abundances)
    	
 	return None
 
@@ -342,7 +342,7 @@ def neural_corner_plot(dataset):
 				if j !=0:
 					plt.setp(axes[i,j].get_yticklabels(), visible=False)
 				P1 = axes[i,j].scatter(data_v[:,j],data_v[:,i],marker='x',alpha=0.3,
-												c=param_error,vmin=0,vmax=color_max,cmap='plasma',s=3)
+												c=param_error,vmin=0,vmax=color_max,cmap=cm.coolwarm,s=3)
 				P2 = axes[i,j].scatter(data_tr[:,j],data_tr[:,i],c='k',marker='+',s=80)
 				axes[i,j].set_xlim(min(data_tr[:,j])-0.1,max(data_tr[:,j])+0.1)
 				axes[i,j].set_ylim(min(data_tr[:,i])-0.1,max(data_tr[:,i])+0.1)
@@ -354,7 +354,7 @@ def neural_corner_plot(dataset):
 				axes[i,j].set_ylabel(parameter_names[i])
 			if i==2 and j == 1:
 				cplot = axes[i,j].scatter(data_v[:,j],data_v[:,i],marker='.',alpha=0.3,
-													c=param_error,vmin=0,vmax=color_max,cmap='plasma',s=3)
+													c=param_error,vmin=0,vmax=color_max,cmap=cm.coolwarm,s=3)
 				axes[i,j].set_xlim(min(data_tr[:,j])-0.1,max(data_tr[:,j])+0.1)
 				axes[i,j].set_ylim(min(data_tr[:,i])-0.1,max(data_tr[:,i])+0.1)
 	cax=fig.add_axes([0.82,0.06,0.02,0.9])
@@ -451,7 +451,7 @@ def max_err_corner_plot(dataset):
 				if j !=0:
 					plt.setp(axes[i,j].get_yticklabels(), visible=False)
 				P1 = axes[i,j].scatter(data_v[:,j],data_v[:,i],marker='x',alpha=0.3,
-												c=param_error,vmin=0,vmax=color_max,cmap='plasma',s=3)
+												c=param_error,vmin=0,vmax=color_max,cmap=cm.coolwarm,s=3)
 				P2 = axes[i,j].scatter(data_tr[:,j],data_tr[:,i],c='k',marker='+',s=80)
 				axes[i,j].set_xlim(min(data_tr[:,j])-0.1,max(data_tr[:,j])+0.1)
 				axes[i,j].set_ylim(min(data_tr[:,i])-0.1,max(data_tr[:,i])+0.1)
@@ -463,7 +463,7 @@ def max_err_corner_plot(dataset):
 				axes[i,j].set_ylabel(parameter_names[i])
 			if i==2 and j == 1:
 				cplot = axes[i,j].scatter(data_v[:,j],data_v[:,i],marker='.',alpha=0.3,
-													c=param_error,vmin=0,vmax=color_max,cmap='plasma',s=3)
+													c=param_error,vmin=0,vmax=color_max,cmap=cm.coolwarm,s=3)
 				axes[i,j].set_xlim(min(data_tr[:,j])-0.1,max(data_tr[:,j])+0.1)
 				axes[i,j].set_ylim(min(data_tr[:,i])-0.1,max(data_tr[:,i])+0.1)
 	cax=fig.add_axes([0.82,0.06,0.02,0.9])
