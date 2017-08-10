@@ -62,7 +62,7 @@ def training_data():
 	
 def verification_and_testing():
 	""" This will create the verification and testing data-sets for use with the neural network.
-	The data-sets are created randomly from the Gaussian prior distribution
+	The data-sets are created randomly from the Gaussian prior distribution, within the bounds set in the parameter file
 	
 	Outputs (saved as .npy files in the Neural/ folder):
 		verif_param_grid - Verification parameter data
@@ -79,27 +79,30 @@ def verification_and_testing():
 	a = ModelParameters()
 	names = ['verif','test'] # Two datasets
 	
-	for i,name in enumerate(names): # Create two identically distributed datasets
-		length = a.verif_test_sizes[i]
-		param_grid = []
-		
-		# Distribute data with prior widths
-		for _ in range(length):
-			param_grid.append(np.random.normal(size = len(a.p0), loc = a.p0,
-									scale = a.test_widths))
-			np.save("Neural/"+name+"_param_grid.npy",param_grid)
+	lower = np.zeros(len(a.p0))
+	upper = np.zeros(len(a.p0))
+
+	# Set upper/lower bounds in parameter space
+	for i,param_name in enumerate(a.to_optimize):
+		lower[i], upper[i] = a.constraints.get(param_name)
     
+	for j ,name in enumerate(names): # Create both test sets
+		param_grid = []
 		model_abundances = []
-		for j,jtem in enumerate(param_grid):
-			abundances,_ = posterior_function_returning_predictions((jtem,a))
+		for k in range(a.verif_test_sizes[j]): 
+			param = np.ones(len(a.p0))*np.inf # To ensure initial value is not in range
+			for i in range(len(a.p0)):
+				param[i] = np.inf
+				while param[i] > upper[i] or param[i] < lower[i]: # Continue until param is in correct range
+					param[i] = np.random.normal(loc=a.p0[i],scale=a.test_widths[i])
+			param_grid.append(param)
+			abundances,_ = posterior_function_returning_predictions((param,a))
 			model_abundances.append(abundances)
-			if j%100 == 0:
-				#print("Calculating %s abundance set %d of %d" %(name,j,length))
-				continue
- 		
- 		# Save abundance table
-		np.save("Neural/"+name+"_abundances.npy",model_abundances)
-		
+			if k%100==0 :
+				print("Calculating %s abundance set %d of %d" %(name,k,a.verif_test_sizes[j]))
+		np.save("Neural/"+name+"_param_grid.npy",param_grid)
+   	np.save("Neural/"+name+"_abundances.npy",model_abundances)
+   	
 	return None
 
 def create_network(learning_rate=a.learning_rate,Plot=True):
@@ -383,7 +386,7 @@ def max_err_corner_plot(dataset):
 	data_tr = np.load('Neural/training_param_grid.npy')
 	data_v = np.load('Neural/'+dataset+'_param_grid.npy')
 
-	_,_,param_error = calculate_errors(dataset)
+	_,_,param_error = calculate_errors(dataset) # Finds MAX error across all elements
 	
 	# Initialize plot
 	plt.clf()

@@ -266,7 +266,7 @@ class ModelParameters(object):
 	'log10_N_0' : (-5,-1), 
 	'log10_sn1a_time_delay' : (-3,1.),
 	'log10_starformation_efficiency' : (-3,2),
-	'log10_sfr_scale' : (-1,1),
+	'log10_sfr_scale' : (0.085,1),
 	'sfr_scale' : (0.0,None),
 	'outflow_feedback_fraction' : (0.,1.),
 	'log10_gas_reservoir_mass_factor': (None,None),
@@ -330,7 +330,7 @@ class ModelParameters(object):
 	training_widths = [0.9,0.9,0.9,0.9,0.3,0.3] # 3 sigma widths
 	verif_test_sizes = [10000,10000] # Size of array for [verification, test] datasets
 	#test_widths = [0.3,0.3,0.3,0.3,0.1,0.1] # Original prior widths for testing/verification
-	test_widths = [0.6,0.6,0.6,0.6,0.3,0.3] # Test widths	
+	test_widths = [0.9,0.9,0.9,0.9,0.3,0.3] # Test widths	
 	
 	neurons = 30 # 20# Number of neurons in layer
 	learning_rate = 0.003 # 0.003 # Default Adam neural network learning rate

@@ -98,7 +98,6 @@ def shorten_sfr(a):
 		star = np.load(localpath + 'input/stars/' + a.stellar_identifier + '.npy')
 	age_of_star = star['age'][0]
 	assert (age_of_star <= 13.0), "Age of the star must be below 13Gyr"
-
 	basic_sfr = SFR(a.start,a.end,a.time_steps)
 	if a.basic_sfr_name == 'gamma_function':
 		getattr(basic_sfr, a.basic_sfr_name)(S0 = a.S_0 * a.mass_factor,a_parameter = a.a_parameter, loc = a.sfr_beginning, scale = a.sfr_scale)
