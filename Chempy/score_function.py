@@ -83,7 +83,8 @@ def Hogg_scoring(index):
 				required_abundance = abundances[n]
 		np.save(directory+'abundance%d.npy' %(i),required_abundance)
 	return None
-   
+
+	 
  def Hogg_wrapper():
 	import fileinput
 	import sys
