@@ -309,7 +309,7 @@ def neural_corner_plot(dataset):
 	top = 0.97
 	wspace = 0.0 # blankspace width between subplots
 	hspace = 0.0 # blankspace height between subplots
-	color_max = 0.015
+	color_max = a.color_max
 	plt.subplots_adjust(left=left,bottom=bottom,right=right,top=top,wspace=wspace,hspace=hspace)
 
 	# Create plot
@@ -328,7 +328,7 @@ def neural_corner_plot(dataset):
 					error=np.extract(choice,param_error)
 					if len(error) != 0:
 						median[k] = np.median(error)
-				colors = cm.plasma(median/color_max)
+				colors = cm.coolwarm(median/color_max)
 				axes[i,j].bar(left = edges[:-1], height=counts, width = edges[1]-edges[0],
 									color=colors,alpha=alpha, linewidth=0)
 				axes[i,j].set_xlim(min(data_v[:,j]),max(data_v[:,j]))
@@ -437,7 +437,7 @@ def max_err_corner_plot(dataset):
 					error=np.extract(choice,param_error)
 					if len(error) != 0:
 						median[k] = np.median(error)
-				colors = cm.plasma(median/color_max)
+				colors = cm.coolwarm(median/color_max)
 				axes[i,j].bar(left = edges[:-1], height=counts, width = edges[1]-edges[0],
 									color=colors,alpha=alpha, linewidth=0)
 				axes[i,j].set_xlim(min(data_v[:,j]),max(data_v[:,j]))

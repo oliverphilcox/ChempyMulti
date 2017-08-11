@@ -330,7 +330,7 @@ class ModelParameters(object):
 	#test_widths = [0.3,0.3,0.3,0.3,0.1,0.1] # Original prior widths for testing/verification
 	test_widths = [0.9,0.9,0.9,0.9,0.3,0.3] # Test widths	
 	
-	neurons = 30 # 20# Number of neurons in layer
+	neurons = 20 # 20# Number of neurons in layer
 	learning_rate = 0.007  # Default Adam neural network learning rate
 	
 	epochs = 5000 # Number of epochs used in testing
@@ -342,5 +342,7 @@ class ModelParameters(object):
 	for item in elements_to_trace:
 		if item in list(sol_dat.dtype.names):
 			neural_names.append(item)
+
+	color_max = 0.04 # Maximum color in neural network error corner plots	
 	
 	UseNeural = True # This defines whether to use trained network in place of Chempy
