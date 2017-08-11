@@ -82,6 +82,24 @@ def Hogg_scoring(index):
 			if name == el_names[i]:
 				required_abundance = abundances[n]
 		np.save(directory+'abundance%d.npy' %(i),required_abundance)
+	return None
    
-    
+ def Hogg_wrapper():
+	import fileinput
+	import sys
+	from Chempy.parameter import ModelParameters
+	from Chempy.score_function import Hogg_scoring
+	import time
+	init_time = time.time()	
+	for index in [1., 1.2, 1.4, 1.7, 2., 2.5, 3., 4., 5., 6., 8., 10., 12., 15., 18., 22., 26., 30., 40., 50.]:
+		print('Calculating index %.2f. This has taken time %.3f' %(index,time.time-init_time))		
+		for line in fileinput.input("Chempy/parameter.py", inplace=True):
+			if "\tbeta_param =" in line:
+				print("\tbeta_param = %.2f" %(index))
+			else:
+				print(line,end='')
+		del sys.modules['Chempy.parameter']
+		Hogg_scoring(index)  
+		
+	return None
     
