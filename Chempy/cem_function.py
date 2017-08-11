@@ -994,10 +994,12 @@ def posterior_function_many_stars_real(changing_parameter,error_list,error_eleme
 	
 def posterior_function_for_integration(changing_parameter):
 	'''
-	This is the actual posterior function. But the functionality is explained in posterior_function.
+	This is the actual posterior function. But the functionality is explained in posterior_function. 
+	This is a cut down version for integration - ONLY using beta function, and solar data
 	'''
 	from .parameter import ModelParameters
 	from .cem_function import posterior_function_returning_predictions
+	from .data_to_test import likelihood_function_for_integration
 		
 	a = ModelParameters()
 	stellar_identifier = a.stellar_identifier
@@ -1014,7 +1016,7 @@ def posterior_function_for_integration(changing_parameter):
 	abundance_list,elements_to_trace = cem_real2(a)
 	
 	# The last two entries of the abundance list are the Corona metallicity and the SN-ratio
-	abundance_list = abundance_list[:-2]
+	list_of_abundances = abundance_list[:-2]
 	elements_to_trace = elements_to_trace[:-2]
 
 	# a likelihood is calculated where the model error is optimized analytically if you do not want model error uncomment one line in the likelihood function
@@ -1024,9 +1026,27 @@ def posterior_function_for_integration(changing_parameter):
 	error_weight = beta.pdf(model_errors, a = a.beta_error_distribution[1], b = a.beta_error_distribution[2])
 	error_weight/= sum(error_weight)
 
+	### Code taken from likelihood function to speed up implementation...	
+	wildcard = np.load('Chempy/input/stars/Proto-sun.npy')	
+	abundance_list = []
+	element_list = []
+	star_abundance_list = []
+	star_error_list = []
+	for i,item in enumerate(elements_to_trace):
+		if item in list(wildcard.dtype.names):
+			element_list.append(item)
+			abundance_list.append(float(list_of_abundances[i]))
+			star_abundance_list.append(float(wildcard[item][0]))
+			star_error_list.append(float(wildcard[item][1]))
+	abundance_list = np.hstack(abundance_list)
+	star_abundance_list = np.hstack(star_abundance_list)
+	star_error_list = np.hstack(star_error_list)
+	assert len(abundance_list) == len(star_abundance_list) == len(star_error_list), 'no equal length, something went wrong'
+	
+	###
 	for i, item in enumerate(model_errors):
 		error_temp = np.ones(len(elements)) * item 
-		likelihood_temp, _, _, _, _, _ = likelihood_function(a.stellar_identifier, abundance_list, elements_to_trace, fixed_model_error = error_temp, elements = elements)
+		likelihood_temp, _, _, _, _, _ = likelihood_function_for_integration(abundance_list, element_list, star_abundance_list, star_error_list, elements_to_trace, error_temp, elements)
 		likelihood_list.append(likelihood_temp)
 	likelihood = logsumexp(likelihood_list, b = error_weight)
 

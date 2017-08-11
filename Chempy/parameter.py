@@ -227,7 +227,7 @@ class ModelParameters(object):
 
 	####### Evaluate model
 	element_names = ['He','C', 'N', 'O', 'F','Ne','Na', 'Mg', 'Al', 'Si', 'P','S', 'Ar','K', 'Ca','Ti', 'V', 'Cr', 'Mn', 'Fe', 'Co', 'Ni']#, 'Zn','Y', 'Ba']# Runs with sun
-	elements_to_trace = ['Al', 'Ar', 'B', 'Be', 'C', 'Ca', 'Cl', 'Co', 'Cr', 'Cu', 'F', 'Fe', 'Ga', 'Ge', 'H', 'He', 'K', 'Li', 'Mg', 'Mn', 'N', 'Na', 'Ne', 'Ni', 'O', 'P', 'S', 'Sc', 'Si', 'Ti', 'V', 'Zn']
+	elements_to_trace = ['Al', 'B', 'Be', 'C', 'Ca', 'Cl', 'Co', 'Cr', 'Cu', 'F', 'Fe', 'Ga', 'Ge', 'H', 'He', 'K', 'Li', 'Mg', 'Mn', 'N', 'Na', 'Ne', 'Ni', 'O', 'P', 'S', 'Sc', 'Si', 'Ti', 'V', 'Zn']
 		
 	#observational_constraints_index = ['sol_norm']#['gas_reservoir','sn_ratio','sol_norm']#,'wildcard ','cas','arcturus','stars_at_end', 'plot_processes', 'save_abundances', 'elements']
 	arcturus_age = 7.1# 7.1 +1.5 -1.2
@@ -325,7 +325,7 @@ class ModelParameters(object):
 	
 	training_size = 5 # no. values per parameter in training set
 	#training_widths = [0.6,0.3,0.3,0.3,0.2,0.2] # Initial gaussian widths for training set
-	training_widths = [0.9,0.9,0.9,0.9,0.3,0.3] # 3 sigma widths
+	training_widths = [0.6,0.6,0.6,0.6,0.2,0.2] # 3 sigma widths
 	verif_test_sizes = [10000,10000] # Size of array for [verification, test] datasets
 	#test_widths = [0.3,0.3,0.3,0.3,0.1,0.1] # Original prior widths for testing/verification
 	test_widths = [0.9,0.9,0.9,0.9,0.3,0.3] # Test widths	

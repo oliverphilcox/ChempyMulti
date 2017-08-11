@@ -1445,3 +1445,42 @@ def read_out_wildcard(stellar_identifier, list_of_abundances, elements_to_trace)
 	assert len(abundance_list) == len(star_abundance_list) == len(star_error_list), 'no equal length, something went wrong'
 	###################
 	return element_list, star_error_list, abundance_list, star_abundance_list
+	
+def likelihood_function_for_integration(abundance_list, element_list, star_abundance_list, star_error_list, elements_to_trace, fixed_model_error, elements):    
+	'''
+	This function calculates analytically an optimal model error and the resulting likelihood from the comparison of predictions and observations
+
+	INPUT:
+
+	   list_of_abundances = a list of the abundances coming from Chempy
+
+	   elements_to_trace = a list of the elemental symbols
+
+	OUTPUT:
+
+	   likelihood = the added log likelihood
+
+	   element_list = the elements that were in common between the predictions and the observations, has the same sequence as the following arrays
+	   
+	   model_error = the analytic optimal model error
+	   
+	   star_error_list = the observed error
+	   
+	   abundance_list = the predictions
+	   
+	   star_abundance_list = the observations
+	'''
+	# Brings the model_abundances, the stellar abundances and the associated error into the same sequence
+		###################
+	el_list = []
+	
+	for i,item in enumerate(elements):
+		el_list.append(item)#.decode('utf-8'))
+	elements = np.hstack(el_list)
+	model_error = []
+	for i,item in enumerate(element_list):
+		model_error.append(fixed_model_error[np.where(elements == item)])
+	model_error = np.hstack(model_error)
+	
+	likelihood = likelihood_evaluation(model_error, star_error_list, abundance_list, star_abundance_list)
+	return likelihood, element_list, model_error, star_error_list, abundance_list, star_abundance_list
