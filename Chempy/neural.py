@@ -143,6 +143,8 @@ def create_network(learning_rate=a.learning_rate,Plot=True):
 	model = torch.nn.Sequential(
 				torch.nn.Linear(dim_in,a.neurons),
 				torch.nn.Tanh(),
+				torch.nn.Linear(a.neurons,a.neurons),
+				torch.nn.Tanh(),
 				torch.nn.Linear(a.neurons,dim_out)
 				)
 	loss_fn = torch.nn.L1Loss(size_average=True)
@@ -180,7 +182,9 @@ def create_network(learning_rate=a.learning_rate,Plot=True):
 				w_array_0=model_numpy[0],
 				b_array_0=model_numpy[1],
 				w_array_1=model_numpy[2],
-				b_array_1=model_numpy[3])
+				b_array_1=model_numpy[3],
+				w_array_2=model_numpy[4],
+				b_array_2=model_numpy[5])
 	
 	if Plot==True:
 		plt.plot(epoch,losslog,label=learning_rate)
@@ -211,15 +215,18 @@ def neural_output(test_input):
 	coeffs = np.load('Neural/neural_model.npz')
 	w_array_0 = coeffs['w_array_0']
 	w_array_1 = coeffs['w_array_1']
+	w_array_2 = coeffs['w_array_2']
 	b_array_0 = coeffs['b_array_0']
 	b_array_1 = coeffs['b_array_1']
-		
+	b_array_2 = coeffs['b_array_2']	
+	
 	# Normalize data for input into network
 	norm_data = (test_input - a.p0)/np.array(a.training_widths)
 	
 	# Calculate neural network output
-	hidden = np.tanh(np.array(np.dot(w_array_0,norm_data)+b_array_0))
-	output = np.dot(w_array_1, hidden)+b_array_1
+	hidden1 = np.tanh(np.array(np.dot(w_array_0,norm_data)+b_array_0))
+	hidden2 = np.tanh(np.array(np.dot(w_array_1,hidden1)+b_array_1))
+	output = np.dot(w_array_2, hidden2)+b_array_2
 	
 	return output
 
