@@ -85,7 +85,7 @@ def Hogg_scoring(index):
 	return None
 
 	 
- def Hogg_wrapper():
+def Hogg_wrapper():
 	import fileinput
 	import sys
 	from Chempy.parameter import ModelParameters
