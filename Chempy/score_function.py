@@ -146,7 +146,7 @@ class preload_params():
 	errors_list = []
 	for error in model_errors:
 		temp_err = np.ones((len(star_error_list),1))*error
-		errors_list.append(np.sqrt(np.multiply(temp_err,temp_err) + np.multiply(star_error_list,star_error_list)))
+		errors_list.append(np.sqrt(np.multiply(temp_err,temp_err) + np.multiply(star_error_list,star_error_list).T).T)
 	
 	
 class preload_params_mcmc():
@@ -177,10 +177,9 @@ class preload_params_mcmc():
 	star_error_list = np.hstack(star_error_list)
 	elements = np.hstack(elements)
 	
-	errors_list = []
-	for error in model_errors:
-		temp_err = np.ones((len(star_error_list),1))*error
-		errors_list.append(np.sqrt(np.multiply(temp_err,temp_err) + np.multiply(star_error_list,star_error_list)))
+	err=[]
+	for i,item in enumerate(model_errors):
+		error_temp = np.ones(len(elements))*item
+		err.append(np.sqrt(np.multiply(error_temp[:,None],error_temp[:,None]).T + np.multiply(star_error_list,star_error_list)).T)
 	
-
-
+			

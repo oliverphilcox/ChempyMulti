@@ -524,7 +524,7 @@ def mcmc_quick(changing_parameter, error_list, elements):
 	import time
 	import os
 	import multiprocessing as mp
-	from .cem_function import  posterior_function_many_stars_quick
+	from .cem_function import  posterior_function_mcmc_quick
 	from .score_function import preload_params_mcmc
 	from .parameter import ModelParameters
 	import emcee

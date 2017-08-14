@@ -1008,6 +1008,8 @@ def posterior_function_for_integration(changing_parameter,b):
 		b is file from the score_function preload_vars file to avoid multiple calculation
 	
 	MUST CHECK THAT THE MODIFIED LIKELIHOOD FUNCTION GIVES THE CORRECT RESULTS
+	
+	ERRORS ARE NOT TREATED CORRECTLY HERE - RELOOK AT
 	'''
 	from .parameter import ModelParameters
 	#from .cem_function import posterior_function_returning_predictions
@@ -1062,7 +1064,7 @@ def posterior_function_for_integration(changing_parameter,b):
 	
 	likelihood_list = np.zeros(len(model_errors))
 	# Can we vectorize this??
-	for i, item in range(len(model_errors)):
+	for i, item in enumerate(model_errors):
 		likelihood_list[i] = likelihood_evaluation_int(errors_list[i], abundance_list, star_abundance_list)
 	likelihood = logsumexp(likelihood_list, b = b.error_weight)
 
@@ -1140,7 +1142,7 @@ def posterior_function_mcmc_quick(changing_parameter,error_list,error_element_li
 	'''
 	import numpy.ma as ma
 	#from .cem_function import get_prior, posterior_function_returning_predictions
-	from .data_to_test import likelihood_evaluation, read_out_wildcard
+	from .data_to_test import likelihood_evaluation_int
 	from .parameter import ModelParameters
 
 	## Initialising the model parameters
@@ -1175,7 +1177,7 @@ def posterior_function_mcmc_quick(changing_parameter,error_list,error_element_li
 	
 	# SPEED UP
 	abundance_list,element_list = posterior_function_returning_predictions((changing_parameter,a))
-	
+	abundance_list = list(abundance_list)
 	
 	# REMOVE
 	predictions_list.append(abundance_list)
@@ -1184,12 +1186,16 @@ def posterior_function_mcmc_quick(changing_parameter,error_list,error_element_li
 	## The wildcards are read out so that the predictions can be compared with the observations
 	args = zip(a.stellar_identifier_list, predictions_list, elements_list)
 	list_of_l_input = []
-	for item in args:
-	    list_of_l_input.append(read_out_wildcard(*item))
-	    list_of_l_input[-1] = list(list_of_l_input[-1])
 
+	output = (list(preload.elements),preload.star_error_list,np.array(predictions_list[0]),preload.star_abundance_list)
+
+	for item in args:
+		#list_of_l_input.append(read_out_wildcard(*item))
+		list_of_l_input.append(output)
+		list_of_l_input[-1] = list(list_of_l_input[-1])
+	
 	# Here the predictions and observations are brought into the same array form in order to perform the likelihood calculation fast
-	#elements = np.unique(np.hstack(elements_list))
+	elements = np.unique(np.hstack(elements_list))
 	# Masking the elements that are not given for specific stars and preparing the likelihood input
 	star_errors = ma.array(np.zeros((len(elements),len(a.stellar_identifier_list))), mask = True)
 	star_abundances = ma.array(np.zeros((len(elements),len(a.stellar_identifier_list))), mask = True)
@@ -1205,8 +1211,8 @@ def posterior_function_mcmc_quick(changing_parameter,error_list,error_element_li
 	#star_errors = preload.star_error_list
 	#star_abundances = preload.star_abundance_list
 	#model_abundances = predictions_list
-	elements = preload.elements
-
+	#elements = preload.elements
+	
 	## given model error from error_list is read out and brought into the same element order (compatibility between python 2 and 3 makes the decode method necessary)
 	if not a.error_marginalization:
 		error_elements_decoded = []
@@ -1228,9 +1234,9 @@ def posterior_function_mcmc_quick(changing_parameter,error_list,error_element_li
 	## likelihood is calculated (the model error vector is expanded)
 	if a.error_marginalization:
 		#from scipy.stats import beta
-		likelihood_list = []
 		#model_errors = np.linspace(a.flat_model_error_prior[0],a.flat_model_error_prior[1],a.flat_model_error_prior[2])
 		model_errors = preload.model_errors
+		likelihood_list = np.zeros(len(model_errors))
 		if a.beta_error_distribution[0]:
 			#error_weight = beta.pdf(model_errors, a = a.beta_error_distribution[1], b = a.beta_error_distribution[2])
 			#error_weight/= sum(error_weight)
@@ -1238,8 +1244,13 @@ def posterior_function_mcmc_quick(changing_parameter,error_list,error_element_li
 		else:
 			error_weight = np.ones_like(model_errors) * 1./float(flat_model_error_prior[2])
 		for i, item in enumerate(model_errors):
-			error_temp = np.ones(len(elements)) * item 
-			likelihood_list.append(likelihood_evaluation(error_temp[:,None], star_errors , model_abundances, star_abundances))
+			#from .data_to_test import likelihood_evaluation
+			#error_temp = np.ones(len(elements))*item
+			#likelihood_list[i] = likelihood_evaluation(error_temp[:,None],star_errors,model_abundances,star_abundances)
+			#err = np.sqrt(np.multiply(error_temp[:,None],error_temp[:,None]) + np.multiply(star_errors,star_errors))
+			likelihood_list[i] = likelihood_evaluation_int(preload.err[i] , model_abundances,star_abundances)
+		#print(likelihood_list[-1])
+		#print(likelihood_evaluation_int(preload.err[-1],model_abundances,star_abundances))
 		likelihood = logsumexp(likelihood_list, b = error_weight)	
 	else:
 		if a.zero_model_error:
@@ -1256,4 +1267,4 @@ def posterior_function_mcmc_quick(changing_parameter,error_list,error_element_li
 	#if a.verbose:
 	#	print('prior = ', prior, 'likelihood = ', likelihood)
 
-	return prior+likelihood
+	return (prior+likelihood,model_abundances)
