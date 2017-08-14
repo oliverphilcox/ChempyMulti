@@ -103,3 +103,36 @@ def Hogg_wrapper():
 		
 	return None
     
+    
+class preload_params():
+	"""This calculates and stores useful quantities that would be calculated multiple times otherwise.
+	Definitions can be called from this file
+	
+	NB - this only works for one wildcard at the moment - GENERALIZE THIS!!!
+	"""
+	from Chempy.parameter import ModelParameters
+	import numpy as np
+	from scipy.stats import beta
+	
+	a = ModelParameters()
+	
+	wildcard = np.load('Chempy/input/stars/Proto-sun.npy')	
+	
+	elements = []
+	star_abundance_list = []
+	star_error_list = []
+	for i,item in enumerate(a.elements_to_trace):
+		if item in list(wildcard.dtype.names):
+			elements.append(item)
+			star_abundance_list.append(float(wildcard[item][0]))
+			star_error_list.append(float(wildcard[item][1]))
+	star_abundance_list = np.hstack(star_abundance_list)
+	star_error_list = np.hstack(star_error_list)
+	elements = np.hstack(elements)
+	
+	
+	model_errors = np.linspace(a.flat_model_error_prior[0],a.flat_model_error_prior[1],a.flat_model_error_prior[2])
+	error_weight = beta.pdf(model_errors, a = a.beta_error_distribution[1], b = a.beta_error_distribution[2])
+	error_weight/= sum(error_weight)
+
+	

@@ -999,6 +999,7 @@ def posterior_function_for_integration(changing_parameter):
 	'''
 	from .parameter import ModelParameters
 	from .cem_function import posterior_function_returning_predictions
+	from .data_to_test import likelihood_function_for_integration
 		
 	a = ModelParameters()
 	stellar_identifier = a.stellar_identifier

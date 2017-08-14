@@ -992,46 +992,71 @@ def posterior_function_many_stars_real(changing_parameter,error_list,error_eleme
 
 	return(posterior,model_abundances)
 	
-def posterior_function_for_integration(changing_parameter):
+def posterior_function_for_integration(changing_parameter,b):
 	'''
 	This is the actual posterior function. But the functionality is explained in posterior_function. 
 	This is a cut down version for integration - ONLY using beta function, and solar data
+	
+	Inputs:
+		changing_parmeter is 6D parameter vector
+		b is file from the score_function preload_vars file to avoid multiple calculation
 	'''
 	from .parameter import ModelParameters
-	from .cem_function import posterior_function_returning_predictions
-	from .data_to_test import likelihood_function_for_integration
+	#from .cem_function import posterior_function_returning_predictions
+	from .data_to_test import likelihood_evaluation
 		
 	a = ModelParameters()
-	stellar_identifier = a.stellar_identifier
+	#stellar_identifier = a.stellar_identifier
 	
 	# the values in a are updated according to changing_parameters and the prior list is appended
 	a = extract_parameters_and_priors(changing_parameter, a)
 	
 	# the log prior is calculated
 	prior = sum(np.log(a.prior))
-
-	_,elements = posterior_function_returning_predictions((changing_parameter,a))
+	
+	#wildcard = np.load('Chempy/input/stars/Proto-sun.npy')	
+	wildcard = b.wildcard
 	
 	# call Chempy and return the abundances at the end of the simulation = time of star's birth and the corresponding element names as a list
-	abundance_list,elements_to_trace = cem_real2(a)
+	#abundance_list,elements_to_trace = cem_real2(a)
+	abundance_list,_ = cem_real2(a)
 	
 	# The last two entries of the abundance list are the Corona metallicity and the SN-ratio
-	abundance_list = abundance_list[:-2]
-	elements_to_trace = elements_to_trace[:-2]
+	list_of_abundances = abundance_list[:-2]
+	#elements_to_trace = elements_to_trace[:-2]
 
-	# a likelihood is calculated where the model error is optimized analytically if you do not want model error uncomment one line in the likelihood function
-	from scipy.stats import beta
-	likelihood_list = []
-	model_errors = np.linspace(a.flat_model_error_prior[0],a.flat_model_error_prior[1],a.flat_model_error_prior[2])
-	error_weight = beta.pdf(model_errors, a = a.beta_error_distribution[1], b = a.beta_error_distribution[2])
-	error_weight/= sum(error_weight)
-
-	wildcard = np.load('Chempy/input/stars/Proto-sun.npy')	
+	#elements = []
+	abundance_list = []
+	#star_abundance_list = []
+	#star_error_list = []
+	# Change to arrays to speed up?
+	for i,item in enumerate(a.elements_to_trace):
+		if item in list(wildcard.dtype.names):
+			#elements.append(item)
+			abundance_list.append(float(list_of_abundances[i]))
+			#star_abundance_list.append(float(wildcard[item][0]))
+			#star_error_list.append(float(wildcard[item][1]))
+	#abundance_list = np.hstack(abundance_list)
+	#star_abundance_list = np.hstack(star_abundance_list)
+	#star_error_list = np.hstack(star_error_list)
+	#elements = np.hstack(elements)
+	star_abundance_list = b.star_abundance_list
+	star_error_list = b.star_error_list
+	elements = b.elements	
 	
+	# a likelihood is calculated where the model error is optimized analytically if you do not want model error uncomment one line in the likelihood function
+	#from scipy.stats import beta
+	likelihood_list = []
+	#model_errors = np.linspace(a.flat_model_error_prior[0],a.flat_model_error_prior[1],a.flat_model_error_prior[2])
+	#error_weight = beta.pdf(model_errors, a = a.beta_error_distribution[1], b = a.beta_error_distribution[2])
+	#error_weight/= sum(error_weight)
+	model_errors = b.model_errors
+	error_weight = b.error_weight
+
+	# Can we vectorize this??
 	for i, item in enumerate(model_errors):
-		error_temp = np.ones(len(elements)) * item 
-		likelihood_temp, _, _, _, _, _ = likelihood_function_for_integration(wildcard, abundance_list, elements_to_trace, fixed_model_error = error_temp, elements = elements)
-		likelihood_list.append(likelihood_temp)
+		error_temp = np.ones((len(elements),1)) * item 
+		likelihood_list.append(likelihood_evaluation(error_temp, star_error_list, abundance_list, star_abundance_list))
 	likelihood = logsumexp(likelihood_list, b = error_weight)
 
 	return(prior+likelihood)

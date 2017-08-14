@@ -93,7 +93,6 @@ def Hogg_wrapper():
 	import time
 	init_time = time.time()	
 	for index in [1., 1.2, 1.4, 1.7, 2., 2.5, 3., 4., 5., 6., 8., 10., 12., 15., 18., 22., 26., 30., 40., 50.]:
-		print(index)		
 		for line in fileinput.input("Chempy/parameter.py", inplace=True):
 			if "\tbeta_param =" in line:
 				print("\tbeta_param = %.2f" %(index))
