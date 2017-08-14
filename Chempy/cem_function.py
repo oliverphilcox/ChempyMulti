@@ -1176,8 +1176,8 @@ def posterior_function_mcmc_quick(changing_parameter,error_list,error_element_li
 	prior = get_prior(changing_parameter,a)
 	
 	# SPEED UP
-	abundance_list,element_list = posterior_function_returning_predictions((changing_parameter,a))
-	abundance_list = list(abundance_list)
+	abundance_list = list(posterior_function_predictions_quick(changing_parameter,a,preload))
+	element_list = preload.elements
 	
 	# REMOVE
 	predictions_list.append(abundance_list)
@@ -1212,7 +1212,7 @@ def posterior_function_mcmc_quick(changing_parameter,error_list,error_element_li
 	#star_abundances = preload.star_abundance_list
 	#model_abundances = predictions_list
 	#elements = preload.elements
-	
+
 	## given model error from error_list is read out and brought into the same element order (compatibility between python 2 and 3 makes the decode method necessary)
 	if not a.error_marginalization:
 		error_elements_decoded = []
@@ -1229,8 +1229,6 @@ def posterior_function_mcmc_quick(changing_parameter,error_list,error_element_li
 		model_error = np.hstack(model_error)
 
 
-
-
 	## likelihood is calculated (the model error vector is expanded)
 	if a.error_marginalization:
 		#from scipy.stats import beta
@@ -1243,12 +1241,17 @@ def posterior_function_mcmc_quick(changing_parameter,error_list,error_element_li
 			error_weight = preload.error_weight
 		else:
 			error_weight = np.ones_like(model_errors) * 1./float(flat_model_error_prior[2])
-		for i, item in enumerate(model_errors):
+		for i in range(len(model_errors)):
 			#from .data_to_test import likelihood_evaluation
 			#error_temp = np.ones(len(elements))*item
 			#likelihood_list[i] = likelihood_evaluation(error_temp[:,None],star_errors,model_abundances,star_abundances)
 			#err = np.sqrt(np.multiply(error_temp[:,None],error_temp[:,None]) + np.multiply(star_errors,star_errors))
+			
+			## VECTORIZE THIS?
 			likelihood_list[i] = likelihood_evaluation_int(preload.err[i] , model_abundances,star_abundances)
+		model_abundances.dump('testmod')
+		star_abundances.dump('teststar')
+		np.save('testerr',preload.err[-1])
 		#print(likelihood_list[-1])
 		#print(likelihood_evaluation_int(preload.err[-1],model_abundances,star_abundances))
 		likelihood = logsumexp(likelihood_list, b = error_weight)	
@@ -1268,3 +1271,24 @@ def posterior_function_mcmc_quick(changing_parameter,error_list,error_element_li
 	#	print('prior = ', prior, 'likelihood = ', likelihood)
 
 	return (prior+likelihood,model_abundances)
+	
+def posterior_function_predictions_quick(changing_parameter,a,preload):
+	'''
+	This is like posterior_function_real. This is cut down for one zone, for MCMC	'''
+	
+	# the values in a are updated according to changing_parameters and the prior list is appended
+	a = extract_parameters_and_priors(changing_parameter, a)
+	
+	# call Chempy and return the abundances at the end of the simulation = time of star's birth and the corresponding element names as a list
+	abundance_list,_ = cem_real2(a)
+		
+	list_of_abundances = abundance_list[:-2]
+	
+	abundance_list = []
+	for i,item in enumerate(a.elements_to_trace):
+		if item in list(preload.wildcard.dtype.names):
+			abundance_list.append(float(list_of_abundances[i]))
+	abundance_list = np.hstack(abundance_list)
+	
+	return abundance_list
+

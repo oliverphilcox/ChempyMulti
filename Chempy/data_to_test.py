@@ -1,5 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
+from scipy.stats import norm
+
 
 def gaussian(x,x0,xsig):
 	'''
@@ -68,7 +70,12 @@ def likelihood_evaluation_int(error, abundance_list, star_abundance_list):
 	#print(star_abundance_list, 'star_abundance_list')
 	#print(abundance_list, 'abundance_list')
 	#print(star_abundance_list.shape,abundance_list.shape,error.shape)
-	list_of_likelihoods = gaussian(star_abundance_list,abundance_list,error)
+	
+	## Too slow...
+	#list_of_likelihoods = gaussian(star_abundance_list,abundance_list,error)
+	
+	list_of_likelihoods = norm.pdf(star_abundance_list,loc=abundance_list,scale=error)
+	
 	#print(list_of_likelihoods, 'list_of_likelihoods')
 	log_likelihood_list = np.log(list_of_likelihoods)
 	#print(log_likelihood_list, 'log_likelihood_list')
