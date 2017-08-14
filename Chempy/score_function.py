@@ -165,11 +165,17 @@ class preload_params_mcmc():
 
 	wildcard = np.load('Chempy/input/stars/Proto-sun.npy')	
 	
+	elements = []
+	star_abundance_list = []
 	star_error_list = []
 	for i,item in enumerate(a.elements_to_trace):
 		if item in list(wildcard.dtype.names):
+			elements.append(item)
+			star_abundance_list.append(float(wildcard[item][0]))
 			star_error_list.append(float(wildcard[item][1]))
+	star_abundance_list = np.hstack(star_abundance_list)
 	star_error_list = np.hstack(star_error_list)
+	elements = np.hstack(elements)
 	
 	errors_list = []
 	for error in model_errors:

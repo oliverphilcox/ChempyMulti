@@ -1156,8 +1156,10 @@ def posterior_function_mcmc_quick(changing_parameter,error_list,error_element_li
 	#global_parameter_prior = get_prior(global_parameters,a)
 	
 	## Chempy is evaluated one after the other for each stellar identifier with the prescribed parameter combination and the element predictions for each star are stored
-	#predictions_list = []
-	#elements_list = []
+	
+	# REMOVE
+	predictions_list = []
+	elements_list = []
 	#log_prior_list = []
 	
 	#for i, item in enumerate(a.stellar_identifier_list):
@@ -1170,11 +1172,14 @@ def posterior_function_mcmc_quick(changing_parameter,error_list,error_element_li
 	#	elements_list.append(element_list)
 	#	#log_prior_list.append(get_prior(changing_parameter,b))
 	prior = get_prior(changing_parameter,a)
-	predictions_list,elements_list = posterior_function_returning_predictions((changing_parameter,a))
+	
+	# SPEED UP
+	abundance_list,element_list = posterior_function_returning_predictions((changing_parameter,a))
+	
 	
 	# REMOVE
-	predictions_list = list(predictions_list)
-	elements_list = list(elements_list)
+	predictions_list.append(abundance_list)
+	elements_list.append(element_list)
 	
 	## The wildcards are read out so that the predictions can be compared with the observations
 	args = zip(a.stellar_identifier_list, predictions_list, elements_list)
@@ -1183,8 +1188,8 @@ def posterior_function_mcmc_quick(changing_parameter,error_list,error_element_li
 	    list_of_l_input.append(read_out_wildcard(*item))
 	    list_of_l_input[-1] = list(list_of_l_input[-1])
 
-	## Here the predictions and observations are brought into the same array form in order to perform the likelihood calculation fast
-	elements = np.unique(np.hstack(elements_list))
+	# Here the predictions and observations are brought into the same array form in order to perform the likelihood calculation fast
+	#elements = np.unique(np.hstack(elements_list))
 	# Masking the elements that are not given for specific stars and preparing the likelihood input
 	star_errors = ma.array(np.zeros((len(elements),len(a.stellar_identifier_list))), mask = True)
 	star_abundances = ma.array(np.zeros((len(elements),len(a.stellar_identifier_list))), mask = True)
@@ -1192,11 +1197,15 @@ def posterior_function_mcmc_quick(changing_parameter,error_list,error_element_li
 
 	for star_index,item in enumerate(list_of_l_input):
 	    for element_index,element in enumerate(item[0]):
-	        assert element in elements, 'observed element is not predicted by Chempy'
-	        new_element_index = np.where(elements == element)[0][0]
-	        star_errors[new_element_index,star_index] = item[1][element_index]
-	        model_abundances[new_element_index,star_index] = item[2][element_index]
-	        star_abundances[new_element_index,star_index] = item[3][element_index]
+	    	assert element in elements, 'observed element is not predicted by Chempy'
+	    	new_element_index = np.where(elements == element)[0][0]
+	    	star_errors[new_element_index,star_index] = item[1][element_index]
+	    	model_abundances[new_element_index,star_index] = item[2][element_index]
+	    	star_abundances[new_element_index,star_index] = item[3][element_index]
+	#star_errors = preload.star_error_list
+	#star_abundances = preload.star_abundance_list
+	#model_abundances = predictions_list
+	elements = preload.elements
 
 	## given model error from error_list is read out and brought into the same element order (compatibility between python 2 and 3 makes the decode method necessary)
 	if not a.error_marginalization:
