@@ -113,6 +113,7 @@ class preload_params():
 	from Chempy.parameter import ModelParameters
 	import numpy as np
 	from scipy.stats import beta
+	from Chempy.neural import neural_output
 	
 	a = ModelParameters()
 	
@@ -130,9 +131,50 @@ class preload_params():
 	star_error_list = np.hstack(star_error_list)
 	elements = np.hstack(elements)
 	
+	elements_to_trace = list(a.elements_to_trace)
+	elements_to_trace.append('Zcorona')
+	elements_to_trace.append('SNratio')
 	
+	# Neural network coeffs
+	coeffs = np.load('Neural/neural_model.npz')
+	
+	# Beta function errors
 	model_errors = np.linspace(a.flat_model_error_prior[0],a.flat_model_error_prior[1],a.flat_model_error_prior[2])
 	error_weight = beta.pdf(model_errors, a = a.beta_error_distribution[1], b = a.beta_error_distribution[2])
 	error_weight/= sum(error_weight)
 
+	errors_list = []
+	for error in model_errors:
+		temp_err = np.ones((len(star_error_list),1))*error
+		errors_list.append(np.sqrt(np.multiply(temp_err,temp_err) + np.multiply(star_error_list,star_error_list)))
 	
+	
+class preload_params_mcmc():
+	"""This calculates and stores useful quantities that would be calculated multiple times otherwise for the mcmc run.
+	Definitions can be called from this file
+	"""
+	import numpy as np
+	from Chempy.parameter import ModelParameters
+	from scipy.stats import beta
+	a = ModelParameters()
+	
+	# Beta function calculations
+	model_errors = np.linspace(a.flat_model_error_prior[0],a.flat_model_error_prior[1],a.flat_model_error_prior[2])
+	error_weight = beta.pdf(model_errors, a = a.beta_error_distribution[1], b = a.beta_error_distribution[2])
+	error_weight/= sum(error_weight)
+
+	wildcard = np.load('Chempy/input/stars/Proto-sun.npy')	
+	
+	star_error_list = []
+	for i,item in enumerate(a.elements_to_trace):
+		if item in list(wildcard.dtype.names):
+			star_error_list.append(float(wildcard[item][1]))
+	star_error_list = np.hstack(star_error_list)
+	
+	errors_list = []
+	for error in model_errors:
+		temp_err = np.ones((len(star_error_list),1))*error
+		errors_list.append(np.sqrt(np.multiply(temp_err,temp_err) + np.multiply(star_error_list,star_error_list)))
+	
+
+

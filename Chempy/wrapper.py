@@ -440,6 +440,7 @@ def mcmc_multi(changing_parameter, error_list, elements):
 	ndim = len(changing_parameter)
 	a.nwalkers = max(a.nwalkers, int(ndim*2))
 	chain = np.empty(shape = (a.nwalkers,ndim))
+	
 	for i in range(a.nwalkers):
 		result = -np.inf
 		while result == -np.inf:
@@ -501,3 +502,84 @@ def send_email(thread_count, iteration_count, posterior_beginning, posterior_end
 	text = msg.as_string()
 	server.sendmail(fromaddr, toaddr, text)	
 	
+def mcmc_quick(changing_parameter, error_list, elements):
+	'''
+	Convenience function to use the MCMC for one zone. A subdirectory mcmc/ will be created in the current directory and intermediate chains will be stored there.
+	The MCMC will sample the volume of best posterior for the likelihood functions that are declared in parameter.py. 
+	This is a cut down version to speed up MCMC for one star only
+	INPUT:
+
+	   changing_parameter = the parameter vector for initialization (will usually be found from minimization before). The initial chain will be created by jittering slightly the initial parameter guess
+
+	   error_list = the vector of element errors
+
+	   elements = the corresponding element symbols
+
+	OUTPUT:
+
+	   The function will create a folder and store the chain as well as the predicted element values
+
+	The MCMC stops when the convergence criteria is met, which is when the median posterior of all walkers does not change much inbetween 200 steps anymore.
+	'''
+	import time
+	import os
+	import multiprocessing as mp
+	from .cem_function import  posterior_function_many_stars_quick
+	from .score_function import preload_params_mcmc
+	from .parameter import ModelParameters
+	import emcee
+
+	a = ModelParameters()
+	start1 = time.time()
+	directory = 'mcmc/'
+	if os.path.exists(directory):
+		if a.verbose:
+			print('%s already existed. Content might be overwritten' %(directory))
+	else:
+		os.makedirs(directory)
+	
+	nthreads = mp.cpu_count()
+	if nthreads == 4:
+		nthreads = 2
+	ndim = len(changing_parameter)
+	a.nwalkers = max(a.nwalkers, int(ndim*2))
+	chain = np.empty(shape = (a.nwalkers,ndim))
+	
+	preload = preload_params_mcmc() 
+	
+	for i in range(a.nwalkers):
+		result = -np.inf
+		while result == -np.inf:
+			jitter = np.random.normal(loc = 0, scale = 0.001, size = ndim)
+			result = posterior_function_mcmc_quick(changing_parameter + jitter,error_list,elements,preload)
+		chain[i] = changing_parameter + jitter
+
+	sampler = emcee.EnsembleSampler(a.nwalkers,ndim,posterior_function_mcmc_quick,threads=nthreads, args = [error_list,elements,preload])
+	pos,prob,state,blobs = sampler.run_mcmc(chain,a.mburn)
+	
+	mean_prob = mean_prob_beginning = np.zeros((a.m))
+	posterior_list = []
+	posterior_std_list = []
+	for i in range(a.m):
+		print('step ', i+1 , 'of ',a.m)
+		pos, prob, state, blobs = sampler.run_mcmc(pos, a.save_state_every, rstate0=state, lnprob0=prob, blobs0 = blobs, storechain = True)
+		np.save('%s/flatchain' %(directory),sampler.chain)
+		np.save('%s/flatlnprobability' %(directory),sampler.lnprobability)
+		np.save('%s/flatblobs' %(directory),sampler.blobs)
+		posterior = np.load('%s/flatlnprobability.npy' %(directory))
+		posterior_list.append(np.mean(posterior, axis = 0)[-1])
+		posterior_std_list.append(np.std(posterior, axis = 0)[-1])
+		np.save('%s/flatmeanposterior' %(directory), posterior_list)
+		np.save('%s/flatstdposterior' %(directory), posterior_std_list)
+		print(np.mean(posterior, axis = 0)[0], np.mean(posterior, axis = 0)[-1])
+		
+		if i>202:
+			print('posterior -1, -100, -200',np.mean(posterior, axis = 0)[-1], np.mean(posterior, axis = 0)[-100], np.mean(posterior, axis = 0)[-200])
+			print('posterior 0, 100, 200',np.mean(posterior, axis = 0)[0], np.mean(posterior, axis = 0)[100], np.mean(posterior, axis = 0)[200])
+		#print("Mean acceptance fraction:", sampler.acceptance_fraction)
+		elapsed1 = (time.time() - start1)
+		print('calculation so far took', elapsed1, ' seconds')
+		if i>a.min_mcmc_iterations and np.abs(np.mean(posterior, axis = 0)[-1] - np.mean(posterior, axis = 0)[-100]) < a.mcmc_tolerance and np.abs(np.mean(posterior, axis = 0)[-1] - np.mean(posterior, axis = 0)[-200]) < a.mcmc_tolerance:
+			break
+	if a.send_email:
+		send_email(nthreads, i, np.mean(posterior, axis = 0)[0], np.mean(posterior, axis = 0)[-1], a, elapsed1)

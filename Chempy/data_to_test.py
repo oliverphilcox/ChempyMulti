@@ -35,7 +35,35 @@ def likelihood_evaluation(model_error, star_error_list, abundance_list, star_abu
 
 	   likelihood = the summed log likelihood
 	'''
-	error = np.sqrt(model_error * model_error + star_error_list * star_error_list)
+	error = np.sqrt(np.multiply(model_error,model_error) + np.multiply(star_error_list,star_error_list))
+	#print(error, 'error')
+	#print(star_abundance_list, 'star_abundance_list')
+	#print(abundance_list, 'abundance_list')
+	list_of_likelihoods = gaussian(star_abundance_list,abundance_list,error)
+	#print(list_of_likelihoods, 'list_of_likelihoods')
+	log_likelihood_list = np.log(list_of_likelihoods)
+	#print(log_likelihood_list, 'log_likelihood_list')
+	likelihood = np.sum(log_likelihood_list)
+	return likelihood
+	
+def likelihood_evaluation_int(error, abundance_list, star_abundance_list):
+	'''
+	This function evaluates the Gaussian for the prediction/observation comparison and returns the resulting log likelihood. The model error and the observed error are added quadratically
+	
+	INPUT:
+
+	   model_error = the error coming from the models side
+
+	   star_error_list = the error coming from the observations
+
+	   abundance_list = the predictions
+
+	   star_abundance_list = the observations
+
+	OUTPUT:
+
+	   likelihood = the summed log likelihood
+	'''
 	#print(error, 'error')
 	#print(star_abundance_list, 'star_abundance_list')
 	#print(abundance_list, 'abundance_list')

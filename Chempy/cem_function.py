@@ -7,6 +7,12 @@ from .data_to_test import likelihood_function, wildcard_likelihood_function, ele
 import multiprocessing as mp
 from .wrapper import initialise_stuff, Chempy
 from scipy.misc import logsumexp
+from .neural import neural_output_int
+	
+import numpy.ma as ma
+from .data_to_test import likelihood_evaluation, read_out_wildcard
+from .parameter import ModelParameters
+
 
 def gaussian_log(x,x0,xsig):
 	'''
@@ -1000,10 +1006,12 @@ def posterior_function_for_integration(changing_parameter,b):
 	Inputs:
 		changing_parmeter is 6D parameter vector
 		b is file from the score_function preload_vars file to avoid multiple calculation
+	
+	MUST CHECK THAT THE MODIFIED LIKELIHOOD FUNCTION GIVES THE CORRECT RESULTS
 	'''
 	from .parameter import ModelParameters
 	#from .cem_function import posterior_function_returning_predictions
-	from .data_to_test import likelihood_evaluation
+	from .data_to_test import likelihood_evaluation_int
 		
 	a = ModelParameters()
 	#stellar_identifier = a.stellar_identifier
@@ -1019,7 +1027,7 @@ def posterior_function_for_integration(changing_parameter,b):
 	
 	# call Chempy and return the abundances at the end of the simulation = time of star's birth and the corresponding element names as a list
 	#abundance_list,elements_to_trace = cem_real2(a)
-	abundance_list,_ = cem_real2(a)
+	abundance_list = cem_real2_int(a,b)
 	
 	# The last two entries of the abundance list are the Corona metallicity and the SN-ratio
 	list_of_abundances = abundance_list[:-2]
@@ -1046,20 +1054,197 @@ def posterior_function_for_integration(changing_parameter,b):
 	
 	# a likelihood is calculated where the model error is optimized analytically if you do not want model error uncomment one line in the likelihood function
 	#from scipy.stats import beta
-	likelihood_list = []
 	#model_errors = np.linspace(a.flat_model_error_prior[0],a.flat_model_error_prior[1],a.flat_model_error_prior[2])
 	#error_weight = beta.pdf(model_errors, a = a.beta_error_distribution[1], b = a.beta_error_distribution[2])
 	#error_weight/= sum(error_weight)
 	model_errors = b.model_errors
-	error_weight = b.error_weight
-
+	errors_list = b.errors_list
+	
+	likelihood_list = np.zeros(len(model_errors))
 	# Can we vectorize this??
-	for i, item in enumerate(model_errors):
-		error_temp = np.ones((len(elements),1)) * item 
-		likelihood_list.append(likelihood_evaluation(error_temp, star_error_list, abundance_list, star_abundance_list))
-	likelihood = logsumexp(likelihood_list, b = error_weight)
+	for i, item in range(len(model_errors)):
+		likelihood_list[i] = likelihood_evaluation_int(errors_list[i], abundance_list, star_abundance_list)
+	likelihood = logsumexp(likelihood_list, b = b.error_weight)
 
 	return(prior+likelihood)
 	
+def cem_real2_int(a,b):
+	'''
+	real chempy function. description can be found in cem2. \
+	If a.UseNeural==True, then this uses the output from a PRE-TRAINED neural network instead.
+	This is a cut-down version for integrations
+	'''
+	## The time until which Chempy is calculated is cropped to the stellar birth time. Also the SFR should not be below 1/20th of the mean SFR
+	#a = shorten_sfr(a)
+	#basic_solar = solar_abundances()
+	#getattr(basic_solar, a.solar_abundance_name)()
+	#elements_to_trace = list(a.elements_to_trace)
+	#directory = 'model_temp/'
+	### Model is calculated
+
+	#if a.UseNeural==True:
+
+	# Alternative path using a Neural network to predict the outcome instead of Chempy
+	param = [a.high_mass_slope,a.log10_N_0,a.log10_sn1a_time_delay,a.log10_starformation_efficiency,a.log10_sfr_scale,a.outflow_feedback_fraction]
+	neural_abundances = neural_output_int(param,a,b)
+	#elements_to_trace.append('Zcorona')
+	#elements_to_trace.append('SNratio')
+	abundance_list=np.zeros(len(b.elements_to_trace))
+	j=0 # This indexes neural_abundances for ordering
+	for i,name in enumerate(b.elements_to_trace):
+		if name in a.neural_names:
+			abundance_list[i] = neural_abundances[j] # Required elements for later
+			j = j+1
+		else:
+			abundance_list[i] = 0 # All unwanted elements set to arbitrary value
+
+	#else:
+	#if a.calculate_model:
+	#	cube, abundances = Chempy(a)
+	#	cube1 = cube.cube
+	#	gas_reservoir = cube.gas_reservoir
+	#	if a.testing_output:
+	#		if os.path.exists(directory):
+	#			if a.verbose:
+	#				print(directory, ' already exists. Content might be overwritten')
+	#		else:
+	#			os.makedirs(directory)
+	#		np.save(directory + '%s_elements_to_trace' %(a.name_string), elements_to_trace)
+	#		np.save(directory + '%s_gas_reservoir' %(a.name_string),gas_reservoir)
+	#		np.save(directory + '%s_cube' %(a.name_string),cube1)
+	#		np.save(directory + '%s_abundances' %(a.name_string),abundances)
+	#else:
+	#	cube1 = np.load(directory + '%s_cube.npy' %(a.name_string))
+	#	abundances = np.load(directory + '%s_abundances.npy' %(a.name_string))
+	#	gas_reservoir = np.load(directory + '%s_gas_reservoir.npy' %(a.name_string))
+	#	elements_to_trace = np.load(directory + '%s_elements_to_trace.npy' %(a.name_string))
+
+	# predicted values are written out and returned together with corona metallicity and SN-ratio
+	#abundance_list = []
+	#for item in elements_to_trace:
+	#	abundance_list.append(abundances[item][-1])
+	
+	#abundance_list.append(gas_reservoir['Z'][-1])
+	#elements_to_trace.append('Zcorona')
+
+	#abundance_list.append(cube1['sn2'][-1]/cube1['sn1a'][-1])
+	#elements_to_trace.append('SNratio')
+
+	#return(abundance_list,elements_to_trace)
+	return(abundance_list)
 
 
+def posterior_function_mcmc_quick(changing_parameter,error_list,error_element_list,preload):
+	'''
+	This is the actual posterior function for many stars. But the functionality is explained in posterior_function_many_stars.
+	'''
+	import numpy.ma as ma
+	#from .cem_function import get_prior, posterior_function_returning_predictions
+	from .data_to_test import likelihood_evaluation, read_out_wildcard
+	from .parameter import ModelParameters
+
+	## Initialising the model parameters
+	a = ModelParameters()
+	
+	## extracting from 'changing_parameters' the global parameters and the local parameters
+	#global_parameters = changing_parameter[:len(a.SSP_parameters)]
+	#local_parameters = changing_parameter[len(a.SSP_parameters):]
+	#local_parameters = local_parameters.reshape((len(a.stellar_identifier_list),len(a.ISM_parameters)))
+
+	## getting the prior for the global parameters in order to subtract it in the end for each time it was evaluated too much
+	#a.to_optimize = a.SSP_parameters_to_optimize
+	#global_parameter_prior = get_prior(global_parameters,a)
+	
+	## Chempy is evaluated one after the other for each stellar identifier with the prescribed parameter combination and the element predictions for each star are stored
+	#predictions_list = []
+	#elements_list = []
+	#log_prior_list = []
+	
+	#for i, item in enumerate(a.stellar_identifier_list):
+	#	b = ModelParameters()
+	#	b.stellar_identifier = item
+	#	changing_parameter = np.hstack((global_parameters,local_parameters[i]))
+	#	args = (changing_parameter,b)
+	#	abundance_list,element_list = posterior_function_returning_predictions(args)
+	#	predictions_list.append(abundance_list)
+	#	elements_list.append(element_list)
+	#	#log_prior_list.append(get_prior(changing_parameter,b))
+	prior = get_prior(changing_parameter,a)
+	predictions_list,elements_list = posterior_function_returning_predictions((changing_parameter,a))
+	
+	# REMOVE
+	predictions_list = list(predictions_list)
+	elements_list = list(elements_list)
+	
+	## The wildcards are read out so that the predictions can be compared with the observations
+	args = zip(a.stellar_identifier_list, predictions_list, elements_list)
+	list_of_l_input = []
+	for item in args:
+	    list_of_l_input.append(read_out_wildcard(*item))
+	    list_of_l_input[-1] = list(list_of_l_input[-1])
+
+	## Here the predictions and observations are brought into the same array form in order to perform the likelihood calculation fast
+	elements = np.unique(np.hstack(elements_list))
+	# Masking the elements that are not given for specific stars and preparing the likelihood input
+	star_errors = ma.array(np.zeros((len(elements),len(a.stellar_identifier_list))), mask = True)
+	star_abundances = ma.array(np.zeros((len(elements),len(a.stellar_identifier_list))), mask = True)
+	model_abundances = ma.array(np.zeros((len(elements),len(a.stellar_identifier_list))), mask = True)
+
+	for star_index,item in enumerate(list_of_l_input):
+	    for element_index,element in enumerate(item[0]):
+	        assert element in elements, 'observed element is not predicted by Chempy'
+	        new_element_index = np.where(elements == element)[0][0]
+	        star_errors[new_element_index,star_index] = item[1][element_index]
+	        model_abundances[new_element_index,star_index] = item[2][element_index]
+	        star_abundances[new_element_index,star_index] = item[3][element_index]
+
+	## given model error from error_list is read out and brought into the same element order (compatibility between python 2 and 3 makes the decode method necessary)
+	if not a.error_marginalization:
+		error_elements_decoded = []
+		for item in error_element_list:
+			error_elements_decoded.append(item)#.decode('utf8')) # DECODING NOT NEEDED IN PYTHON 3
+		error_element_list = np.hstack(error_elements_decoded)
+
+
+		error_list = np.hstack(error_list)
+		model_error = []
+		for element in elements:
+			assert element in error_element_list, 'for this element the model error was not given, %s' %(element)
+			model_error.append(error_list[np.where(error_element_list == element)])
+		model_error = np.hstack(model_error)
+
+
+
+
+	## likelihood is calculated (the model error vector is expanded)
+	if a.error_marginalization:
+		#from scipy.stats import beta
+		likelihood_list = []
+		#model_errors = np.linspace(a.flat_model_error_prior[0],a.flat_model_error_prior[1],a.flat_model_error_prior[2])
+		model_errors = preload.model_errors
+		if a.beta_error_distribution[0]:
+			#error_weight = beta.pdf(model_errors, a = a.beta_error_distribution[1], b = a.beta_error_distribution[2])
+			#error_weight/= sum(error_weight)
+			error_weight = preload.error_weight
+		else:
+			error_weight = np.ones_like(model_errors) * 1./float(flat_model_error_prior[2])
+		for i, item in enumerate(model_errors):
+			error_temp = np.ones(len(elements)) * item 
+			likelihood_list.append(likelihood_evaluation(error_temp[:,None], star_errors , model_abundances, star_abundances))
+		likelihood = logsumexp(likelihood_list, b = error_weight)	
+	else:
+		if a.zero_model_error:
+			model_error = np.zeros_like(model_error)
+		likelihood = likelihood_evaluation(model_error[:,None], star_errors , model_abundances, star_abundances)
+	
+	## Prior from all stars is added
+	#prior = sum(log_prior_list)
+	## Prior for global parameters is subtracted
+	#prior -= (len(a.stellar_identifier_list)-1) * global_parameter_prior
+	#posterior = prior+likelihood
+	#assert np.isnan(posterior) == False, ('returned posterior = ', posterior , 'prior = ' , prior, 'likelihood = ', likelihood, 'changing parameter = ', changing_parameter )
+	########
+	#if a.verbose:
+	#	print('prior = ', prior, 'likelihood = ', likelihood)
+
+	return prior+likelihood

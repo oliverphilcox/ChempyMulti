@@ -1,5 +1,5 @@
-from Chempy.parameter import ModelParameters
-from Chempy.cem_function import posterior_function_returning_predictions
+from .parameter import ModelParameters
+#from .cem_function import posterior_function_returning_predictions
 import numpy as np
 import os
 import matplotlib.pyplot as plt
@@ -204,6 +204,7 @@ def neural_output(test_input):
 	Output:
 		Neural network abundance prediction
 	"""
+	from Chempy.cem_function import posterior_function_returning_predictions
 
 	a = ModelParameters()
 
@@ -473,3 +474,34 @@ def max_err_corner_plot(dataset):
 	fig.savefig('Neural/'+dataset+'max_err_corner_parameter_plot.png',bbox_inches='tight')
 
 	return None
+
+def neural_output_int(test_input,a,b):
+	""" This calculates the neural network predicted output for a trained network.
+	This is cut down for speed.
+
+	Inputs:
+		test_input - Array containing unnormalized parameter values
+		(coeffs - loaded automatically from Neural/neural_model.npz)
+
+	Output:
+		Neural network abundance prediction
+	"""
+
+	#a = ModelParameters()
+
+	# Load in model coefficients
+	#coeffs = np.load('Neural/neural_model.npz')
+	coeffs = b.coeffs
+	w_array_0 = coeffs['w_array_0']
+	w_array_1 = coeffs['w_array_1']
+	b_array_0 = coeffs['b_array_0']
+	b_array_1 = coeffs['b_array_1']
+
+	# Normalize data for input into network
+	norm_data = (test_input - a.p0)/np.array(a.training_widths)
+
+	# Calculate neural network output
+	hidden1 = np.tanh(np.array(np.dot(w_array_0,norm_data)+b_array_0))
+	output = np.dot(w_array_1, hidden1)+b_array_1
+
+	return output

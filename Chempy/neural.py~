@@ -4,38 +4,38 @@ import numpy as np
 import os
 import matplotlib.pyplot as plt
 a = ModelParameters()
-	
+
 def training_data():
-	""" Function to create neural network training dataset for Chempy data. 
+	""" Function to create neural network training dataset for Chempy data.
 
 	We calculate a list of 5 trial values for each parameter about the prior, and create an array of all combinations.
 	Trial values are chosen to be uniform in the Gaussian probability space (16.7,33.3, 50 percentile etc.)
 	Gaussian widths (stored in parameter.py) are chosen to fully explore required parameter space
-	Trial values normalized to unit Gaussians are created for neural network input	
-	
+	Trial values normalized to unit Gaussians are created for neural network input
+
 	Outputs (stored in Neural/ as npy files):
 		training_norm_grid - Input training dataset saved as normalized unit Gaussians
 		training_param_grid - Input training dataset in parameter space
 		training_abundances - Output training abundance data
-		
+
 	"""
 
 	from scipy.stats import norm as gaussian
-		
-	# FOR TESTING	
+
+	# FOR TESTING
 	import warnings
 	warnings.filterwarnings("ignore")
 
 	a = ModelParameters()
-	
+
 	N = a.training_size # No. data points per parameter
-	widths = a.training_widths # Gaussian widths for parameters	
-	
-	# Create 1d grid of data points equally spaced in probability space 
+	widths = a.training_widths # Gaussian widths for parameters
+
+	# Create 1d grid of data points equally spaced in probability space
 	prob = np.linspace(1/(N+1), 1-1/(N+1), N)
 	grids = [gaussian.ppf(prob) for _ in range(len(a.p0))] # Normalize to unit Gaussian
 	norm_grid = np.array(np.meshgrid(*grids)).T.reshape(-1,len(a.p0))
-	
+
 	# Create grid in parameter space
 	param_grid = [item*widths+a.p0 for item in norm_grid]
 
@@ -43,10 +43,10 @@ def training_data():
 	directory = 'Neural/'
 	if not os.path.exists(directory):
 		os.makedirs(directory)
-		
+
 	np.save(directory+'training_norm_grid.npy',norm_grid)
 	np.save(directory+'training_param_grid.npy',param_grid)
-	
+
 	## Create abundance output
 	training_abundances = []
 	for i,item in enumerate(param_grid):
@@ -54,42 +54,42 @@ def training_data():
 		training_abundances.append(abundances)
 		if i%100 == 0:
 			print("Calculating abundance set %d of %d" %(i,len(param_grid)))
-              
+
 	# Save abundance table
 	np.save(directory+'training_abundances.npy', training_abundances)
 
 	return None
-	
+
 def verification_and_testing():
 	""" This will create the verification and testing data-sets for use with the neural network.
 	The data-sets are created randomly from the Gaussian prior distribution, within the bounds set in the parameter file
-	
+
 	Outputs (saved as .npy files in the Neural/ folder):
 		verif_param_grid - Verification parameter data
 		verif_abundances - Verification dataset abundances
 		test_param_grid - Test parameter data
 		test_abundances - Test dataset abundances
-		
+
 	"""
 
-	# FOR TESTING	
+	# FOR TESTING
 	import warnings
 	warnings.filterwarnings("ignore")
-		
+
 	a = ModelParameters()
 	names = ['verif','test'] # Two datasets
-	
+
 	lower = np.zeros(len(a.p0))
 	upper = np.zeros(len(a.p0))
 
 	# Set upper/lower bounds in parameter space
 	for i,param_name in enumerate(a.to_optimize):
 		lower[i], upper[i] = a.constraints.get(param_name)
-    
+
 	for j ,name in enumerate(names): # Create both test sets
 		param_grid = []
 		model_abundances = []
-		for k in range(a.verif_test_sizes[j]): 
+		for k in range(a.verif_test_sizes[j]):
 			param = np.ones(len(a.p0))*np.inf # To ensure initial value is not in range
 			for i in range(len(a.p0)):
 				param[i] = np.inf
@@ -102,7 +102,7 @@ def verification_and_testing():
 				print("Calculating %s abundance set %d of %d" %(name,k,a.verif_test_sizes[j]))
 		np.save("Neural/"+name+"_param_grid.npy",param_grid)
 		np.save("Neural/"+name+"_abundances.npy",model_abundances)
-   	
+
 	return None
 
 def create_network(learning_rate=a.learning_rate,Plot=True):
@@ -114,21 +114,21 @@ def create_network(learning_rate=a.learning_rate,Plot=True):
 		epochs - Training epoch number (outputted each 10 epochs)
 		losslog - loss value for each 10 epochs
 		Plot of loss against epoch (if Plot=True)
-		
+
 		Neural/neural_model.npz - Saved .npz file with model weights
 	"""
-	
+
 	import torch
 	from torch.autograd import Variable
 	#from torch.optim import lr_scheduler
-	
+
 	# Load parameters
 	n_train = a.training_size**len(a.p0) # No. data points in training set
-	
+
 	# Load pre-processed training data
 	tr_input = np.load('Neural/training_norm_grid.npy')
-	tr_output = np.load('Neural/training_abundances.npy')	
-	
+	tr_output = np.load('Neural/training_abundances.npy')
+
 	# Calculate the model dimensions
 	dim_in = tr_input.shape[1]
 	dim_out = tr_output.shape[1]
@@ -136,25 +136,25 @@ def create_network(learning_rate=a.learning_rate,Plot=True):
 	# Convert to torch variables
 	tr_input = Variable(torch.from_numpy(tr_input)).type(torch.FloatTensor)
 	tr_output = Variable(torch.from_numpy(tr_output), requires_grad=False).type(torch.FloatTensor)
-	
+
 	# Set up the neural network, with one hidden layer
 	model = [] # Remove any previous network
-	
+
 	model = torch.nn.Sequential(
 				torch.nn.Linear(dim_in,a.neurons),
 				torch.nn.Tanh(),
 				torch.nn.Linear(a.neurons,dim_out)
 				)
 	loss_fn = torch.nn.L1Loss(size_average=True)
-	
+
 	# Use Adam optimizer with learning rate specified in parameter.py
 	optimizer = torch.optim.Adam(model.parameters(), lr = learning_rate)
 	#scheduler = lr_scheduler.ReduceLROnPlateau(optimizer, 'min')
-	
+
 	# For loss records
 	losslog = []
 	epoch = []
-	
+
 	# Train neural network
 	for i in range(a.epochs):
 		pred_output = model(tr_input)
@@ -163,75 +163,75 @@ def create_network(learning_rate=a.learning_rate,Plot=True):
 		loss.backward() # Backpropagation
 		optimizer.step() # Update via optimizer
 		#scheduler.step(loss)
-		
+
 		# Output loss
 		if i % 3 ==0:
 			losslog.append(loss.data[0])
 			epoch.append(i)
 		if i % 1000==0:
 			print("Training epoch %d of %d complete" %(i,a.epochs))
-		
-	# Convert weights to numpy arrays	
+
+	# Convert weights to numpy arrays
 	model_numpy = []
 	for param in model.parameters():
 		model_numpy.append(param.data.numpy())
-		
+
 	np.savez("Neural/neural_model.npz",
 				w_array_0=model_numpy[0],
 				b_array_0=model_numpy[1],
 				w_array_1=model_numpy[2],
 				b_array_1=model_numpy[3])
-	
+
 	if Plot==True:
 		plt.plot(epoch,losslog,label=learning_rate)
 		plt.ylabel("L1 Loss value")
 		plt.xlabel("Epoch")
-		plt.title("Loss plot")	
+		plt.title("Loss plot")
 		plt.legend()
 		plt.show()
 		plt.savefig('Neural/lossplot')
-			
+
 	return epoch, losslog
 
 
 def neural_output(test_input):
 	""" This calculates the neural network predicted output for a trained network.
-	
+
 	Inputs:
 		test_input - Array containing unnormalized parameter values
 		(coeffs - loaded automatically from Neural/neural_model.npz)
-	
+
 	Output:
 		Neural network abundance prediction
 	"""
-	
-	a = ModelParameters()	
-	
+
+	a = ModelParameters()
+
 	# Load in model coefficients
 	coeffs = np.load('Neural/neural_model.npz')
 	w_array_0 = coeffs['w_array_0']
 	w_array_1 = coeffs['w_array_1']
 	b_array_0 = coeffs['b_array_0']
 	b_array_1 = coeffs['b_array_1']
-	
+
 	# Normalize data for input into network
 	norm_data = (test_input - a.p0)/np.array(a.training_widths)
-	
+
 	# Calculate neural network output
 	hidden1 = np.tanh(np.array(np.dot(w_array_0,norm_data)+b_array_0))
 	output = np.dot(w_array_1, hidden1)+b_array_1
-	
+
 	return output
 
 def neural_errors(dataset):
 	""" Calculate median absolute error between Chempy and neural network for each set of parameters.
 	Input is the name of the dataset: 'verif' or 'test'
 	"""
-	
+
 	# Load abundances
 	model_abundances = np.load('Neural/'+dataset+'_abundances.npy')
 	params = np.load('Neural/'+dataset+'_param_grid.npy')
-	
+
 	# Calculate absolute model error
 	error=[]
 	for i in range(len(params)):
@@ -239,17 +239,17 @@ def neural_errors(dataset):
 		error.append(np.absolute(predicted_abundances-model_abundances[i]))
 
 	return np.median(error,axis=1)
-	
+
 def calculate_errors(dataset):
 	""" Calculate summed absolute error between Chempy and neural network across all elements for each set of parameters.
 	Input is the name of the dataset: 'verif' or 'test'
 	Output is mean and standard deviation of errors across all elements and maximum element error
 	"""
-	
+
 	# Load abundances
 	model_abundances = np.load('Neural/'+dataset+'_abundances.npy')
 	params = np.load('Neural/'+dataset+'_param_grid.npy')
-	
+
 	# Calculate absolute model error
 	error=[]
 	for i in range(len(params)):
@@ -257,28 +257,28 @@ def calculate_errors(dataset):
 		error.append(np.absolute(predicted_abundances-model_abundances[i]))
 
 	return np.mean(error,axis=1),np.std(error,axis=1),np.amax(error,axis=1)
-	
+
 def neural_corner_plot(dataset):
 	""" This function plots a corner plot of the model parameters, with colors showing the median neural network error.
 	The error corresponding to max color can be changed by the color_max parameter.
-	
+
 	Input:
 		Name of dataset ('verif' or 'test')
-	
+
 	Output:
 		corner_parameter_plot.png saved in Neural/ directory
 	"""
-	
+
 	from matplotlib import cm
 
-	a=ModelParameters()	
+	a=ModelParameters()
 
 	# Load datasets
 	data_tr = np.load('Neural/training_param_grid.npy')
 	data_v = np.load('Neural/'+dataset+'_param_grid.npy')
 
 	param_error = neural_errors(dataset)
-	
+
 	# Initialize plot
 	plt.clf()
 	text_size = 12
@@ -298,7 +298,7 @@ def neural_corner_plot(dataset):
                    r'$\log_{10}(\tau_\mathrm{Ia})$',r'$\log_{10}(\mathrm{SFE})$',
                    r'$\log_{10}(\mathrm{SFR_{peak}})$',r'x_{out}']
 
-	
+
 	# Plot settings
 	fig,axes = plt.subplots(nrows = len(a.p0), ncols = len(a.p0),figsize=(14.69,8.0),dpi=300)
 	alpha = 0.5
@@ -335,8 +335,8 @@ def neural_corner_plot(dataset):
 				axes[i,j].set_ylim(0,1.05)
 				if j !=0:
 					plt.setp(axes[i,j].get_yticklabels(), visible=False)
-				axes[i,j].vlines(np.percentile(data_v[:,j],15.865),axes[i,j].get_ylim()[0],axes[i,j].get_ylim()[1], color = 'k',alpha=alpha,linewidth = lw,linestyle = 'dashed')    
-				axes[i,j].vlines(np.percentile(data_v[:,j],100-15.865),axes[i,j].get_ylim()[0],axes[i,j].get_ylim()[1], color = 'k',alpha=alpha,linewidth = lw,linestyle = 'dashed')    
+				axes[i,j].vlines(np.percentile(data_v[:,j],15.865),axes[i,j].get_ylim()[0],axes[i,j].get_ylim()[1], color = 'k',alpha=alpha,linewidth = lw,linestyle = 'dashed')
+				axes[i,j].vlines(np.percentile(data_v[:,j],100-15.865),axes[i,j].get_ylim()[0],axes[i,j].get_ylim()[1], color = 'k',alpha=alpha,linewidth = lw,linestyle = 'dashed')
 				axes[i,j].vlines(np.percentile(data_v[:,j],50),axes[i,j].get_ylim()[0],axes[i,j].get_ylim()[1], color = 'k',alpha=alpha,linewidth = lw)
 			if i>j:
 				if j !=0:
@@ -359,7 +359,7 @@ def neural_corner_plot(dataset):
 				axes[i,j].set_ylim(min(data_tr[:,i])-0.1,max(data_tr[:,i])+0.1)
 	cax=fig.add_axes([0.82,0.06,0.02,0.9])
 	plt.colorbar(cplot,cax=cax)
-	
+
 	plt.show()
 	fig.savefig('Neural/'+dataset+'_corner_parameter_plot.png',bbox_inches='tight')
 
@@ -370,24 +370,24 @@ def neural_corner_plot(dataset):
 def max_err_corner_plot(dataset):
 	""" This function plots a corner plot of the model parameters, with colors showing the max neural network error across all elements.
 	The error corresponding to max color can be changed by the color_max parameter.
-	
+
 	Input:
 		Name of dataset ('verif' or 'test')
-	
+
 	Output:
 		corner_parameter_plot.png saved in Neural/ directory
 	"""
-	
+
 	from matplotlib import cm
 
-	a=ModelParameters()	
+	a=ModelParameters()
 
 	# Load datasets
 	data_tr = np.load('Neural/training_param_grid.npy')
 	data_v = np.load('Neural/'+dataset+'_param_grid.npy')
 
 	_,_,param_error = calculate_errors(dataset) # Finds MAX error across all elements
-	
+
 	# Initialize plot
 	plt.clf()
 	text_size = 12
@@ -407,7 +407,7 @@ def max_err_corner_plot(dataset):
                    r'$\log_{10}(\tau_\mathrm{Ia})$',r'$\log_{10}(\mathrm{SFE})$',
                    r'$\log_{10}(\mathrm{SFR_{peak}})$',r'x_{out}']
 
-	
+
 	# Plot settings
 	fig,axes = plt.subplots(nrows = len(a.p0), ncols = len(a.p0),figsize=(14.69,8.0),dpi=300)
 	alpha = 0.5
@@ -444,8 +444,8 @@ def max_err_corner_plot(dataset):
 				axes[i,j].set_ylim(0,1.05)
 				if j !=0:
 					plt.setp(axes[i,j].get_yticklabels(), visible=False)
-				axes[i,j].vlines(np.percentile(data_v[:,j],15.865),axes[i,j].get_ylim()[0],axes[i,j].get_ylim()[1], color = 'k',alpha=alpha,linewidth = lw,linestyle = 'dashed')    
-				axes[i,j].vlines(np.percentile(data_v[:,j],100-15.865),axes[i,j].get_ylim()[0],axes[i,j].get_ylim()[1], color = 'k',alpha=alpha,linewidth = lw,linestyle = 'dashed')    
+				axes[i,j].vlines(np.percentile(data_v[:,j],15.865),axes[i,j].get_ylim()[0],axes[i,j].get_ylim()[1], color = 'k',alpha=alpha,linewidth = lw,linestyle = 'dashed')
+				axes[i,j].vlines(np.percentile(data_v[:,j],100-15.865),axes[i,j].get_ylim()[0],axes[i,j].get_ylim()[1], color = 'k',alpha=alpha,linewidth = lw,linestyle = 'dashed')
 				axes[i,j].vlines(np.percentile(data_v[:,j],50),axes[i,j].get_ylim()[0],axes[i,j].get_ylim()[1], color = 'k',alpha=alpha,linewidth = lw)
 			if i>j:
 				if j !=0:
@@ -468,18 +468,8 @@ def max_err_corner_plot(dataset):
 				axes[i,j].set_ylim(min(data_tr[:,i])-0.1,max(data_tr[:,i])+0.1)
 	cax=fig.add_axes([0.82,0.06,0.02,0.9])
 	plt.colorbar(cplot,cax=cax)
-	
+
 	plt.show()
 	fig.savefig('Neural/'+dataset+'max_err_corner_parameter_plot.png',bbox_inches='tight')
 
 	return None
-
-
-
-
-
-
-
-
-
-	
