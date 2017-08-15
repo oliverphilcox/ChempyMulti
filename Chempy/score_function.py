@@ -109,6 +109,7 @@ class preload_params():
 	Definitions can be called from this file
 	
 	NB - this only works for one wildcard at the moment - GENERALIZE THIS!!!
+	This is old and probably shouldn't be used....
 	"""
 	from Chempy.parameter import ModelParameters
 	import numpy as np
@@ -117,7 +118,7 @@ class preload_params():
 	
 	a = ModelParameters()
 	
-	wildcard = np.load('Chempy/input/stars/Proto-sun.npy')	
+	wildcard = np.load('Chempy/input/stars/'+a.stellar_identifier+'.npy')	
 	
 	elements = []
 	star_abundance_list = []
@@ -170,7 +171,7 @@ class preload_params_mcmc():
 	error_weight = beta.pdf(model_errors, a = a.beta_error_distribution[1], b = a.beta_error_distribution[2])
 	error_weight/= sum(error_weight)
 
-	wildcard = np.load('Chempy/input/stars/Proto-sun.npy')	
+	wildcard = np.load('Chempy/input/stars/'+a.stellar_identifier+'.npy')	
 	
 	elements = []
 	star_abundance_list = []

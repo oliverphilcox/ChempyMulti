@@ -27,8 +27,8 @@ class ModelParameters(object):
 	#	stellar_identifier_list.append("Rob_%d" %item)
 	#stellar_identifier_list = ['Proto-sun', 'Arcturus', 'B-stars']
 	# 'prior' can be used as stellar_identifier, then the prior will be sampled with Chempy.wrapper.mcmc() routine
-	stellar_identifier_list = ['Proto-sun']
-	stellar_identifier = 'Proto-sun'
+	stellar_identifier_list = ['Proto-sun_all']
+	stellar_identifier = 'Proto-sun_all'
 
 	# Convergense parameters of minimization and MCMC
 	maxiter_minimization = 500
@@ -226,7 +226,13 @@ class ModelParameters(object):
 
 
 	####### Evaluate model
-	element_names = ['He','C', 'N', 'O', 'F','Ne','Na', 'Mg', 'Al', 'Si', 'P','S', 'Ar','K', 'Ca','Ti', 'V', 'Cr', 'Mn', 'Fe', 'Co', 'Ni']#, 'Zn','Y', 'Ba']# Runs with sun
+	
+	# 22 elements
+	#element_names = ['He','C', 'N', 'O', 'F','Ne','Na', 'Mg', 'Al', 'Si', 'P','S', 'Ar','K', 'Ca','Ti', 'V', 'Cr', 'Mn', 'Fe', 'Co', 'Ni']#, 'Zn','Y', 'Ba']# Runs with sun
+
+	# 28 elements	
+	element_names = ['He','C', 'N', 'O', 'F','Ne','Na', 'Mg', 'Al', 'Si', 'P','S', 'Cl','Ar','K', 'Ca','Sc','Ti', 'V', 'Cr', 'Mn', 'Fe', 'Co', 'Ni','Cu','Zn','Ga','Ge']#, 'Zn','Y', 'Ba']# Runs with sun
+	
 	elements_to_trace = ['Al', 'Ar', 'B', 'Be', 'C', 'Ca', 'Cl', 'Co', 'Cr', 'Cu', 'F', 'Fe', 'Ga', 'Ge', 'H', 'He', 'K', 'Li', 'Mg', 'Mn', 'N', 'Na', 'Ne', 'Ni', 'O', 'P', 'S', 'Sc', 'Si', 'Ti', 'V', 'Zn']
 		
 	#observational_constraints_index = ['sol_norm']#['gas_reservoir','sn_ratio','sol_norm']#,'wildcard ','cas','arcturus','stars_at_end', 'plot_processes', 'save_abundances', 'elements']
@@ -337,7 +343,7 @@ class ModelParameters(object):
 	
 	# Create list of elements calculated by neural network
 	# (These are common elements between proto-sun and Chempy traced elements)
-	sol_dat=np.load('Chempy/input/stars/Proto-sun.npy')	
+	sol_dat=np.load('Chempy/input/stars/'+stellar_identifier+'.npy')	
 	neural_names = []
 	for item in elements_to_trace:
 		if item in list(sol_dat.dtype.names):

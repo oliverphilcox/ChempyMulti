@@ -1299,6 +1299,8 @@ def posterior_function_for_minimization_quick(changing_parameter,a,preload):
 def posterior_function_quick(changing_parameter,a,preload):
 	'''
 	This is the actual posterior function. But the functionality is explained in posterior_function.
+	
+	THIS USES OPTIMAL MODEL ERRORS - NOT BETA FUNCTION!!!!
 	'''
 	
 	#start_time = time.time()
@@ -1325,15 +1327,39 @@ def posterior_function_quick(changing_parameter,a,preload):
 	a.end ,a.time_steps, a.total_mass = backup
 		
 		# The last two entries of the abundance list are the Corona metallicity and the SN-ratio
-	abundance_list = abundance_list[:-2]
+	list_of_abundances = abundance_list[:-2]
 	#elements_to_trace = elements_to_trace[:-2]
 
 	#model = time.time()
 		#print('model: ', precalculation - model)
 
 		# a likelihood is calculated where the model error is optimized analytically if you do not want model error uncomment one line in the likelihood function
+	wildcard = preload.wildcard
+	abundance_list = []
+	element_list = []
+	star_abundance_list = []
+	star_error_list = []
+	for i,item in enumerate(preload.elements_to_trace):
+		if item in list(wildcard.dtype.names):
+			element_list.append(item)
+			abundance_list.append(float(list_of_abundances[i]))
+			star_abundance_list.append(float(wildcard[item][0]))
+			star_error_list.append(float(wildcard[item][1]))
+	abundance_list = np.hstack(abundance_list)
+	star_abundance_list = np.hstack(star_abundance_list)
+	star_error_list = np.hstack(star_error_list)
 	
-	likelihood, element_list, model_error, star_error_list, abundance_list, star_abundance_list = likelihood_function(a.stellar_identifier, abundance_list, preload.elements_to_trace)
+	model_error = []
+	for i, item in enumerate(element_list):
+		if (abundance_list[i] - star_abundance_list[i]) * (abundance_list[i] - star_abundance_list[i]) <= star_error_list[i] * star_error_list[i]:
+			model_error.append(0.)
+		else:
+			model_error.append(np.sqrt((abundance_list[i] - star_abundance_list[i]) * (abundance_list[i] - star_abundance_list[i]) - star_error_list[i] * star_error_list[i]))
+	model_error = np.hstack(model_error)
+
+	likelihood = likelihood_evaluation(model_error, star_error_list, abundance_list, star_abundance_list)
+	
+	#likelihood, element_list, model_error, star_error_list, abundance_list, star_abundance_list = likelihood_function(a.stellar_identifier, abundance_list, preload.elements_to_trace)
 		#likelihood = 0.
 		#abundance_list = [0]
 
