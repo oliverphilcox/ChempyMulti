@@ -1,5 +1,5 @@
 from .parameter import ModelParameters
-#from .cem_function import posterior_function_returning_predictions
+from .cem_function import posterior_function_returning_predictions
 import numpy as np
 import os
 import matplotlib.pyplot as plt
