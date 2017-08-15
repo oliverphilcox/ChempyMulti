@@ -157,6 +157,13 @@ class preload_params_mcmc():
 	from Chempy.parameter import ModelParameters
 	from scipy.stats import beta
 	a = ModelParameters()
+
+	elements_to_trace = list(a.elements_to_trace)
+	elements_to_trace.append('Zcorona')
+	elements_to_trace.append('SNratio')
+	
+	# Neural network coeffs
+	coeffs = np.load('Neural/neural_model.npz')
 	
 	# Beta function calculations
 	model_errors = np.linspace(a.flat_model_error_prior[0],a.flat_model_error_prior[1],a.flat_model_error_prior[2])

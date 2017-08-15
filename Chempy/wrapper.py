@@ -502,7 +502,7 @@ def send_email(thread_count, iteration_count, posterior_beginning, posterior_end
 	text = msg.as_string()
 	server.sendmail(fromaddr, toaddr, text)	
 	
-def mcmc_quick(changing_parameter, error_list, elements):
+def mcmc_quick(changing_parameter, error_list, elements,preload):
 	'''
 	Convenience function to use the MCMC for one zone. A subdirectory mcmc/ will be created in the current directory and intermediate chains will be stored there.
 	The MCMC will sample the volume of best posterior for the likelihood functions that are declared in parameter.py. 
@@ -545,8 +545,6 @@ def mcmc_quick(changing_parameter, error_list, elements):
 	a.nwalkers = max(a.nwalkers, int(ndim*2))
 	chain = np.empty(shape = (a.nwalkers,ndim))
 	
-	preload = preload_params_mcmc() 
-	
 	for i in range(a.nwalkers):
 		result = -np.inf
 		while result == -np.inf:
@@ -563,14 +561,15 @@ def mcmc_quick(changing_parameter, error_list, elements):
 	for i in range(a.m):
 		print('step ', i+1 , 'of ',a.m)
 		pos, prob, state, blobs = sampler.run_mcmc(pos, a.save_state_every, rstate0=state, lnprob0=prob, blobs0 = blobs, storechain = True)
-		np.save('%s/flatchain' %(directory),sampler.chain)
-		np.save('%s/flatlnprobability' %(directory),sampler.lnprobability)
-		np.save('%s/flatblobs' %(directory),sampler.blobs)
-		posterior = np.load('%s/flatlnprobability.npy' %(directory))
+	#	np.save('%s/flatchain' %(directory),sampler.chain)
+	#	np.save('%s/flatlnprobability' %(directory),sampler.lnprobability)
+	#	np.save('%s/flatblobs' %(directory),sampler.blobs)
+	#	posterior = np.load('%s/flatlnprobability.npy' %(directory))
+		posterior = sampler.lnprobability
 		posterior_list.append(np.mean(posterior, axis = 0)[-1])
 		posterior_std_list.append(np.std(posterior, axis = 0)[-1])
-		np.save('%s/flatmeanposterior' %(directory), posterior_list)
-		np.save('%s/flatstdposterior' %(directory), posterior_std_list)
+	#	np.save('%s/flatmeanposterior' %(directory), posterior_list)
+	#	np.save('%s/flatstdposterior' %(directory), posterior_std_list)
 		print(np.mean(posterior, axis = 0)[0], np.mean(posterior, axis = 0)[-1])
 		
 		if i>202:
@@ -581,5 +580,139 @@ def mcmc_quick(changing_parameter, error_list, elements):
 		print('calculation so far took', elapsed1, ' seconds')
 		if i>a.min_mcmc_iterations and np.abs(np.mean(posterior, axis = 0)[-1] - np.mean(posterior, axis = 0)[-100]) < a.mcmc_tolerance and np.abs(np.mean(posterior, axis = 0)[-1] - np.mean(posterior, axis = 0)[-200]) < a.mcmc_tolerance:
 			break
+	np.save('%s/flatchain' %(directory),sampler.chain)
+	np.save('%s/flatlnprobability' %(directory),sampler.lnprobability)
+	np.save('%s/flatblobs' %(directory),sampler.blobs)
+	posterior = np.load('%s/flatlnprobability.npy' %(directory))
+	posterior_list.append(np.mean(posterior, axis = 0)[-1])
+	posterior_std_list.append(np.std(posterior, axis = 0)[-1])
+	np.save('%s/flatmeanposterior' %(directory), posterior_list)
+	np.save('%s/flatstdposterior' %(directory), posterior_std_list)
+		
 	if a.send_email:
 		send_email(nthreads, i, np.mean(posterior, axis = 0)[0], np.mean(posterior, axis = 0)[-1], a, elapsed1)
+
+def single_star_optimization():
+	'''
+	This function will optimize the parameters of a single zone quickly
+
+	INPUT: 
+
+	   a = will be loaded from parameter.py (prepare all variables there)
+
+	OUTPUT:
+
+	   log_list = a list of intermediate results (so far only for debugging)
+	'''
+	import time
+	import multiprocessing as mp
+	from .optimization import minimizer_initial_quick, minimizer_global, minimizer_local
+	from .cem_function import global_optimization_error_returned
+	from .parameter import ModelParameters
+	from .score_function import preload_params_mcmc
+	
+	# For testing
+	import warnings
+	warnings.filterwarnings("ignore")
+		
+	a = ModelParameters()
+	preload = preload_params_mcmc()
+	
+	print(a.stellar_identifier_list)
+	start_time = time.time()
+
+	log_list = []
+	# I: Minimization for each star seperately
+	# 1: for each star make initial conditions (each star needs other model parameters)	
+	parameter_list = []
+	for item in a.stellar_identifier_list:
+		parameter_list.append(item)
+	# 2: call posterior_function_for_minimization with scipy.optimize.minimize in multiprocess for each star and recover the found parameters
+	p = mp.Pool(len(parameter_list))
+	t = p.map(minimizer_initial_quick, parameter_list)
+	p.close()
+	p.join()
+	result = np.vstack(t)
+
+	log_list.append(np.copy(result))
+	log_list.append('initial minimization')
+	initial = time.time()
+	print('first minimization for each star separately took: %2.f seconds' %(initial - start_time))
+
+	# IV: repeat II and III until posterior does not change much
+	result[:,:len(a.SSP_parameters)] = np.mean(result[:,:len(a.SSP_parameters)], axis = 0)
+	posteriors = []
+	counter = 0
+	while True:
+		counter += 1
+		if len(posteriors) > 1:
+			if np.abs(posteriors[-1] - posteriors[-2]) < a.gibbs_sampler_tolerance:
+				break
+			if len(posteriors) > a.gibbs_sampler_maxiter:
+				break
+
+		initial = time.time()
+		# II: Global parameter minimization:
+		# 1: only SSP parameters free. Use mean SSP parameter values and individual (but fixed ISM parameter values)
+		changing_parameter = result[0,:len(a.SSP_parameters)]
+		# 2: Call each star in multiprocess but only return the predictions
+		# 3: Calculate the likelihood for each star and optimize the common model error (is all done within minimizer global, which is calling 'global optimization')
+		x = minimizer_global(changing_parameter,  a.tol_minimization, a.maxiter_minimization, a.verbose, result)
+
+		# 4: return global SSP parameters and common model error
+		posterior, error_list, elements = global_optimization_error_returned(x, result)
+		posteriors.append(posterior)
+		print(posteriors)
+
+		global_iteration1 = time.time()
+		print('step %d global minimization took: %2.f seconds' %(counter, global_iteration1 - initial))	
+
+		# III: Local parameter minimization:
+		# 1: Use fixed global parameters and fixed common errors make initial conditions
+		result[:,:len(a.SSP_parameters)] = x
+
+		log_list.append((np.copy(x),posterior))
+		log_list.append('step %d global minimization' %(counter))
+
+		p0_list = []
+		parameter_list = []
+		x_list = []
+		error_list_mp = []
+		element_list_mp = []
+
+		for i,item in enumerate(a.stellar_identifier_list):
+			parameter_list.append(item)
+			p0_list.append(result[i,len(a.SSP_parameters):])
+			x_list.append(x)
+			error_list_mp.append(error_list)
+			element_list_mp.append(elements)
+
+		args = zip(p0_list,parameter_list,x_list,error_list_mp,element_list_mp)
+
+		# 2: Minimize each star ISM parameters in multiprocess
+		p = mp.Pool(len(parameter_list))
+		t = p.map(minimizer_local, args)
+		p.close()
+		p.join()
+		local_parameters = np.vstack(t)
+		result[:,len(a.SSP_parameters):] = local_parameters
+
+		log_list.append(np.copy(result))
+		log_list.append('step %d local minimization' %(counter))
+		local_iteration1 = time.time()
+		print('step %d local minimization took: %2.f seconds' %(counter, local_iteration1 - global_iteration1))	
+
+	log_list.append(posteriors)
+	print(log_list)
+
+	# V: MCMC run
+	## reshape the result to have global parameters in the front and the local parameters following
+	changing_parameter = list(result[0,:len(a.SSP_parameters)])
+	for i in range(result.shape[0]):
+		changing_parameter.append(list(result[i,len(a.SSP_parameters):]))
+	changing_parameter = np.hstack(changing_parameter)
+	## jitter the parameters to initialise the chain (add a validation later, i.e. testing that the particular parameters yield a result)
+	mcmc_quick(changing_parameter, error_list, elements,preload)
+	# 1: Free all parameters and optimize common error (SSP should be the same for all stars)
+	# 2: Plug everything into emcee and sample the posterior
+	return log_list

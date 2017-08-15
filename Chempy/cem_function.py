@@ -8,9 +8,8 @@ import multiprocessing as mp
 from .wrapper import initialise_stuff, Chempy
 from scipy.misc import logsumexp
 from .neural import neural_output_int
-	
 import numpy.ma as ma
-from .data_to_test import likelihood_evaluation, read_out_wildcard
+from .data_to_test import likelihood_evaluation, read_out_wildcard, likelihood_evaluation_int
 from .parameter import ModelParameters
 
 
@@ -1140,11 +1139,7 @@ def posterior_function_mcmc_quick(changing_parameter,error_list,error_element_li
 	'''
 	This is the actual posterior function for many stars. But the functionality is explained in posterior_function_many_stars.
 	'''
-	import numpy.ma as ma
-	#from .cem_function import get_prior, posterior_function_returning_predictions
-	from .data_to_test import likelihood_evaluation_int
-	from .parameter import ModelParameters
-
+	
 	## Initialising the model parameters
 	a = ModelParameters()
 	
@@ -1195,9 +1190,10 @@ def posterior_function_mcmc_quick(changing_parameter,error_list,error_element_li
 		list_of_l_input[-1] = list(list_of_l_input[-1])
 	
 	# Here the predictions and observations are brought into the same array form in order to perform the likelihood calculation fast
+	#elements = preload.elements
 	elements = np.unique(np.hstack(elements_list))
 	# Masking the elements that are not given for specific stars and preparing the likelihood input
-	star_errors = ma.array(np.zeros((len(elements),len(a.stellar_identifier_list))), mask = True)
+	#star_errors = ma.array(np.zeros((len(elements),len(a.stellar_identifier_list))), mask = True)
 	star_abundances = ma.array(np.zeros((len(elements),len(a.stellar_identifier_list))), mask = True)
 	model_abundances = ma.array(np.zeros((len(elements),len(a.stellar_identifier_list))), mask = True)
 
@@ -1205,13 +1201,13 @@ def posterior_function_mcmc_quick(changing_parameter,error_list,error_element_li
 	    for element_index,element in enumerate(item[0]):
 	    	assert element in elements, 'observed element is not predicted by Chempy'
 	    	new_element_index = np.where(elements == element)[0][0]
-	    	star_errors[new_element_index,star_index] = item[1][element_index]
+	#    	star_errors[new_element_index,star_index] = item[1][element_index]
 	    	model_abundances[new_element_index,star_index] = item[2][element_index]
 	    	star_abundances[new_element_index,star_index] = item[3][element_index]
-	#star_errors = preload.star_error_list
+	star_errors = preload.star_error_list
 	#star_abundances = preload.star_abundance_list
 	#model_abundances = predictions_list
-	#elements = preload.elements
+	elements = preload.elements
 
 	## given model error from error_list is read out and brought into the same element order (compatibility between python 2 and 3 makes the decode method necessary)
 	if not a.error_marginalization:
@@ -1219,7 +1215,6 @@ def posterior_function_mcmc_quick(changing_parameter,error_list,error_element_li
 		for item in error_element_list:
 			error_elements_decoded.append(item)#.decode('utf8')) # DECODING NOT NEEDED IN PYTHON 3
 		error_element_list = np.hstack(error_elements_decoded)
-
 
 		error_list = np.hstack(error_list)
 		model_error = []
@@ -1249,9 +1244,6 @@ def posterior_function_mcmc_quick(changing_parameter,error_list,error_element_li
 			
 			## VECTORIZE THIS?
 			likelihood_list[i] = likelihood_evaluation_int(preload.err[i] , model_abundances,star_abundances)
-		model_abundances.dump('testmod')
-		star_abundances.dump('teststar')
-		np.save('testerr',preload.err[-1])
 		#print(likelihood_list[-1])
 		#print(likelihood_evaluation_int(preload.err[-1],model_abundances,star_abundances))
 		likelihood = logsumexp(likelihood_list, b = error_weight)	
@@ -1277,10 +1269,14 @@ def posterior_function_predictions_quick(changing_parameter,a,preload):
 	This is like posterior_function_real. This is cut down for one zone, for MCMC	'''
 	
 	# the values in a are updated according to changing_parameters and the prior list is appended
-	a = extract_parameters_and_priors(changing_parameter, a)
+	#a = extract_parameters_and_priors(changing_parameter, a)
+	for i,item in enumerate(a.to_optimize):
+		setattr(a, item, changing_parameter[i])
+		#val = getattr(a, item)
+
 	
 	# call Chempy and return the abundances at the end of the simulation = time of star's birth and the corresponding element names as a list
-	abundance_list,_ = cem_real2(a)
+	abundance_list = cem_real2_int(a,preload)
 		
 	list_of_abundances = abundance_list[:-2]
 	
@@ -1292,3 +1288,61 @@ def posterior_function_predictions_quick(changing_parameter,a,preload):
 	
 	return abundance_list
 
+def posterior_function_for_minimization_quick(changing_parameter,a,preload):
+	'''
+	calls the posterior function but just returns the negative log posterior instead of posterior and blobs
+	'''
+	posterior, blobs = posterior_function_quick(changing_parameter,a,preload)
+	
+	return -posterior
+
+def posterior_function_quick(changing_parameter,a,preload):
+	'''
+	This is the actual posterior function. But the functionality is explained in posterior_function.
+	'''
+	
+	#start_time = time.time()
+	# the values in a are updated according to changing_parameters and the prior list is appended
+	a = extract_parameters_and_priors(changing_parameter, a)
+	
+
+	# the log prior is calculated
+	prior = sum(np.log(a.prior))
+
+	
+	#precalculation = time.time()
+	#print('precalculation: ', start_time - precalculation)
+
+	# The endtime is changed for the actual calculation but restored to default afterwards
+	backup = a.end ,a.time_steps, a.total_mass
+	
+	#if a.stellar_identifier is 'prior':
+	#	likelihood = 0.
+	#	abundance_list = 0
+	#else:
+		# call Chempy and return the abundances at the end of the simulation = time of star's birth and the corresponding element names as a list
+	abundance_list = cem_real2_int(a,preload)
+	a.end ,a.time_steps, a.total_mass = backup
+		
+		# The last two entries of the abundance list are the Corona metallicity and the SN-ratio
+	abundance_list = abundance_list[:-2]
+	#elements_to_trace = elements_to_trace[:-2]
+
+	#model = time.time()
+		#print('model: ', precalculation - model)
+
+		# a likelihood is calculated where the model error is optimized analytically if you do not want model error uncomment one line in the likelihood function
+	
+	likelihood, element_list, model_error, star_error_list, abundance_list, star_abundance_list = likelihood_function(a.stellar_identifier, abundance_list, preload.elements_to_trace)
+		#likelihood = 0.
+		#abundance_list = [0]
+
+	#error_optimization = time.time()
+	#print('error optimization: ', model - error_optimization)
+	#if a.verbose:
+	#	if not a.testing_output:
+	#		print('prior = ', prior, 'likelihood = ', likelihood, mp.current_process()._identity[0])
+	#	else:
+	#		print('prior = ', prior, 'likelihood = ', likelihood)
+
+	return prior+likelihood,abundance_list

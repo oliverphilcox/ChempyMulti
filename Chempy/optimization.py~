@@ -153,34 +153,3 @@ def minimizer_global(changing_parameter, tol, maxiter, verbose, result):
 	if verbose:
 		print(res.message)
 	return res.x
-	
-def minimizer_initial_quick(identifier):
-	'''
-	This is a function that is minimizing the posterior of Chempy from initial conditions (and can be called in multiprocesses)
-
-	INPUT:
-
-	   a = model parameters
-
-	OUTPUT:
-
-	   res.x = the free Chempy parameter for which the posterior was minimal (log posterior is maximized)
-	'''
-	from scipy.optimize import minimize
-	from .cem_function import posterior_function_for_minimization_quick
-	from .parameter import ModelParameters
-	from .score_function import preload_params_mcmc
-	
-	a = ModelParameters()
-	preload = preload_params_mcmc()
-	a.stellar_identifier = identifier
-
-	res = minimize(fun = posterior_function_for_minimization_quick,
-		x0 = a.p0,
-		args = (a,preload),
-		method = 'Nelder-Mead',
-		tol = a.tol_minimization,
-		options = {'maxiter':a.maxiter_minimization})
-	if a.verbose:
-		print(res.message)
-	return res.x
