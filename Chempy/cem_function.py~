@@ -7,11 +7,9 @@ from .data_to_test import likelihood_function, wildcard_likelihood_function, ele
 import multiprocessing as mp
 from .wrapper import initialise_stuff, Chempy
 from scipy.misc import logsumexp
-#from .neural import neural_output_int
 import numpy.ma as ma
 from .data_to_test import likelihood_evaluation, read_out_wildcard, likelihood_evaluation_int
 from .parameter import ModelParameters
-
 
 def gaussian_log(x,x0,xsig):
 	'''
@@ -1075,6 +1073,7 @@ def cem_real2_int(a,b):
 	If a.UseNeural==True, then this uses the output from a PRE-TRAINED neural network instead.
 	This is a cut-down version for integrations
 	'''
+	from .neural import neural_output_int
 	## The time until which Chempy is calculated is cropped to the stellar birth time. Also the SFR should not be below 1/20th of the mean SFR
 	#a = shorten_sfr(a)
 	#basic_solar = solar_abundances()
@@ -1135,7 +1134,7 @@ def cem_real2_int(a,b):
 	return(abundance_list)
 
 
-def posterior_function_mcmc_quick(changing_parameter,error_list,error_element_list,preload):
+def posterior_function_mcmc_quick(changing_parameter,error_element_list,preload):
 	'''
 	This is the actual posterior function for many stars. But the functionality is explained in posterior_function_many_stars.
 	'''
@@ -1210,47 +1209,27 @@ def posterior_function_mcmc_quick(changing_parameter,error_list,error_element_li
 	elements = preload.elements
 
 	## given model error from error_list is read out and brought into the same element order (compatibility between python 2 and 3 makes the decode method necessary)
-	if not a.error_marginalization:
-		error_elements_decoded = []
-		for item in error_element_list:
-			error_elements_decoded.append(item)#.decode('utf8')) # DECODING NOT NEEDED IN PYTHON 3
-		error_element_list = np.hstack(error_elements_decoded)
-
-		error_list = np.hstack(error_list)
-		model_error = []
-		for element in elements:
-			assert element in error_element_list, 'for this element the model error was not given, %s' %(element)
-			model_error.append(error_list[np.where(error_element_list == element)])
-		model_error = np.hstack(model_error)
-
-
+	
 	## likelihood is calculated (the model error vector is expanded)
-	if a.error_marginalization:
-		#from scipy.stats import beta
-		#model_errors = np.linspace(a.flat_model_error_prior[0],a.flat_model_error_prior[1],a.flat_model_error_prior[2])
-		model_errors = preload.model_errors
-		likelihood_list = np.zeros(len(model_errors))
-		if a.beta_error_distribution[0]:
-			#error_weight = beta.pdf(model_errors, a = a.beta_error_distribution[1], b = a.beta_error_distribution[2])
-			#error_weight/= sum(error_weight)
-			error_weight = preload.error_weight
-		else:
-			error_weight = np.ones_like(model_errors) * 1./float(flat_model_error_prior[2])
-		for i in range(len(model_errors)):
-			#from .data_to_test import likelihood_evaluation
-			#error_temp = np.ones(len(elements))*item
-			#likelihood_list[i] = likelihood_evaluation(error_temp[:,None],star_errors,model_abundances,star_abundances)
-			#err = np.sqrt(np.multiply(error_temp[:,None],error_temp[:,None]) + np.multiply(star_errors,star_errors))
+	#from scipy.stats import beta
+	#model_errors = np.linspace(a.flat_model_error_prior[0],a.flat_model_error_prior[1],a.flat_model_error_prior[2])
+	model_errors = preload.model_errors
+	likelihood_list = np.zeros(len(model_errors))
+	#error_weight = beta.pdf(model_errors, a = a.beta_error_distribution[1], b = a.beta_error_distribution[2])
+	#error_weight/= sum(error_weight)
+	error_weight = preload.error_weight
+	
+	for i in range(len(model_errors)):
+		#from .data_to_test import likelihood_evaluation
+		#error_temp = np.ones(len(elements))*item
+		#likelihood_list[i] = likelihood_evaluation(error_temp[:,None],star_errors,model_abundances,star_abundances)
+		#err = np.sqrt(np.multiply(error_temp[:,None],error_temp[:,None]) + np.multiply(star_errors,star_errors))
 			
-			## VECTORIZE THIS?
-			likelihood_list[i] = likelihood_evaluation_int(preload.err[i] , model_abundances,star_abundances)
-		#print(likelihood_list[-1])
-		#print(likelihood_evaluation_int(preload.err[-1],model_abundances,star_abundances))
-		likelihood = logsumexp(likelihood_list, b = error_weight)	
-	else:
-		if a.zero_model_error:
-			model_error = np.zeros_like(model_error)
-		likelihood = likelihood_evaluation(model_error[:,None], star_errors , model_abundances, star_abundances)
+		## VECTORIZE THIS?
+		likelihood_list[i] = likelihood_evaluation_int(preload.err[i] , model_abundances,star_abundances)
+	#print(likelihood_list[-1])
+	#print(likelihood_evaluation_int(preload.err[-1],model_abundances,star_abundances))
+	likelihood = logsumexp(likelihood_list, b = error_weight)	
 	
 	## Prior from all stars is added
 	#prior = sum(log_prior_list)
@@ -1284,7 +1263,7 @@ def posterior_function_predictions_quick(changing_parameter,a,preload):
 	for i,item in enumerate(a.elements_to_trace):
 		if item in list(preload.wildcard.dtype.names):
 			abundance_list.append(float(list_of_abundances[i]))
-	abundance_list = np.hstack(abundance_list)
+	#abundance_list = np.hstack(abundance_list)
 	
 	return abundance_list
 

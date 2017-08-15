@@ -491,17 +491,12 @@ def neural_output_int(test_input,a,b):
 
 	# Load in model coefficients
 	#coeffs = np.load('Neural/neural_model.npz')
-	coeffs = b.coeffs
-	w_array_0 = coeffs['w_array_0']
-	w_array_1 = coeffs['w_array_1']
-	b_array_0 = coeffs['b_array_0']
-	b_array_1 = coeffs['b_array_1']
 
 	# Normalize data for input into network
 	norm_data = (test_input - a.p0)/np.array(a.training_widths)
 
 	# Calculate neural network output
-	hidden1 = np.tanh(np.array(np.dot(w_array_0,norm_data)+b_array_0))
-	output = np.dot(w_array_1, hidden1)+b_array_1
+	hidden1 = np.tanh(np.array(np.dot(b.w_array_0,norm_data)+b.b_array_0))
+	output = np.dot(b.w_array_1, hidden1)+b.b_array_1
 
 	return output

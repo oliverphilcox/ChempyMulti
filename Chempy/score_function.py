@@ -104,52 +104,6 @@ def Hogg_wrapper():
 	return None
     
     
-class preload_params():
-	"""This calculates and stores useful quantities that would be calculated multiple times otherwise.
-	Definitions can be called from this file
-	
-	NB - this only works for one wildcard at the moment - GENERALIZE THIS!!!
-	This is old and probably shouldn't be used....
-	"""
-	from Chempy.parameter import ModelParameters
-	import numpy as np
-	from scipy.stats import beta
-	from Chempy.neural import neural_output
-	
-	a = ModelParameters()
-	
-	wildcard = np.load('Chempy/input/stars/'+a.stellar_identifier+'.npy')	
-	
-	elements = []
-	star_abundance_list = []
-	star_error_list = []
-	for i,item in enumerate(a.elements_to_trace):
-		if item in list(wildcard.dtype.names):
-			elements.append(item)
-			star_abundance_list.append(float(wildcard[item][0]))
-			star_error_list.append(float(wildcard[item][1]))
-	star_abundance_list = np.hstack(star_abundance_list)
-	star_error_list = np.hstack(star_error_list)
-	elements = np.hstack(elements)
-	
-	elements_to_trace = list(a.elements_to_trace)
-	elements_to_trace.append('Zcorona')
-	elements_to_trace.append('SNratio')
-	
-	# Neural network coeffs
-	coeffs = np.load('Neural/neural_model.npz')
-	
-	# Beta function errors
-	model_errors = np.linspace(a.flat_model_error_prior[0],a.flat_model_error_prior[1],a.flat_model_error_prior[2])
-	error_weight = beta.pdf(model_errors, a = a.beta_error_distribution[1], b = a.beta_error_distribution[2])
-	error_weight/= sum(error_weight)
-
-	errors_list = []
-	for error in model_errors:
-		temp_err = np.ones((len(star_error_list),1))*error
-		errors_list.append(np.sqrt(np.multiply(temp_err,temp_err) + np.multiply(star_error_list,star_error_list).T).T)
-	
-	
 class preload_params_mcmc():
 	"""This calculates and stores useful quantities that would be calculated multiple times otherwise for the mcmc run.
 	Definitions can be called from this file
@@ -165,6 +119,10 @@ class preload_params_mcmc():
 	
 	# Neural network coeffs
 	coeffs = np.load('Neural/neural_model.npz')
+	w_array_0 = coeffs['w_array_0']
+	w_array_1 = coeffs['w_array_1']
+	b_array_0 = coeffs['b_array_0']
+	b_array_1 = coeffs['b_array_1']
 	
 	# Beta function calculations
 	model_errors = np.linspace(a.flat_model_error_prior[0],a.flat_model_error_prior[1],a.flat_model_error_prior[2])

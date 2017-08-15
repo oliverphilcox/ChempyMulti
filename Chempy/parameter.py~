@@ -1,7 +1,8 @@
 import numpy as np
 
-
 class ModelParameters(object):
+	
+	
 	'''
 	In this class the model parameters are specified. It contains a lot of information which is (not always) necessary to run Chempy.
 	The individual definitions are given as comments.
@@ -27,8 +28,8 @@ class ModelParameters(object):
 	#	stellar_identifier_list.append("Rob_%d" %item)
 	#stellar_identifier_list = ['Proto-sun', 'Arcturus', 'B-stars']
 	# 'prior' can be used as stellar_identifier, then the prior will be sampled with Chempy.wrapper.mcmc() routine
-	stellar_identifier_list = ['Proto-sun_all']
-	stellar_identifier = 'Proto-sun_all'
+	stellar_identifier_list = ['Proto-sun_all']#['Proto-sun']
+	stellar_identifier = 'Proto-sun_all'#'Proto-sun'
 
 	# Convergense parameters of minimization and MCMC
 	maxiter_minimization = 500
@@ -231,7 +232,7 @@ class ModelParameters(object):
 	#element_names = ['He','C', 'N', 'O', 'F','Ne','Na', 'Mg', 'Al', 'Si', 'P','S', 'Ar','K', 'Ca','Ti', 'V', 'Cr', 'Mn', 'Fe', 'Co', 'Ni']#, 'Zn','Y', 'Ba']# Runs with sun
 
 	# 28 elements	
-	element_names = ['He','C', 'N', 'O', 'F','Ne','Na', 'Mg', 'Al', 'Si', 'P','S', 'Cl','Ar','K', 'Ca','Sc','Ti', 'V', 'Cr', 'Mn', 'Fe', 'Co', 'Ni','Cu','Zn','Ga','Ge']#, 'Zn','Y', 'Ba']# Runs with sun
+	element_names = ['He', 'C', 'N', 'O', 'F','Ne','Na', 'Mg', 'Al', 'Si', 'P','S', 'Cl','Ar','K', 'Ca','Sc','Ti', 'V', 'Cr', 'Mn', 'Fe', 'Co', 'Ni','Cu','Zn','Ga','Ge']#, 'Zn','Y', 'Ba']# Runs with sun
 	
 	elements_to_trace = ['Al', 'Ar', 'B', 'Be', 'C', 'Ca', 'Cl', 'Co', 'Cr', 'Cu', 'F', 'Fe', 'Ga', 'Ge', 'H', 'He', 'K', 'Li', 'Mg', 'Mn', 'N', 'Na', 'Ne', 'Ni', 'O', 'P', 'S', 'Sc', 'Si', 'Ti', 'V', 'Zn']
 		
@@ -329,9 +330,9 @@ class ModelParameters(object):
 	
 	## Neural network parameters
 	
-	training_size = 5 # no. values per parameter in training set
+	training_size = 6 # no. values per parameter in training set
 	#training_widths = [0.6,0.3,0.3,0.3,0.2,0.2] # Initial gaussian widths for training set
-	training_widths = [0.6,0.6,0.6,0.6,0.2,0.2] # 2 sigma widths
+	training_widths = [0.9,0.9,0.9,0.9,0.3,0.3] # 2 sigma widths
 	verif_test_sizes = [10000,10000] # Size of array for [verification, test] datasets
 	#test_widths = [0.3,0.3,0.3,0.3,0.1,0.1] # Original prior widths for testing/verification
 	test_widths = [0.9,0.9,0.9,0.9,0.3,0.3] # Test widths	
@@ -352,3 +353,5 @@ class ModelParameters(object):
 	color_max = 0.04 # Maximum color in error plots	
 	
 	UseNeural = True # This defines whether to use trained network in place of Chempyimport numpy as np
+	
+	

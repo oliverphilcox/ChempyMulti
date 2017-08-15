@@ -109,6 +109,7 @@ class preload_params():
 	Definitions can be called from this file
 	
 	NB - this only works for one wildcard at the moment - GENERALIZE THIS!!!
+	This is old and probably shouldn't be used....
 	"""
 	from Chempy.parameter import ModelParameters
 	import numpy as np
@@ -117,7 +118,7 @@ class preload_params():
 	
 	a = ModelParameters()
 	
-	wildcard = np.load('Chempy/input/stars/Proto-sun.npy')	
+	wildcard = np.load('Chempy/input/stars/'+a.stellar_identifier+'.npy')	
 	
 	elements = []
 	star_abundance_list = []
@@ -164,6 +165,10 @@ class preload_params_mcmc():
 	
 	# Neural network coeffs
 	coeffs = np.load('Neural/neural_model.npz')
+	w_array_0 = coeffs['w_array_0']
+	w_array_1 = coeffs['w_array_1']
+	b_array_0 = coeffs['b_array_0']
+	b_array_1 = coeffs['b_array_1']
 	
 	# Beta function calculations
 	model_errors = np.linspace(a.flat_model_error_prior[0],a.flat_model_error_prior[1],a.flat_model_error_prior[2])
