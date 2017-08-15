@@ -343,7 +343,7 @@ class ModelParameters(object):
 	
 	# Create list of elements calculated by neural network
 	# (These are common elements between proto-sun and Chempy traced elements)
-	sol_dat=np.load('Chempy/input/stars/Proto-sun_all.npy')	
+	sol_dat=np.load('Chempy/input/stars/'+stellar_identifier+'.npy')	
 	neural_names = []
 	for item in elements_to_trace:
 		if item in list(sol_dat.dtype.names):
