@@ -7,7 +7,7 @@ from .data_to_test import likelihood_function, wildcard_likelihood_function, ele
 import multiprocessing as mp
 from .wrapper import initialise_stuff, Chempy
 from scipy.misc import logsumexp
-from .neural import neural_output_int
+#from .neural import neural_output_int
 import numpy.ma as ma
 from .data_to_test import likelihood_evaluation, read_out_wildcard, likelihood_evaluation_int
 from .parameter import ModelParameters
