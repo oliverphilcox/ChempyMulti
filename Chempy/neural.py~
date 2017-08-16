@@ -120,7 +120,7 @@ def create_network(learning_rate=a.learning_rate,Plot=True):
 
 	import torch
 	from torch.autograd import Variable
-	from torch.optim import lr_scheduler
+	#from torch.optim import lr_scheduler
 
 	# Load parameters
 	n_train = a.training_size**len(a.p0) # No. data points in training set
@@ -149,7 +149,7 @@ def create_network(learning_rate=a.learning_rate,Plot=True):
 
 	# Use Adam optimizer with learning rate specified in parameter.py
 	optimizer = torch.optim.Adam(model.parameters(), lr = learning_rate)
-	scheduler = lr_scheduler.ReduceLROnPlateau(optimizer, 'min')
+	#scheduler = lr_scheduler.ReduceLROnPlateau(optimizer, 'min')
 
 	# For loss records
 	losslog = []
@@ -162,7 +162,7 @@ def create_network(learning_rate=a.learning_rate,Plot=True):
 		optimizer.zero_grad() # Initially zero gradient
 		loss.backward() # Backpropagation
 		optimizer.step() # Update via optimizer
-		scheduler.step(loss)
+		#scheduler.step(loss)
 
 		# Output loss
 		if i % 3 ==0:
@@ -500,3 +500,42 @@ def neural_output_int(test_input,a,b):
 	output = np.dot(b.w_array_1, hidden1)+b.b_array_1
 
 	return output
+	
+
+def test_dataset(width,size):
+    """
+    Create test dataset for fixed gaussian width.
+    The data points are randomly distributed along a uniform distribution with fixed width in parameter space.
+    
+    Input: width of test dataset
+    """
+    
+    import warnings
+    warnings.filterwarnings("ignore")
+    
+    a = ModelParameters()
+    
+    lower = np.zeros(len(a.p0))
+    upper = np.zeros(len(a.p0))
+
+    # Set upper/lower bounds in parameter space
+    for i,param_name in enumerate(a.to_optimize):
+        lower[i], upper[i] = a.constraints.get(param_name)
+        
+    sigma = []
+    for i,param_name in enumerate(a.to_optimize):
+        sigma.append(a.priors.get(param_name)[1])
+
+    param_grid = []
+    abundance_grid = []
+    for i in range(size):
+        if i%10==0:
+            print('Calculating sample %d of %d' %(i+1,size))
+        param = np.random.uniform(a.p0-width*np.array(sigma),a.p0+width*np.array(sigma))
+        pred,_ = posterior_function_returning_predictions((param,a))
+        param_grid.append(list(param))
+        abundance_grid.append(list(pred))
+       
+    np.save('SingleElement/'+str(width)+'_sigma_param_grid.npy',param_grid)
+    np.save('SingleElement/'+str(width)+'_sigma_abundances.npy',abundance_grid)
+    return None	

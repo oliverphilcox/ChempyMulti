@@ -500,3 +500,37 @@ def neural_output_int(test_input,a,b):
 	output = np.dot(b.w_array_1, hidden1)+b.b_array_1
 
 	return output
+	
+
+def test_dataset(width,size):
+	"""
+	Create test dataset for fixed gaussian width.
+	The data points are randomly distributed along a uniform distribution with fixed width in parameter space.
+	
+	Input: width of test dataset
+	"""
+	
+	import warnings
+	warnings.filterwarnings("ignore")
+	
+	a = ModelParameters()
+	
+	sigma = []
+	for i,param_name in enumerate(a.to_optimize):
+		sigma.append(a.priors.get(param_name)[1])
+
+	param_grid = []
+	abundance_grid = []
+	for i in range(size):
+		if i%10==0:
+			print('Calculating sample %d of %d' %(i+1,size))
+		param = np.random.uniform(a.p0-width*np.array(sigma),a.p0+width*np.array(sigma))
+		pred,_ = posterior_function_returning_predictions((param,a))
+		param_grid.append(list(param))
+		abundance_grid.append(list(pred))
+       
+	np.save('SingleElement/'+str(width)+'_sigma_param_grid.npy',param_grid)
+	np.save('SingleElement/'+str(width)+'_sigma_abundances.npy',abundance_grid)
+
+	return None	
+    
