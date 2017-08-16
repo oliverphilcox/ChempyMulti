@@ -337,10 +337,10 @@ class ModelParameters(object):
 	#test_widths = [0.3,0.3,0.3,0.3,0.1,0.1] # Original prior widths for testing/verification
 	test_widths = [0.9,0.9,0.9,0.9,0.3,0.3] # Test widths	
 	
-	neurons = 30 # 20# Number of neurons in layer
+	neurons = 40 # 20# Number of neurons in layer
 	learning_rate = 0.007  # Default Adam neural network learning rate
 	
-	epochs = 5000 # Number of epochs used in testing
+	epochs = 1000 # Number of epochs used in testing
 	
 	# Create list of elements calculated by neural network
 	# (These are common elements between proto-sun and Chempy traced elements)
