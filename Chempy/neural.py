@@ -513,6 +513,10 @@ def test_dataset(width,size):
 	import warnings
 	warnings.filterwarnings("ignore")
 	
+	directory = 'SingleElement/'
+	if not os.path.exists(directory):
+		os.makedirs(directory)
+
 	a = ModelParameters()
 	
 	sigma = []

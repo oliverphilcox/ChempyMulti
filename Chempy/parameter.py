@@ -352,6 +352,6 @@ class ModelParameters(object):
 
 	color_max = 0.04 # Maximum color in error plots	
 	
-	UseNeural = False # This defines whether to use trained network in place of Chempyimport numpy as np
+	UseNeural = True # This defines whether to use trained network in place of Chempyimport numpy as np
 	
 	
