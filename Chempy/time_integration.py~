@@ -195,7 +195,8 @@ class ABUNDANCE_MATRIX(object):
 		'''
 		### This aligns the SSP yield such that it becomes a simple vector multiplication with a little memory overhead
 		# self.all_feedback has the following data structure: [element][time_index_of_the_born_ssp][time_index_of_this_ssp_giving_back_the_elements_mass]
-
+		disp_errors = False
+		
 		for i,item in enumerate(self.all_feedback_names):
 			self.all_feedback[item][index-1][index-1:] = ssp_yield[item] 
 		if self.check_processes:
@@ -242,11 +243,13 @@ class ABUNDANCE_MATRIX(object):
 				infall_needed = 0.
 			## for few parameter values of gas_power and SFE the infall_needed value could be too small
 			if infall_needed + gas_there <= self.sfr[index]:
-				#print('too few gas requested', 'infall needed= ', infall_needed, 'gas there = ', gas_there, 'total SFR = ', self.sfr, 'gas needed = ', gas_needed, 'corona = ', self.gas_reservoir['gas'][index], 'sfe = ', self.starformation_efficiency , 'dt = ', self.dt) 
+				if disp_errors == True:
+					print('too few gas requested', 'infall needed= ', infall_needed, 'gas there = ', gas_there, 'total SFR = ', self.sfr, 'gas needed = ', gas_needed, 'corona = ', self.gas_reservoir['gas'][index], 'sfe = ', self.starformation_efficiency , 'dt = ', self.dt) 
 				infall_needed = self.sfr[index] - gas_there
 				infall_needed *= 1.01 # to avoid the ISM being empty
 			if infall_needed > self.gas_reservoir['gas'][index]:
-				#print('gas reservoir is empty')
+				if disp_errors == True:
+					print('gas reservoir is empty')
 				infall_needed = float(self.gas_reservoir['gas'][index])
 			self.infall[index] = float(infall_needed)
 			self.cube['infall'][index] = float(infall_needed)
