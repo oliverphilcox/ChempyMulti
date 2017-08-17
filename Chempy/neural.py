@@ -66,7 +66,7 @@ def training_data():
 		if (completed == num_tasks):
 			break
 		print ("Waiting for %d tasks to complete" %(num_tasks-completed))
-		time.sleep(10)
+		time.sleep(3)
 	p.close()	
 	p.join()
 	result = np.vstack(t)	

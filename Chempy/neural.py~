@@ -56,12 +56,12 @@ def training_data():
 	#p = mp.Pool(10)#len(param_grid))
 	#for _ in tqdm.tqdm(p.map(create_dataset, param_grid[:10]), total=10):#len(param_grid)):
 		#pass	
-	num_tasks=10	
+	num_tasks=len(param_grid)	
 	
-	p = mp.Pool(10)#len(param_grid))
-	t = p.imap(create_dataset, param_grid[:10])
+	p = mp.Pool(len(param_grid))
+	t = p.imap(create_dataset, param_grid)
 	
-	while (True):
+	while True:
 		completed = t._index
 		if (completed == num_tasks):
 			break
