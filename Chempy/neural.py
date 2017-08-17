@@ -46,8 +46,6 @@ def training_data():
 	if not os.path.exists(directory):
 		os.makedirs(directory)
 
-	print(param_grid)
-
 	#np.save(directory+'training_norm_grid.npy',norm_grid)
 	#np.save(directory+'training_param_grid.npy',param_grid)
 	
@@ -59,7 +57,7 @@ def training_data():
 	p = mp.Pool()#processes=mp.cpu_count())#len(param_grid))
 
 	#t = p.imap(create_dataset, zip(param_grid[:6],index[:6]))
-	r = list(tqdm.tqdm(p.imap_unordered(create_dataset, param_grid[:10]), total=10))#len(param_grid)))
+	r = list(tqdm.tqdm(p.imap_unordered(create_dataset, param_grid), total=len(param_grid)))#len(param_grid)))
 	params = []
 	norm_params = []
 	abun = []
