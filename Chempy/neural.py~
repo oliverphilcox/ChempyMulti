@@ -47,8 +47,10 @@ def training_data():
 
 	np.save(directory+'training_norm_grid.npy',norm_grid)
 	np.save(directory+'training_param_grid.npy',param_grid)
-
+	index=0
 	def create_dataset(data):
+		print(index)
+		index+=1
 		a=ModelParameters
 		abundances,_ = posterior_function_returning_predictions((data,a))
 		return abundances
