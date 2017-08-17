@@ -48,13 +48,28 @@ def training_data():
 	np.save(directory+'training_norm_grid.npy',norm_grid)
 	np.save(directory+'training_param_grid.npy',param_grid)
 
+	def create_dataset(data):
+		a=ModelParameters
+		abundances,_ = posterior_function_returning_predictions((data,a))
+		return abundances
+	
 	## Create abundance output
+	p = mp.Pool(len(param_grid))
+	t = p.map(create_dataset, param_grid)
+	p.close()
+	p.join()
+	result = np.vstack(t)	
+	
 	training_abundances = []
-	for i,item in enumerate(param_grid):
-		abundances,_ = posterior_function_returning_predictions((item,a))
-		training_abundances.append(abundances)
-		if i%100 == 0:
-			print("Calculating abundance set %d of %d" %(i,len(param_grid)))
+	for x in result:
+		training_abundances.append(x)	
+	
+	#training_abundances = []
+	#for i,item in enumerate(param_grid):
+	#	abundances,_ = posterior_function_returning_predictions((item,a))
+	#	training_abundances.append(abundances)
+	#	if i%100 == 0:
+	#		print("Calculating abundance set %d of %d" %(i,len(param_grid)))
 
 	# Save abundance table
 	np.save(directory+'training_abundances.npy', training_abundances)
@@ -503,7 +518,7 @@ def neural_output_int(test_input,a,b):
 	return output
 	
 
-def test_dataset(width,size):
+def test_dataset(width):
 	"""
 	Create test dataset for fixed gaussian width.
 	The data points are randomly distributed along a uniform distribution with fixed width in parameter space.
@@ -519,7 +534,7 @@ def test_dataset(width,size):
 		os.makedirs(directory)
 
 	a = ModelParameters()
-	
+	size = a.test_size # Number of points
 	sigma = []
 	for i,param_name in enumerate(a.to_optimize):
 		sigma.append(a.priors.get(param_name)[1])

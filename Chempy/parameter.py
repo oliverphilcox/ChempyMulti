@@ -354,3 +354,5 @@ class ModelParameters(object):
 	
 	UseNeural = False # This defines whether to use trained network in place of Chempyimport numpy as np
 	
+	test_size = 3000 # Number of elements in test set
+	
