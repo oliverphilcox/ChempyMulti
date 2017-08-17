@@ -47,7 +47,7 @@ def training_data():
 		os.makedirs(directory)
 
 	print(param_grid)
-	break
+
 	#np.save(directory+'training_norm_grid.npy',norm_grid)
 	#np.save(directory+'training_param_grid.npy',param_grid)
 	
