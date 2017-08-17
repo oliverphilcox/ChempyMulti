@@ -47,18 +47,11 @@ def training_data():
 
 	np.save(directory+'training_norm_grid.npy',norm_grid)
 	np.save(directory+'training_param_grid.npy',param_grid)
-	index=0
-	def create_dataset(data):
-		print(index)
-		index+=1
-		a=ModelParameters()
-		abundances,_ = posterior_function_returning_predictions((data,a))
-		return abundances
 	
 	## Create abundance output
 	print("Starting")
 	p = mp.Pool(10)#len(param_grid))
-	t = p.map(create_dataset, param_grid)
+	t = p.map(create_dataset, param_grid[:10])
 	p.close()
 	p.join()
 	result = np.vstack(t)	
@@ -557,3 +550,8 @@ def test_dataset(width):
 
 	return None	
     
+def create_dataset(data):
+		a=ModelParameters()
+		abundances,_ = posterior_function_returning_predictions((data,a))
+		return abundances
+
