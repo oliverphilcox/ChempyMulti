@@ -51,7 +51,7 @@ def training_data():
 	def create_dataset(data):
 		print(index)
 		index+=1
-		a=ModelParameters
+		a=ModelParameters()
 		abundances,_ = posterior_function_returning_predictions((data,a))
 		return abundances
 	
