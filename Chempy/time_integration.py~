@@ -203,7 +203,7 @@ class ABUNDANCE_MATRIX(object):
 				self.sn2_feedback[item][index-1][index-1:] = sn2_yield[item] 
 				self.sn1a_feedback[item][index-1][index-1:] = sn1a_yield[item]
 				self.agb_feedback[item][index-1][index-1:] = agb_yield[item]
-				self.bh_feedback[item][index-1][index-1:] = bh_yield[item]
+				self.bh_feedback[item][index-1][index-1:] = bh_yield[item]	
 		feedback_mass = []
 		for i,item in enumerate(self.all_feedback_names):
 			tmp = self.sfr[:index] * self.all_feedback[item][:index,index]

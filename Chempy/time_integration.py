@@ -246,7 +246,7 @@ class ABUNDANCE_MATRIX(object):
 				infall_needed = self.sfr[index] - gas_there
 				infall_needed *= 1.01 # to avoid the ISM being empty
 			if infall_needed > self.gas_reservoir['gas'][index]:
-				print('gas reservoir is empty')
+				#print('gas reservoir is empty')
 				infall_needed = float(self.gas_reservoir['gas'][index])
 			self.infall[index] = float(infall_needed)
 			self.cube['infall'][index] = float(infall_needed)
