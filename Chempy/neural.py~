@@ -57,12 +57,14 @@ def training_data():
 	#for _ in tqdm.tqdm(p.map(create_dataset, param_grid[:10]), total=10):#len(param_grid)):
 		#pass	
 	#num_tasks=30#len(param_grid)	
-
+	index = range(len(param_grid))
+	
 	p = mp.Pool(processes=mp.cpu_count())#len(param_grid))
-	t = p.imap(create_dataset, param_grid[:30])
-		
-	#p.join()
-	#p.close()
+	
+	t = p.map(create_dataset, zip(param_grid,index))
+
+	p.join()
+	p.close()
 	result = np.vstack(t)	
 	
 	
@@ -561,7 +563,8 @@ def test_dataset(width):
 
 	return None	
     
-def create_dataset(data):
+def create_dataset((data,index)):
+	print(index)	
 	a=ModelParameters()
 	abundances,_ = posterior_function_returning_predictions((data,a))
 	print('Process complete')
