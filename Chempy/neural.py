@@ -50,9 +50,24 @@ def training_data():
 	
 	## Create abundance output
 	print("Starting")
-	p = mp.Pool(10)#len(param_grid))
-	t = p.map(create_dataset, param_grid[:10])
-	p.close()
+
+	import time
+
+	#p = mp.Pool(10)#len(param_grid))
+	#for _ in tqdm.tqdm(p.map(create_dataset, param_grid[:10]), total=10):#len(param_grid)):
+		#pass	
+	num_tasks=len(param_grid)	
+	
+	p = mp.Pool(len(param_grid))
+	t = p.imap(create_dataset, param_grid)
+	
+	while True:
+		completed = t._index
+		if (completed == num_tasks):
+			break
+		print ("Waiting for %d tasks to complete" %(num_tasks-completed))
+		time.sleep(10)
+	p.close()	
 	p.join()
 	result = np.vstack(t)	
 	
@@ -525,7 +540,7 @@ def test_dataset(width):
 	import warnings
 	warnings.filterwarnings("ignore")
 	
-	directory = 'SingleElement/'
+	directory = 'Neural/'
 	if not os.path.exists(directory):
 		os.makedirs(directory)
 
