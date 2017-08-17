@@ -1,8 +1,9 @@
+import numpy as np
+	
 def Hogg_scoring(index):
 	"""This function will compute the cross-validation abundances for each of the 22 elements,
 	using the best parameter choice for each. Abundances are saved in Hogg/abundnace[INDEX].npy,
 	with order used in elements.npy"""
-	import numpy as np
 	from Chempy.parameter import ModelParameters
 	import importlib
 	import fileinput
@@ -148,4 +149,77 @@ class preload_params_mcmc():
 		error_temp = np.ones(len(elements))*item
 		err.append(np.sqrt(np.multiply(error_temp[:,None],error_temp[:,None]).T + np.multiply(star_error_list,star_error_list)).T)
 	
+def Bayes_score():
+	"""
+	This calculates the Bayes factor score for a specific yield set and choice of error parameter, as defined in parameter file.
+	First MCMC is run to determine the centre of the parameter space and then integration is performed.
+	This needs a trained neural network in the Neural/ folder.
+	
+	Output is Bayes score and predicted (1 sigma) error.
+	"""
+	from .parameter import ModelParameters
+	from .cem_function import posterior_function_mcmc_quick
+	from .score_function import preload_params_mcmc
+	from .plot_mcmc import restructure_chain
+	from .wrapper import single_star_optimization
+	from scipy.stats import multivariate_normal as scinorm
+	from numpy.random import multivariate_normal as numnorm
+	from skmonaco import mcimport
+	
+	# Load model parameters
+	a = ModelParameters()
+	preload = preload_params_mcmc()
 			
+	# Compute posterior + load median values - this automatically uses the neural network!!
+	print('Finding posterior parameter values')
+	single_star_optimization()
+	restructure_chain('mcmc/')
+	positions = np.load('mcmc/posteriorPDF.npy')
+	init_param = []
+	for j in range(len(a.p0)):
+		init_param.append(np.percentile(positions[:,j],50))
+	print('Initial parameters are:',init_param)
+	
+	# Function to compute posterior (needs a trained neural network)
+	def posterior(theta):
+		a = ModelParameters()
+		post,_ = posterior_function_mcmc_quick(theta,a,preload)
+		posterior = np.exp(post)
+		return posterior
+	
+	# Read prior sigma from file	
+	sigma = [] # Read prior sigma from parameter file
+	for i,param_name in enumerate(a.to_optimize):
+		sigma.append(a.priors.get(param_name)[1])
+	sigma = np.array(sigma)
+	
+	# Compute covariance matrix
+	print('Computing covariance matrix')
+	positions = np.load('mcmc/posteriorPDF.npy')
+	cov_matrix = np.zeros((len(a.p0),len(a.p0)))
+	for i in range(len(a.p0)):
+		for j in range(len(a.p0)):
+			cov_matrix[i,j] = np.cov((positions[:,i],positions[:,j]))[1,0]
+
+	def gauss_factor(theta):
+		# Returns gaussian fit to data
+		return scinorm.pdf(theta,mean=np.array(init_param),cov=cov_matrix)
+
+	def posterior_mod(theta):
+		# Returns flattened posterior
+		return posterior(theta)/gauss_factor(theta)
+
+	def dist(size):
+	# Distribution function for mcmc sampling
+		mean = np.array(init_param)
+		return numnorm(mean,cov_matrix,size=size)
+		
+	print('Integrating posterior function')
+	integral,integral_err = mcimport(posterior_mod,a.int_samples,dist)
+
+	print('Integration complete')
+	np.save('Scores/integral_%.1f' %(a.beta_param),integral)
+	np.save('Scores/integral_err_%.1f%' %(a.beta_param),integral_err)
+	
+	return integral,integral_err	
+	

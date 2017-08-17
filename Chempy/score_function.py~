@@ -104,52 +104,6 @@ def Hogg_wrapper():
 	return None
     
     
-class preload_params():
-	"""This calculates and stores useful quantities that would be calculated multiple times otherwise.
-	Definitions can be called from this file
-	
-	NB - this only works for one wildcard at the moment - GENERALIZE THIS!!!
-	This is old and probably shouldn't be used....
-	"""
-	from Chempy.parameter import ModelParameters
-	import numpy as np
-	from scipy.stats import beta
-	from Chempy.neural import neural_output
-	
-	a = ModelParameters()
-	
-	wildcard = np.load('Chempy/input/stars/'+a.stellar_identifier+'.npy')	
-	
-	elements = []
-	star_abundance_list = []
-	star_error_list = []
-	for i,item in enumerate(a.elements_to_trace):
-		if item in list(wildcard.dtype.names):
-			elements.append(item)
-			star_abundance_list.append(float(wildcard[item][0]))
-			star_error_list.append(float(wildcard[item][1]))
-	star_abundance_list = np.hstack(star_abundance_list)
-	star_error_list = np.hstack(star_error_list)
-	elements = np.hstack(elements)
-	
-	elements_to_trace = list(a.elements_to_trace)
-	elements_to_trace.append('Zcorona')
-	elements_to_trace.append('SNratio')
-	
-	# Neural network coeffs
-	coeffs = np.load('Neural/neural_model.npz')
-	
-	# Beta function errors
-	model_errors = np.linspace(a.flat_model_error_prior[0],a.flat_model_error_prior[1],a.flat_model_error_prior[2])
-	error_weight = beta.pdf(model_errors, a = a.beta_error_distribution[1], b = a.beta_error_distribution[2])
-	error_weight/= sum(error_weight)
-
-	errors_list = []
-	for error in model_errors:
-		temp_err = np.ones((len(star_error_list),1))*error
-		errors_list.append(np.sqrt(np.multiply(temp_err,temp_err) + np.multiply(star_error_list,star_error_list).T).T)
-	
-	
 class preload_params_mcmc():
 	"""This calculates and stores useful quantities that would be calculated multiple times otherwise for the mcmc run.
 	Definitions can be called from this file
@@ -194,4 +148,77 @@ class preload_params_mcmc():
 		error_temp = np.ones(len(elements))*item
 		err.append(np.sqrt(np.multiply(error_temp[:,None],error_temp[:,None]).T + np.multiply(star_error_list,star_error_list)).T)
 	
+def Bayes_score():
+	"""
+	This calculates the Bayes factor score for a specific yield set and choice of error parameter, as defined in parameter file.
+	First MCMC is run to determine the centre of the parameter space and then integration is performed.
+	This needs a trained neural network in the Neural/ folder.
+	
+	Output is Bayes score and predicted (1 sigma) error.
+	"""
+	from .parameter import ModelParameters
+	from .cem_function import posterior_function_mcmc_quick
+	from .score_function import preload_params_mcmc
+	from .plot_mcmc import restructure_chain
+	from .wrapper import single_star_optimization
+	from scipy.stats import multivariate_normal as scinorm
+	from numpy.random import multivariate_normal as numnorm
+	from skmonaco import mcimport
+	
+	# Load model parameters
+	a = ModelParameters()
+	preload = preload_params_mcmc()
 			
+	# Compute posterior + load median values - this automatically uses the neural network!!
+	print('Finding posterior parameter values')
+	single_star_optimization()
+	restructure_chain('mcmc/')
+	positions = np.load('mcmc/posteriorPDF.npy')
+	init_param = []
+	for j in range(len(a.p0)):
+		init_param.append(np.percentile(positions[:,j],50))
+	print('Initial parameters are:',init_param)
+	
+	# Function to compute posterior (needs a trained neural network)
+	def posterior(theta):
+		a = ModelParameters()
+		post,_ = posterior_function_mcmc_quick(theta,a,preload)
+		posterior = np.exp(post)
+		return posterior
+	
+	# Read prior sigma from file	
+	sigma = [] # Read prior sigma from parameter file
+	for i,param_name in enumerate(a.to_optimize):
+		sigma.append(a.priors.get(param_name)[1])
+	sigma = np.array(sigma)
+	
+	# Compute covariance matrix
+	print('Computing covariance matrix')
+	positions = np.load('mcmc/posteriorPDF.npy')
+	cov_matrix = np.zeros((len(a.p0),len(a.p0)))
+	for i in range(len(a.p0)):
+		for j in range(len(a.p0)):
+			cov_matrix[i,j] = np.cov((positions[:,i],positions[:,j]))[1,0]
+
+	def gauss_factor(theta):
+		# Returns gaussian fit to data
+		return scinorm.pdf(theta,mean=np.array(init_param),cov=cov_matrix)
+
+	def posterior_mod(theta):
+		# Returns flattened posterior
+		return posterior(theta)/gauss_factor(theta)
+
+	def dist(size):
+	# Distribution function for mcmc sampling
+		mean = np.array(init_param)
+		return numnorm(mean,cov_matrix,size=size)
+		
+	print('Integrating posterior function')
+	integral,integral_err = mcimport(posterior_mod,a.int_samples,dist)
+
+	print('Integration complete')
+	np.save('Scores/integral_%.1f' %(a.beta_param),integral)
+	np.save('Scores/integral_err_%.1f%' %(a.beta_param),integral_err)
+	
+	return integral,integral_err	
+	
