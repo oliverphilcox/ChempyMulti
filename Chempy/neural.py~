@@ -102,7 +102,6 @@ def training_data():
 	np.save(directory+'training_norm_grid.npy',norm_params)
 	np.save(directory+'training_param_grid.npy',params)
 	
-
 	return None
 
 def verification_and_testing():
