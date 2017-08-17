@@ -354,4 +354,6 @@ class ModelParameters(object):
 	
 	UseNeural = True # This defines whether to use trained network in place of Chempyimport numpy as np
 	
+	disp_errors = False # To display gas reservoir errors - turn off for testing....
+	
 	
