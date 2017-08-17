@@ -716,7 +716,7 @@ def extract_parameters_and_priors(changing_parameter, a):
 		(lower, upper) = a.constraints.get(name)
 		val = getattr(a, name)
 		if lower is not None and val<lower:
-			assert False, '%s lower border is violated' %(name)
+			assert False, '%s lower border is violated with %.5f' %(name,val)
 		if upper is not None and val>upper:
 			assert False, '%s upper border is violated' %(name)
 	if a.verbose:

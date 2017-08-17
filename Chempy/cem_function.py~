@@ -182,7 +182,7 @@ def cem_real(changing_parameter,a):
 		(lower, upper) = a.constraints.get(name)
 		val = getattr(a, name)
 		if lower is not None and val<lower:
-			print('%s lower border is violated with %.2f' %(name,val))
+			print('%s lower border is violated with %.5f' %(name,val))
 			return -np.inf, [0]
 		if upper is not None and val>upper:
 			print('%s upper border is violated' %(name))
