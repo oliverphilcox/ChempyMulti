@@ -56,19 +56,22 @@ def training_data():
 	#p = mp.Pool(10)#len(param_grid))
 	#for _ in tqdm.tqdm(p.map(create_dataset, param_grid[:10]), total=10):#len(param_grid)):
 		#pass	
-	num_tasks=len(param_grid)	
+	num_tasks=30#len(param_grid)	
 	
-	p = mp.Pool(len(param_grid))
-	t = p.imap(create_dataset, param_grid)
+	p = mp.Pool(30)#len(param_grid))
+	t = p.imap(create_dataset, param_grid[:30])
 	
+
+	p.join()
 	while True:
 		completed = t._index
 		if (completed == num_tasks):
 			break
 		print ("Waiting for %d tasks to complete" %(num_tasks-completed))
-		time.sleep(3)
-	p.close()	
-	p.join()
+		time.sleep(2)
+	p.close()
+	
+	
 	result = np.vstack(t)	
 	
 	training_abundances = []
