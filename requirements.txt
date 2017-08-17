@@ -5,3 +5,5 @@ corner
 multiprocessing
 scipy
 pytorch
+scikit-monaco
+tqdm
