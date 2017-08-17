@@ -57,15 +57,14 @@ def training_data():
 	p = mp.Pool()#processes=mp.cpu_count())#len(param_grid))
 
 	#t = p.imap(create_dataset, zip(param_grid[:6],index[:6]))
-	tqdm.tqdm(p.imap_unordered(create_dataset,param_grid[:10]),total=10)
-	#r = list(tqdm.tqdm(p.imap_unordered(create_dataset, param_grid[:10]), total=10))#len(param_grid)))
+	r = list(tqdm.tqdm(p.imap_unordered(create_dataset, param_grid[:10]), total=10))#len(param_grid)))
 	params = []
 	norm_params = []
 	abun = []
-#	for item in r:
-#		params.append(item[0])
-#		norm_params.append(item[1])
-#		abun.append(item[2])
+	for item in r:
+		params.append(item[0])
+		norm_params.append(item[1])
+		abun.append(item[2])
 	#p.join()
 	#p.close()
 	#result = np.vstack(t)
@@ -584,9 +583,9 @@ def test_dataset(width):
 	return None	
     
 def create_dataset(params):
-	return(params)	
-	#a=ModelParameters()
-	#abundances,_ = posterior_function_returning_predictions((params,a))
-	#norm_params = (params-a.p0)/a.training_widths
-	#return params,norm_params,abundances
+	print(params)	
+	a=ModelParameters()
+	abundances,_ = posterior_function_returning_predictions((params,a))
+	norm_params = (params-a.p0)/a.training_widths
+	return params,norm_params,abundances
 
