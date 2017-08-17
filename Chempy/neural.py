@@ -45,8 +45,8 @@ def training_data():
 	if not os.path.exists(directory):
 		os.makedirs(directory)
 
-	np.save(directory+'training_norm_grid.npy',norm_grid)
-	np.save(directory+'training_param_grid.npy',param_grid)
+	#np.save(directory+'training_norm_grid.npy',norm_grid)
+	#np.save(directory+'training_param_grid.npy',param_grid)
 	
 	## Create abundance output
 	print("Starting")
@@ -61,7 +61,7 @@ def training_data():
 	
 	p = mp.Pool(processes=mp.cpu_count())#len(param_grid))
 	
-	t = p.map(create_dataset, zip(param_grid,index))
+	t,q,r = p.map(create_dataset, zip(param_grid,index))
 
 	p.join()
 	p.close()
@@ -564,10 +564,10 @@ def test_dataset(width):
 	return None	
     
 def create_dataset(args):
-	data,index=args	
-	print(index)	
+	params,index=args	
 	a=ModelParameters()
 	abundances,_ = posterior_function_returning_predictions((data,a))
-	print('Process complete')
-	return abundances
+	norm_params = (params-a.p0)/a.training_widths
+	print('Process %d complete' %(index))
+	return params,norm_params,abundances
 

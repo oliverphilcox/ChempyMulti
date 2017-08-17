@@ -38,15 +38,15 @@ def training_data():
 	norm_grid = np.array(np.meshgrid(*grids)).T.reshape(-1,len(a.p0))
 
 	# Create grid in parameter space
-	param_grid = [item*widths+a.p0 for item in norm_grid]
+	param_grid = [item*a.training_widths+a.p0 for item in norm_grid]
 
 	# Save grids
 	directory = 'Neural/'
 	if not os.path.exists(directory):
 		os.makedirs(directory)
 
-	np.save(directory+'training_norm_grid.npy',norm_grid)
-	np.save(directory+'training_param_grid.npy',param_grid)
+	#np.save(directory+'training_norm_grid.npy',norm_grid)
+	#np.save(directory+'training_param_grid.npy',param_grid)
 	
 	## Create abundance output
 	print("Starting")
@@ -61,7 +61,7 @@ def training_data():
 	
 	p = mp.Pool(processes=mp.cpu_count())#len(param_grid))
 	
-	t = p.map(create_dataset, zip(param_grid,index))
+	t,q,r = p.map(create_dataset, zip(param_grid,index))
 
 	p.join()
 	p.close()
@@ -563,10 +563,11 @@ def test_dataset(width):
 
 	return None	
     
-def create_dataset((data,index)):
-	print(index)	
+def create_dataset(args):
+	params,index=args	
 	a=ModelParameters()
 	abundances,_ = posterior_function_returning_predictions((data,a))
-	print('Process complete')
-	return abundances
+	norm_params = (params-a.p0)/a.training_widths
+	print('Process %d complete' %(index))
+	return params,norm_params,abundances
 

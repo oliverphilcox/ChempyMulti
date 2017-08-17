@@ -183,6 +183,7 @@ def cem_real(changing_parameter,a):
 		val = getattr(a, name)
 		if lower is not None and val<lower:
 			print('%s lower border is violated' %(name))
+			print(val)
 			return -np.inf, [0]
 		if upper is not None and val>upper:
 			print('%s upper border is violated' %(name))
