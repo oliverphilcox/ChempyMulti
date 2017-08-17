@@ -3,7 +3,7 @@ from .cem_function import posterior_function_returning_predictions
 import numpy as np
 import os
 import matplotlib.pyplot as plt
-a = ModelParameters()
+#a = ModelParameters()
 
 def training_data():
 	""" Function to create neural network training dataset for Chempy data.
@@ -30,7 +30,7 @@ def training_data():
 
 	a = ModelParameters()
 
-	N = a.training_size # No. data points per parameter
+	N = float(a.training_size) # No. data points per parameter
 	widths = a.training_widths # Gaussian widths for parameters
 
 	# Create 1d grid of data points equally spaced in probability space
