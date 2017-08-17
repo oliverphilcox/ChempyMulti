@@ -59,7 +59,7 @@ def training_data():
 	#num_tasks=30#len(param_grid)	
 
 	p = mp.Pool(processes=mp.cpu_count())#len(param_grid))
-	t = p.imap(create_dataset, param_grid[:30])
+	t = p.imap(create_dataset, param_grid)
 		
 	#p.join()
 	#p.close()
