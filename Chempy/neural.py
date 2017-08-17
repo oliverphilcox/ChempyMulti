@@ -58,7 +58,7 @@ def training_data():
 	## Create abundance output
 	print("Starting")
 	p = mp.Pool(10)#len(param_grid))
-	t = p.map(create_dataset, param_grid)
+	t = p.map(create_dataset, param_grid[:10])
 	p.close()
 	p.join()
 	result = np.vstack(t)	
