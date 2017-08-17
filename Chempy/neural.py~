@@ -583,8 +583,9 @@ def test_dataset(width):
 	return None	
     
 def create_dataset(params):
-	a=ModelParameters()
-	abundances,_ = posterior_function_returning_predictions((params,a))
-	norm_params = (params-a.p0)/a.training_widths
-	return params,norm_params,abundances
+	return(params)	
+	#a=ModelParameters()
+	#abundances,_ = posterior_function_returning_predictions((params,a))
+	#norm_params = (params-a.p0)/a.training_widths
+	#return params,norm_params,abundances
 
