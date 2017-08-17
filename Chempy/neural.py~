@@ -51,28 +51,21 @@ def training_data():
 	## Create abundance output
 	print("Starting")
 
-	import time
+	#import time
 
 	#p = mp.Pool(10)#len(param_grid))
 	#for _ in tqdm.tqdm(p.map(create_dataset, param_grid[:10]), total=10):#len(param_grid)):
 		#pass	
-	num_tasks=30#len(param_grid)	
-	
-	p = mp.Pool(30)#len(param_grid))
-	t = p.imap(create_dataset, param_grid[:30])
-	
+	#num_tasks=30#len(param_grid)	
 
-	p.join()
-	while True:
-		completed = t._index
-		if (completed == num_tasks):
-			break
-		print ("Waiting for %d tasks to complete" %(num_tasks-completed))
-		time.sleep(2)
-	p.close()
-	
-	
+	p = mp.Pool(processes=mp.cpu_count())#len(param_grid))
+	t = p.imap(create_dataset, param_grid[:30])
+		
+	#p.join()
+	#p.close()
 	result = np.vstack(t)	
+	
+	
 	
 	training_abundances = []
 	for x in result:
@@ -571,5 +564,6 @@ def test_dataset(width):
 def create_dataset(data):
 	a=ModelParameters()
 	abundances,_ = posterior_function_returning_predictions((data,a))
+	print('Process complete')
 	return abundances
 
