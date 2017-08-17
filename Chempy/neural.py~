@@ -63,13 +63,13 @@ def training_data():
 	
 
 	p.join()
-	p.close()
 	while True:
 		completed = t._index
 		if (completed == num_tasks):
 			break
 		print ("Waiting for %d tasks to complete" %(num_tasks-completed))
 		time.sleep(2)
+	p.close()
 	
 	
 	result = np.vstack(t)	
