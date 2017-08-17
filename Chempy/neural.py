@@ -21,6 +21,7 @@ def training_data():
 	"""
 
 	from scipy.stats import norm as gaussian
+	import multiprocessing as mp
 
 	# FOR TESTING
 	import warnings
