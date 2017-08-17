@@ -7,7 +7,7 @@ Flexible one-zone open-box chemical evolution modeling. Abundance fitting and st
 pip install git+https://github.com/oliverphilcox/Chempy.git
 ```
 Chempy should run with the latest python 2 and python 3 version.
-Its dependencies are: [Numpy](http://numpy.scipy.org/), [SciPy](http://www.scipy.org/), [matplotlib](http://matplotlib.sourceforge.net/), [multiprocessing](https://docs.python.org/2/library/multiprocessing.html#module-multiprocessing), [emcee](http://dan.iel.fm/emcee/current/) (for the MCMC), [corner](http://corner.readthedocs.io/en/latest/) (for the MCMC plots), and [PyTorch](http://pytorch.org/) (for Neural Networks). They are all pip installable and you can also get part of it with [Anaconda](https://www.continuum.io/downloads).
+Its dependencies are: [Numpy](http://numpy.scipy.org/), [SciPy](http://www.scipy.org/), [matplotlib](http://matplotlib.sourceforge.net/), [multiprocessing](https://docs.python.org/2/library/multiprocessing.html#module-multiprocessing), [emcee](http://dan.iel.fm/emcee/current/) (for the MCMC), [corner](http://corner.readthedocs.io/en/latest/) (for the MCMC plots), [PyTorch](http://pytorch.org/) (for Neural Networks), [scikit-monaco](https://pypi.python.org/pypi/scikit-monaco) (for Monte Carlo integration), and [tqdm](https://pypi.python.org/pypi/tqdm) (for timing multiprocessing). They are all pip installable and you can also get part of it with [Anaconda](https://www.continuum.io/downloads).
 
 ### Installation without admin rights:
 You can install *Chempy* into a folder where you have write access:
