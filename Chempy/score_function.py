@@ -86,7 +86,7 @@ def Hogg_scoring(index):
 	return None
 
 	 
-def Hogg_wrapper():
+def Hogg_mini_wrapper():
 	import fileinput
 	import sys
 	from Chempy.parameter import ModelParameters
@@ -165,20 +165,22 @@ def Bayes_score():
 	from scipy.stats import multivariate_normal as scinorm
 	from numpy.random import multivariate_normal as numnorm
 	from skmonaco import mcimport
+	import time
 	
 	# Load model parameters
 	a = ModelParameters()
 	preload = preload_params_mcmc()
-			
+	init_time = time.time()
+	
 	# Compute posterior + load median values - this automatically uses the neural network!!
-	print('Finding posterior parameter values')
+	print('After %.3f seconds, finding posterior parameter values' %(time.time()-init_time))
 	single_star_optimization()
 	restructure_chain('mcmc/')
 	positions = np.load('mcmc/posteriorPDF.npy')
 	init_param = []
 	for j in range(len(a.p0)):
 		init_param.append(np.percentile(positions[:,j],50))
-	print('Initial parameters are:',init_param)
+	print('After %.3f seconds, initial parameters are:' %(time.time()-init_time),init_param)
 	
 	# Function to compute posterior (needs a trained neural network)
 	def posterior(theta):
@@ -194,7 +196,7 @@ def Bayes_score():
 	sigma = np.array(sigma)
 	
 	# Compute covariance matrix
-	print('Computing covariance matrix')
+	print('After %.3f seconds, computing covariance matrix' %(time.time()-init_time))
 	positions = np.load('mcmc/posteriorPDF.npy')
 	cov_matrix = np.zeros((len(a.p0),len(a.p0)))
 	for i in range(len(a.p0)):
@@ -214,12 +216,100 @@ def Bayes_score():
 		mean = np.array(init_param)
 		return numnorm(mean,cov_matrix,size=size)
 		
-	print('Integrating posterior function')
+	print('After %.3f seconds, starting parameter-space integration' %(time.time()-init_time))
 	integral,integral_err = mcimport(posterior_mod,a.int_samples,dist)
 
-	print('Integration complete')
-	np.save('Scores/integral_%.1f' %(a.beta_param),integral)
-	np.save('Scores/integral_err_%.1f%' %(a.beta_param),integral_err)
+	print('After %.3f seconds, integration is complete' %(time.time()-init_time))
+	np.save('Scores/integral_'+str(a.beta_param)+'.npy',integral)
+	np.save('Scores/integral_err_'+str(a.beta_param)+'.npy',integral_err)
 	
 	return integral,integral_err	
+	
+def Bayes_wrapper():
+	"""
+	This function calculates the Bayes score as a function of the beta-function parameter (defined in parameter.py)
+	It is not currently parallelized (parallelization is done in MCMC already, but not in the integration).
+	
+	Output scores are saved and labelled in the Scores/ folder as an .npz file
+	"""
+	import time
+	import fileinput
+	import sys
+	from .parameter import ModelParameters
+	directory = 'Scores/'
+	if not os.path.exists(directory):
+		os.makedirs(directory)
+
+	a = ModelParameters()
+	beta_params = a.list_of_beta_params
+	score = []
+	score_err = []
+	init_time = time.time()
+	
+	for i in range(len(beta_params)): # Iterate over beta parameters
+		print("Calculating value %d of %d after %.3f seconds" %(i+1,len(beta_params),time.time()-init_time))
+		# Modify beta value
+		for line in fileinput.input("Chempy/parameter.py", inplace=True):
+			if "\tbeta_param" in line:
+				print("\tbeta_param = %.5f" %beta_params[i])
+			else:
+				print(line,end='')
+				
+		# Reimport model parameters for new beta 
+		del sys.modules['Chempy.parameter']
+		from .parameter import ModelParameters
+		a = ModelParameters()
+		
+		# Calculate Bayes score
+		integral,integral_err = Bayes_score()
+		score.append(integral)
+		score_err.append(integral_err)
+	
+	# Save output as npz array
+	np.savez("Scores/Bayes_score - "+str(a.yield_table_name_sn2)+", "+str(a.yield_table_name_agb)+", "+str(a.yield_table_name_1a)+".npz",
+				beta_param=beta_params,
+				score=score,
+				score_err=score_err)
+				
+	return beta_params,score,score_err
+	
+def Hogg_wrapper():
+	"""
+	This function calculates the Hogg score as a function of the beta-function parameter (defined in parameter.py)
+	It is not currently parallelized (parallelization is done in MCMC already and for element predictions).
+	"""
+	import time
+	import fileinput
+	import sys
+	from .parameter import ModelParameters
+	a = ModelParameters()
+	beta_params = a.list_of_beta_params
+	Hogg_score = []
+	init_time = time.time()
+	
+	for i in range(len(beta_params)): # Iterate over beta parameters
+		print("Calculating value %d of %d after %.3f seconds" %(i+1,len(beta_params),time.time()-init_time))
+		# Modify beta value
+		for line in fileinput.input("Chempy/parameter.py", inplace=True):
+			if "\tbeta_param" in line:
+				print("\tbeta_param = %.5f" %beta_params[i])
+			else:
+				print(line,end='')
+				
+		# Reimport model parameters for new beta 
+		del sys.modules['Chempy.parameter']
+		from Chempy.parameter import ModelParameters
+		a = ModelParameters()
+		
+		# Calculate Bayes score
+		score = Hogg_mini_wrapper()
+		Hogg_score.append(score)
+	
+	# Save output as npz array
+	np.savez("Scores/Hogg_score - "+str(a.yield_table_name_sn2)+", "+str(a.yield_table_name_agb)+", "+str(a.yield_table_name_1a)+".npz",
+				beta_param=beta_params,
+				score=Hogg_score)
+				
+	return beta_params,Hogg_score
+	
 	
