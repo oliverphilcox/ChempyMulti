@@ -10,9 +10,12 @@ def Hogg_scoring(index):
 	import fileinput
 	import sys   
 	import os
+	import multiprocessing as mp
+	import tqdm
 	from Chempy.wrapper import multi_star_optimization
 	from Chempy.plot_mcmc import restructure_chain
-	from Chempy.cem_function import posterior_function_returning_predictions
+	from Chempy.cem_function import posterior_function_mcmc_quick
+	from scipy.stats import norm
 
 	directory = "Scores/Hogg_"+str(index)+"/"
 	if not os.path.exists(directory):
@@ -21,13 +24,17 @@ def Hogg_scoring(index):
 	## Code to rewrite parameter file for each element in turn, so as to run MCMC for 21/22 elements only
 	# This is definitely not a good implementation (involves rewriting entire parameter file),
 	# But other steps are far slower
-
+	
+	# Initialise arrays
+	element_mean = []
+	element_sigma = []
+	
 	# Starting elements (copied from original parameter file)
 	elements_to_trace = ['Al', 'Ar', 'B', 'Be', 'C', 'Ca', 'Cl', 'Co', 'Cr', 'Cu', 'F', 'Fe', 'Ga', 'Ge', 'H', 'He', 'K', 'Li', 'Mg', 'Mn', 'N', 'Na', 'Ne', 'Ni', 'O', 'P', 'S', 'Sc', 'Si', 'Ti', 'V', 'Zn']
 	orig = "\telements_to_trace = "+str(elements_to_trace) # Original element string
 
 	# Calculate required Chempy elements
-	sol_dat = np.load("Chempy/input/stars/Proto-sun.npy")
+	sol_dat = np.load("Chempy/input/stars/"+a.stellar_identifier)
 	el_names = []
 	for el in elements_to_trace:
 		if el in sol_dat.dtype.names:
@@ -51,23 +58,21 @@ def Hogg_scoring(index):
 		del sys.modules['Chempy.parameter']
 		from Chempy.parameter import ModelParameters
 		a = ModelParameters()
+		del sys.modules['Chempy.score_function']
+		from .score_function import preload_params_mcmc 
+		preload = preload_params_mcmc()
 		##############
-		# MCMC using 21 elements only goes here
+		
+		# Run MCMC with 27/28 elements. 
 		print('Running MCMC iteration %d of %d' %(i+1,len(el_names)))
-		multi_star_optimization()
+		single_star_optimization()
+		
+		# Create the posterior PDF and load it 
 		restructure_chain('mcmc/')
-		positions = np.load('mcmc/posteriorPDF.npy')
-		median = []
-		up = []
-		low = []
-		for j in range(len(a.p0)):
-			median.append(np.percentile(positions[:,j],50))
-			low.append(np.percentile(positions[:,j],15.865))
-			up.append(np.percentile(positions[:,j],100-15.865))
-		np.save(directory+'median%d.npy' %(i),np.array(median))
-		np.save(directory+'low%d.npy' %(i),np.array(low))
-		np.save(directory+'up%d.npy' %(i),np.array(up))
+		positions = np.load('mcmc/posteriorPDF.npy') # Posterior parameter PDF
+		
 		##############
+		
 		for line in fileinput.input("Chempy/parameter.py", inplace=True):
 			if "\telements_to_trace" in line:
 				print(orig)
@@ -75,17 +80,52 @@ def Hogg_scoring(index):
 				print(line,end='')
 		del sys.modules['Chempy.parameter']
 		from Chempy.parameter import ModelParameters
+		del sys.modules['Chempy.score_function']
+		from .score_function import preload_params_mcmc 
 		a = ModelParameters()
+		preload = preload_params_mcmc()
+		
 		##############
-		# Code needing all 22 elements goes here
-		param = median
-		abundances,names = posterior_function_returning_predictions((param,a))
-		for n,name in enumerate(names):
-			if name == el_names[i]:
-				required_abundance = abundances[n]
+		
+		# This uses all 28 elements again for predictions
+		elements = []
+		for item in a.elements_to_trace:
+    		if item in preload.wildcard.dtype.names:
+				elements.append(item)
+		
+		# Multiprocess and calculate elemental predictions for each parameter set
+		p = mp.Pool()
+		abundance = list(tqdm.tqdm(p.imap_unordered(element_predictor,positions),total=len(positions)))
+		
+		abundance = np.array(abundance)
+		mean,sigma = norm.fit(abundance)
+		
+		element_mean.append(mean)
+		element_sigma.append(sigma)
+		
+		if plot_hist == True:
+			plt.clf()
+			plt.hist(abundance, bins=40, normed=True, alpha=0.6, color='g')
+			#abundance = np.array(abundance) # Unmask array
+			# Plot the PDF.
+			xmin, xmax = plt.xlim()
+			x = np.linspace(xmin, xmax, 100)
+			p = norm.pdf(x, mean, sigma)
+			plt.plot(x, p, c='k', linewidth=2)
+			title = 'Plot of element %d abundance' %(i)
+			plt.title(title)
+			plt.xlabel('[X/Fe] abundance')
+			plt.ylabel('Relative frequency')
+		
+		
+		
 		np.save(directory+'abundance%d.npy' %(i),required_abundance)
 	return None
 
+def element_predictor(params):
+	from .cem_function import posterior_function_mcmc_quick
+    _,all_abun = posterior_function_mcmc_quick(params,elements,preload)
+    return all_abun[i]
 	 
 def Hogg_mini_wrapper():
 	import fileinput
@@ -217,7 +257,7 @@ def Bayes_score():
 		mean = np.array(init_param)
 		return numnorm(mean,cov_matrix,size=size)
 		
-	print('After %.3f seconds, starting parameter-space integration' %(time.time()-init_time))
+	print('After %.3f seconds, starting parameter-space integration for beta = ' %(time.time()-init_time, a.beta_param))
 	integral,integral_err = mcimport(posterior_mod,a.int_samples,dist)
 
 	print('After %.3f seconds, integration is complete' %(time.time()-init_time))
@@ -258,7 +298,10 @@ def Bayes_wrapper():
 				
 		# Reimport model parameters for new beta 
 		del sys.modules['Chempy.parameter']
+		del sys.modules['Chempy.score_function']
 		from .parameter import ModelParameters
+		from .score_function import preload_params_mcmc 
+		preload = preload_params_mcmc() # Must be reloaded since this depends on beta parameter
 		a = ModelParameters()
 		
 		# Calculate Bayes score
