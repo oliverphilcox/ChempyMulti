@@ -104,7 +104,7 @@ def Hogg_score():
 		
 		element_mean.append(mean)
 		element_sigma.append(sigma)
-		a.plot_hist=True
+		#a.plot_hist=True
 		if a.plot_hist == True:
 			plt.clf()
 			plt.hist(abundance, bins=40, normed=True, alpha=0.6, color='g')
@@ -114,7 +114,7 @@ def Hogg_score():
 			x = np.linspace(xmin, xmax, 100)
 			p = norm.pdf(x, mean, sigma)
 			plt.plot(x, p, c='k', linewidth=2)
-			title = 'Plot of element %d abundance' %(i)
+			title = 'Plot of element %d abundance' %(index)
 			plt.title(title)
 			plt.xlabel('[X/Fe] abundance')
 			plt.ylabel('Relative frequency')

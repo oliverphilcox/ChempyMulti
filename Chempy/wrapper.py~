@@ -735,7 +735,7 @@ def scoring_wrapper():
 	"""
 	from Chempy.neural import training_data,create_network
 	import time
-	from Chempy.parameter import ModelParameters()
+	from Chempy.parameter import ModelParameters
 	from Chempy.score_function import Hogg_wrapper, Bayes_wrapper
 	init_time = time.time()
 	a = ModelParameters()
