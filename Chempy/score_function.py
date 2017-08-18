@@ -13,7 +13,7 @@ def Hogg_scoring():
 	import os
 	import multiprocessing as mp
 	import tqdm
-	from Chempy.wrapper import multi_star_optimization
+	from Chempy.wrapper import single_star_optimization
 	from Chempy.plot_mcmc import restructure_chain
 	from Chempy.cem_function import posterior_function_mcmc_quick
 	from scipy.stats import norm
