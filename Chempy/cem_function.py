@@ -9,7 +9,6 @@ from .wrapper import initialise_stuff, Chempy
 from scipy.misc import logsumexp
 import numpy.ma as ma
 from .data_to_test import likelihood_evaluation, read_out_wildcard, likelihood_evaluation_int
-from .parameter import ModelParameters
 
 def gaussian_log(x,x0,xsig):
 	'''
@@ -1138,6 +1137,7 @@ def posterior_function_mcmc_quick(changing_parameter,error_element_list,preload)
 	'''
 	This is the actual posterior function for many stars. But the functionality is explained in posterior_function_many_stars.
 	'''
+	from .parameter import ModelParameters
 	
 	## Initialising the model parameters
 	a = ModelParameters()

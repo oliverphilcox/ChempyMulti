@@ -58,18 +58,17 @@ def restructure_chain(directory , parameter_names = [r'$\alpha_\mathrm{IMF}$',r'
 	if posterior.shape[0] != positions.shape[0] or posterior.shape[1] != positions.shape[1]:
 		raise Exception('chain and probability do not have the same number of walkers and or iterations')
 
-
-	plt.figure(figsize=(10.69,8.27), dpi=100)
-	plt.plot(mean_posterior+10.-np.max(mean_posterior), label= 'mean (maximum shifted to 10)')
-	plt.plot(std_posterior, label= 'std')
-	plt.yscale('log')
-	plt.ylim((1.,None))
-	plt.title('Statistical moments of the %d walkers at each step' %(nwalkers))
-	plt.legend(loc = 'best')
-	plt.grid('on')
-	plt.savefig('%sposterior_evolution.png' %(directory))
-	plt.clf()
-	#print np.mean(posterior, axis = 0)[0], np.mean(posterior, axis = 0)[-1] 
+	#plt.figure(figsize=(10.69,8.27), dpi=100)
+#	plt.plot(mean_posterior+10.-np.max(mean_posterior), label= 'mean (maximum shifted to 10)')
+#	plt.plot(std_posterior, label= 'std')
+#	plt.yscale('log')
+#	plt.ylim((1.,None))
+#	plt.title('Statistical moments of the %d walkers at each step' %(nwalkers))
+#	plt.legend(loc = 'best')
+#	plt.grid('on')
+#	plt.savefig('%sposterior_evolution.png' %(directory))
+#	plt.clf()
+#	#print np.mean(posterior, axis = 0)[0], np.mean(posterior, axis = 0)[-1] 
 	if True:#np.mean(posterior, axis = 0)[0] < np.mean(posterior, axis = 0)[-1]:
 		#print 'chain is inverted' ##Sometimes the chain is stored differently depending on the system
 		posterior = posterior[:,::-1]
@@ -155,17 +154,17 @@ def restructure_chain(directory , parameter_names = [r'$\alpha_\mathrm{IMF}$',r'
 	if with_blobs:
 		np.savetxt('%slikelihood_moments.csv' %(directory), list(np.hstack(y.T).T), fmt='%.4f', delimiter=',')
 		np.save('%sblobs_max' %(directory), blobs_max)
-		plt.figure(figsize=(30.69,8.27), dpi=100)
-		#plt.plot(blobs_max, label= 'blobs of best run')
-		plt.plot(y[0], label= 'mean blobs')
-		plt.plot(y[1], label= 'std blobs')
-		#plt.yscale('log')
-		#plt.ylim((1.,None))
-		plt.title('Statistical moments of the blobs for the %d plot runs' %(how_many_plot_samples))
-		plt.legend(loc = 'best')
-		plt.grid('on')
-		plt.savefig('%sblobs_distribution.png' %(directory))
-		plt.clf()
+		#plt.figure(figsize=(30.69,8.27), dpi=100)
+#		#plt.plot(blobs_max, label= 'blobs of best run')
+#		plt.plot(y[0], label= 'mean blobs')
+#		plt.plot(y[1], label= 'std blobs')
+#		#plt.yscale('log')
+#		#plt.ylim((1.,None))
+#		plt.title('Statistical moments of the blobs for the %d plot runs' %(how_many_plot_samples))
+#		plt.legend(loc = 'best')
+#		plt.grid('on')
+#		plt.savefig('%sblobs_distribution.png' %(directory))
+#		plt.clf()
 
 
 	np.save("%sparameter_names" %(directory), parameter_names)
@@ -176,20 +175,20 @@ def restructure_chain(directory , parameter_names = [r'$\alpha_\mathrm{IMF}$',r'
 		print(j, positions[:,j].mean(), '+-', positions[:,j].std())
 
 
-	fig, axes = plt.subplots(nrows=dimensions+1, ncols=1,figsize=(14.69,30.27), dpi=100,sharex=True)
-	for i in range(dimensions):
-		axes[i].plot(positions[:,i])
-		axes[i].set_ylabel(i)
-	axes[i+1].plot(posterior)
-	axes[i+1].set_ylabel('posterior')	
-
-	fig.savefig("%schain.png" %(directory))
-	plt.clf()
-	plt.figure(figsize=(14.69,30.27), dpi=100)
-	plt.hist(posterior,bins=100)
-	plt.savefig('%sposterior_histo.png' %(directory))
-	plt.clf()
-	plt.close()
+#	fig, axes = plt.subplots(nrows=dimensions+1, ncols=1,figsize=(14.69,30.27), dpi=100,sharex=True)
+#	for i in range(dimensions):
+#		axes[i].plot(positions[:,i])
+#		axes[i].set_ylabel(i)
+#	axes[i+1].plot(posterior)
+#	axes[i+1].set_ylabel('posterior')	
+#
+#	fig.savefig("%schain.png" %(directory))
+#	plt.clf()
+#	plt.figure(figsize=(14.69,30.27), dpi=100)
+#	plt.hist(posterior,bins=100)
+#	plt.savefig('%sposterior_histo.png' %(directory))
+#	plt.clf()
+#	plt.close()
 
 def plot_mcmc_chain(directory, set_scale = False, use_scale = False, only_first_star = True):
 	'''

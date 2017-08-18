@@ -39,21 +39,21 @@ def Hogg_scoring():
 
 	# Calculate required Chempy elements
 	preload = preload_params_mcmc()
-	elements = preload.elements
-	np.save('Scores/Hogg_elements.npy',elements)
+	elements_init = np.copy(preload.elements)
+	np.save('Scores/Hogg_elements.npy',elements_init)
      
 	# Create new parameter names
 	newstr = []
-	for i,el in enumerate(elements):
+	for i,el in enumerate(elements_init):
 		if el !='Zn':
 			newstr.append(orig.replace("'"+str(el)+"', ",""))
 		else:
 			newstr.append(orig.replace("'"+str(el)+"', ",""))
 
-	for i in range(len(elements)): # Iterate over removed element
+	for index in range(len(elements_init)): # Iterate over removed element
 		for line in fileinput.input("Chempy/parameter.py", inplace=True):
 			if "\telements_to_trace" in line:
-				print(newstr[i])
+				print(newstr[index])
 			else:
 				print(line,end='')
 		del sys.modules['Chempy.parameter']
@@ -65,7 +65,8 @@ def Hogg_scoring():
 		##############
 		
 		# Run MCMC with 27/28 elements. 
-		print('Running MCMC iteration %d of %d' %(i+1,len(elements)))
+		print('Running MCMC iteration %d of %d' %(index+1,len(elements_init)))
+		print(a.elements_to_trace)
 		single_star_optimization()
 		
 		# Create the posterior PDF and load it 
@@ -91,6 +92,11 @@ def Hogg_scoring():
 		# This uses all 28 elements again for predictions
 				
 		# Multiprocess and calculate elemental predictions for each parameter set
+		def element_predictor(params):
+			from .cem_function import posterior_function_mcmc_quick
+			_,all_abun = posterior_function_mcmc_quick(params,preload.elements,preload)
+		return all_abun[index]
+	 
 		p = mp.Pool()
 		abundance = list(tqdm.tqdm(p.imap_unordered(element_predictor,positions),total=len(positions)))
 		
@@ -114,23 +120,21 @@ def Hogg_scoring():
 			plt.xlabel('[X/Fe] abundance')
 			plt.ylabel('Relative frequency')
 		
-		total_err = np.sqrt((preload.star_error_list[i])**2 + sigma**2)
-		likelihood_factor = norm.pdf(mean,loc=preload.star_abundance_list[i],scale=total_err)
+		total_err = np.sqrt((preload.star_error_list[index])**2 + sigma**2)
+		likelihood_factor = norm.pdf(mean,loc=preload.star_abundance_list[index],scale=total_err)
 		overall_score *= likelihood_factor
 		factors.append(likelihood_factor)
-		print("Likelihood contribution from %dth element is %.8f" %(i,likelihood_factor))
+		print("Likelihood contribution from %dth element is %.8f" %(index,likelihood_factor))
+	
+	
 	np.savez('Scores/Hogg_beta_elements'+str(a.beta_param)+'.npz',
-				elements=elements,
+				elements=elements_init,
 				likelihood_factors=factors,
 				element_mean = element_mean,
 				element_sigma = element_sigma)	
 	return overall_score
 
-def element_predictor(params):
-	from .cem_function import posterior_function_mcmc_quick
-	_,all_abun = posterior_function_mcmc_quick(params,elements,preload)
-	return all_abun[i]
-	 
+
 def Hogg_mini_wrapper():
 	import fileinput
 	import sys
