@@ -729,9 +729,13 @@ def single_star_optimization():
 
 def scoring_wrapper():
 	"""
-	This function will create and train a neural network then calculate Bayes and Hogg scores for it, using the scores in score_function.py.
+	This function will calculate Bayes and Hogg scores for yield set, using the code in score_function.py.
 	
-	Main outputs are labelled .npz files in the Scores/ file
+	The neural network must be trained beforehand using training_data and create_network	
+	
+	Main outputs are labelled .npz files in the Scores/ file.
+	
+	MUST set a.UseNeural = True for this and select correct dataset.
 	"""
 	from Chempy.neural import training_data,create_network
 	import time
@@ -740,16 +744,10 @@ def scoring_wrapper():
 	init_time = time.time()
 	a = ModelParameters()
 	
-	print('Step 1 (at time %.2f s): Create training dataset for network' %(time.time()-init_time))
-	training_data()	
-	
-	print('Step 2 (at time %.2f s): Create neural network' %(time.time()-init_time))
-	create_network(learning_rate = a.learning_rate,Plot=False)
-	
-	print('Step 3 (at time %.2f s): Calculate Bayes score' %(time.time()-init_time))
+	print('Step 1 (at time %.2f s): Calculate Bayes score' %(time.time()-init_time))
 	Bayes_wrapper()
 	
-	print('Step 4 (at time %.2f s): Calculate cross-validation score' %(time.time()-init_time))
+	print('Step 2 (at time %.2f s): Calculate cross-validation score' %(time.time()-init_time))
 	Hogg_wrapper()
 	
 	print('Process complete in time %.2f s' %(time.time()-init_time))	
