@@ -1,7 +1,7 @@
 import numpy as np
 import os
 	
-def Hogg_scoring():
+def Hogg_score():
 	"""This function will compute the cross-validation abundances for each of the 22 elements,
 	using the best parameter choice for each. 
 	This computes the likelihood contribution, and saves each separately.
@@ -18,11 +18,9 @@ def Hogg_scoring():
 	from Chempy.cem_function import posterior_function_mcmc_quick
 	from scipy.stats import norm
 	from .score_function import preload_params_mcmc
+	import matplotlib.pyplot as plt
 
-	#directory = "Scores/Hogg_"+str(index)+"/"
-	#if not os.path.exists(directory):
-	#	os.makedirs(directory)
-    
+	 
 	## Code to rewrite parameter file for each element in turn, so as to run MCMC for 21/22 elements only
 	# This is definitely not a good implementation (involves rewriting entire parameter file),
 	# But other steps are far slower
@@ -53,7 +51,8 @@ def Hogg_scoring():
 	for index in range(len(elements_init)): # Iterate over removed element
 		for line in fileinput.input("Chempy/parameter.py", inplace=True):
 			if "\telements_to_trace" in line:
-				print(newstr[index])
+				#print(newstr[index])
+				print(line,end='') # TO TEST
 			else:
 				print(line,end='')
 		del sys.modules['Chempy.parameter']
@@ -66,6 +65,7 @@ def Hogg_scoring():
 		
 		# Run MCMC with 27/28 elements. 
 		print('Running MCMC iteration %d of %d' %(index+1,len(elements_init)))
+		#print(a.elements_to_trace)
 		single_star_optimization()
 		
 		# Create the posterior PDF and load it 
@@ -91,21 +91,21 @@ def Hogg_scoring():
 		# This uses all 28 elements again for predictions
 				
 		# Multiprocess and calculate elemental predictions for each parameter set
-		def element_predictor(params):
-			from .cem_function import posterior_function_mcmc_quick
-			_,all_abun = posterior_function_mcmc_quick(params,preload.elements,preload)
-		return all_abun[index]
-	 
+
+		from .score_function import element_predictor
 		p = mp.Pool()
-		abundance = list(tqdm.tqdm(p.imap_unordered(element_predictor,positions),total=len(positions)))
+		indices = np.ones(len(positions))*index
+		abundance = list(tqdm.tqdm(p.imap_unordered(element_predictor,zip(positions,indices)),total=len(positions)))
 		
 		abundance = np.array(abundance)
 		mean,sigma = norm.fit(abundance)
+		print(mean)
+		print(sigma)
 		
 		element_mean.append(mean)
 		element_sigma.append(sigma)
-		
-		if plot_hist == True:
+		a.plot_hist=True
+		if a.plot_hist == True:
 			plt.clf()
 			plt.hist(abundance, bins=40, normed=True, alpha=0.6, color='g')
 			#abundance = np.array(abundance) # Unmask array
@@ -124,7 +124,7 @@ def Hogg_scoring():
 		overall_score *= likelihood_factor
 		factors.append(likelihood_factor)
 		print("Likelihood contribution from %dth element is %.8f" %(index,likelihood_factor))
-	
+		print(overall_score)
 	
 	np.savez('Scores/Hogg_beta_elements'+str(a.beta_param)+'.npz',
 				elements=elements_init,
@@ -133,25 +133,16 @@ def Hogg_scoring():
 				element_sigma = element_sigma)	
 	return overall_score
 
+def element_predictor(args):
+	params,index = args	
+	index = int(index)
+	preload = preload_params_mcmc()
+	from .cem_function import posterior_function_mcmc_quick
+	_,all_abun = posterior_function_mcmc_quick(params,preload.elements,preload)
+	output = all_abun[index]
+	return output
 
-def Hogg_mini_wrapper():
-	import fileinput
-	import sys
-	from Chempy.parameter import ModelParameters
-	from Chempy.score_function import Hogg_scoring
-	import time
-	init_time = time.time()	
-	for index in [1., 1.2, 1.4, 1.7, 2., 2.5, 3., 4., 5., 6., 8., 10., 12., 15., 18., 22., 26., 30., 40., 50.]:
-		for line in fileinput.input("Chempy/parameter.py", inplace=True):
-			if "\tbeta_param =" in line:
-				print("\tbeta_param = %.2f" %(index))
-			else:
-				print(line,end='')
-		del sys.modules['Chempy.parameter']
-		Hogg_scoring(index)  
-		
-	return None
-    
+
     
 class preload_params_mcmc():
 	"""This calculates and stores useful quantities that would be calculated multiple times otherwise for the mcmc run.
@@ -333,9 +324,11 @@ def Hogg_wrapper():
 	import fileinput
 	import sys
 	from .parameter import ModelParameters
+	from .score_function import Hogg_score
+	
 	a = ModelParameters()
 	beta_params = a.list_of_beta_params
-	Hogg_score = []
+	Hogg_score_list = []
 	init_time = time.time()
 	
 	for i in range(len(beta_params)): # Iterate over beta parameters
@@ -349,18 +342,20 @@ def Hogg_wrapper():
 				
 		# Reimport model parameters for new beta 
 		del sys.modules['Chempy.parameter']
+		del sys.modules['Chempy.score_function']
+		from Chempy.score_function import preload_params_mcmc
 		from Chempy.parameter import ModelParameters
 		a = ModelParameters()
 		
 		# Calculate Bayes score
-		score = Hogg_mini_wrapper()
-		Hogg_score.append(score)
+		score = Hogg_score()
+		Hogg_score_list.append(score)
 	
 	# Save output as npz array
 	np.savez("Scores/Hogg_score - "+str(a.yield_table_name_sn2)+", "+str(a.yield_table_name_agb)+", "+str(a.yield_table_name_1a)+".npz",
 				beta_param=beta_params,
-				score=Hogg_score)
+				score=Hogg_score_list)
 				
-	return beta_params,Hogg_score
+	return beta_params,Hogg_score_list
 	
 	

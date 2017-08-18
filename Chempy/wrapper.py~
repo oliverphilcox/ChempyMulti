@@ -709,13 +709,49 @@ def single_star_optimization():
 	# V: MCMC run
 	## reshape the result to have global parameters in the front and the local parameters following
 	#changing_parameter = list(result[0,:len(a.SSP_parameters)])
+	
 	elements = np.unique(a.elements_to_trace,preload.wildcard.dtype.names)
 	changing_parameter = list(result)
+	
 	#for i in range(result.shape[0]):
 	#	changing_parameter.append(list(result[i,len(a.SSP_parameters):]))
+	
 	changing_parameter = np.hstack(changing_parameter)
+	
 	## jitter the parameters to initialise the chain (add a validation later, i.e. testing that the particular parameters yield a result)
+	
 	mcmc_quick(changing_parameter, elements,preload)
+	
 	# 1: Free all parameters and optimize common error (SSP should be the same for all stars)
 	# 2: Plug everything into emcee and sample the posterior
 	return log_list
+
+
+def scoring_wrapper():
+	"""
+	This function will create and train a neural network then calculate Bayes and Hogg scores for it, using the scores in score_function.py.
+	
+	Main outputs are labelled .npz files in the Scores/ file
+	"""
+	from Chempy.neural import training_data,create_network
+	import time
+	from Chempy.parameter import ModelParameters()
+	from Chempy.score_function import Hogg_wrapper, Bayes_wrapper
+	init_time = time.time()
+	a = ModelParameters()
+	
+	print('Step 1 (at time %.2f s): Create training dataset for network' %(time.time()-init_time))
+	training_data()	
+	
+	print('Step 2 (at time %.2f s): Create neural network' %(time.time()-init_time))
+	create_network(learning_rate = a.learning_rate,Plot=False)
+	
+	print('Step 3 (at time %.2f s): Calculate Bayes score' %(time.time()-init_time))
+	Bayes_wrapper()
+	
+	print('Step 4 (at time %.2f s): Calculate cross-validation score' %(time.time()-init_time))
+	Hogg_wrapper()
+	
+	print('Process complete in time %.2f s' %(time.time()-init_time))	
+	return None	
+	

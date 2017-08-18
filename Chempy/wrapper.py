@@ -725,3 +725,33 @@ def single_star_optimization():
 	# 1: Free all parameters and optimize common error (SSP should be the same for all stars)
 	# 2: Plug everything into emcee and sample the posterior
 	return log_list
+
+
+def scoring_wrapper():
+	"""
+	This function will create and train a neural network then calculate Bayes and Hogg scores for it, using the scores in score_function.py.
+	
+	Main outputs are labelled .npz files in the Scores/ file
+	"""
+	from Chempy.neural import training_data,create_network
+	import time
+	from Chempy.parameter import ModelParameters
+	from Chempy.score_function import Hogg_wrapper, Bayes_wrapper
+	init_time = time.time()
+	a = ModelParameters()
+	
+	print('Step 1 (at time %.2f s): Create training dataset for network' %(time.time()-init_time))
+	training_data()	
+	
+	print('Step 2 (at time %.2f s): Create neural network' %(time.time()-init_time))
+	create_network(learning_rate = a.learning_rate,Plot=False)
+	
+	print('Step 3 (at time %.2f s): Calculate Bayes score' %(time.time()-init_time))
+	Bayes_wrapper()
+	
+	print('Step 4 (at time %.2f s): Calculate cross-validation score' %(time.time()-init_time))
+	Hogg_wrapper()
+	
+	print('Process complete in time %.2f s' %(time.time()-init_time))	
+	return None	
+	
