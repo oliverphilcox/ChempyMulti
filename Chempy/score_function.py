@@ -44,7 +44,7 @@ def Hogg_scoring():
      
 	# Create new parameter names
 	newstr = []
-	for i,el in enumerate(el_names):
+	for i,el in enumerate(elements):
 		if el !='Zn':
 			newstr.append(orig.replace("'"+str(el)+"', ",""))
 		else:

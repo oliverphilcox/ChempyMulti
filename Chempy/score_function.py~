@@ -40,11 +40,11 @@ def Hogg_scoring():
 	# Calculate required Chempy elements
 	preload = preload_params_mcmc()
 	elements = preload.elements
-	np.save('Scores/Hogg_elements.npy',np.array(el_names))
+	np.save('Scores/Hogg_elements.npy',elements)
      
 	# Create new parameter names
 	newstr = []
-	for i,el in enumerate(el_names):
+	for i,el in enumerate(elements):
 		if el !='Zn':
 			newstr.append(orig.replace("'"+str(el)+"', ",""))
 		else:
