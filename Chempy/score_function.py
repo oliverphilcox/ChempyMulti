@@ -17,6 +17,7 @@ def Hogg_scoring():
 	from Chempy.plot_mcmc import restructure_chain
 	from Chempy.cem_function import posterior_function_mcmc_quick
 	from scipy.stats import norm
+	from .score_function import preload_params_mcmc
 
 	#directory = "Scores/Hogg_"+str(index)+"/"
 	#if not os.path.exists(directory):
