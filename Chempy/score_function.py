@@ -65,7 +65,7 @@ def Hogg_scoring():
 		##############
 		
 		# Run MCMC with 27/28 elements. 
-		print('Running MCMC iteration %d of %d' %(i+1,len(el_names)))
+		print('Running MCMC iteration %d of %d' %(i+1,len(elements)))
 		single_star_optimization()
 		
 		# Create the posterior PDF and load it 
