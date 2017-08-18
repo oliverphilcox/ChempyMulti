@@ -18,9 +18,9 @@ def Hogg_scoring():
 	from Chempy.cem_function import posterior_function_mcmc_quick
 	from scipy.stats import norm
 
-	directory = "Scores/Hogg_"+str(index)+"/"
-	if not os.path.exists(directory):
-		os.makedirs(directory)
+	#directory = "Scores/Hogg_"+str(index)+"/"
+	#if not os.path.exists(directory):
+	#	os.makedirs(directory)
     
 	## Code to rewrite parameter file for each element in turn, so as to run MCMC for 21/22 elements only
 	# This is definitely not a good implementation (involves rewriting entire parameter file),
