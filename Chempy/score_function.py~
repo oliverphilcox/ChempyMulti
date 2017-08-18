@@ -1,10 +1,11 @@
 import numpy as np
 import os
 	
-def Hogg_scoring(index):
+def Hogg_scoring():
 	"""This function will compute the cross-validation abundances for each of the 22 elements,
-	using the best parameter choice for each. Abundances are saved in Hogg/abundnace[INDEX].npy,
-	with order used in elements.npy"""
+	using the best parameter choice for each. 
+	This computes the likelihood contribution, and saves each separately.
+	"""
 	from Chempy.parameter import ModelParameters
 	import importlib
 	import fileinput
@@ -28,17 +29,16 @@ def Hogg_scoring(index):
 	# Initialise arrays
 	element_mean = []
 	element_sigma = []
+	overall_score = 1.
+	factors = []
 	
 	# Starting elements (copied from original parameter file)
 	elements_to_trace = ['Al', 'Ar', 'B', 'Be', 'C', 'Ca', 'Cl', 'Co', 'Cr', 'Cu', 'F', 'Fe', 'Ga', 'Ge', 'H', 'He', 'K', 'Li', 'Mg', 'Mn', 'N', 'Na', 'Ne', 'Ni', 'O', 'P', 'S', 'Sc', 'Si', 'Ti', 'V', 'Zn']
 	orig = "\telements_to_trace = "+str(elements_to_trace) # Original element string
 
 	# Calculate required Chempy elements
-	sol_dat = np.load("Chempy/input/stars/"+a.stellar_identifier)
-	el_names = []
-	for el in elements_to_trace:
-		if el in sol_dat.dtype.names:
-			el_names.append(el)
+	preload = preload_params_mcmc()
+	elements = preload.elements
 	np.save(directory+"elements.npy",np.array(el_names))
      
 	# Create new parameter names
@@ -49,7 +49,7 @@ def Hogg_scoring(index):
 		else:
 			newstr.append(orig.replace("'"+str(el)+"', ",""))
 
-	for i in range(len(el_names)): # Iterate over removed element
+	for i in range(len(elements)): # Iterate over removed element
 		for line in fileinput.input("Chempy/parameter.py", inplace=True):
 			if "\telements_to_trace" in line:
 				print(newstr[i])
@@ -60,7 +60,7 @@ def Hogg_scoring(index):
 		a = ModelParameters()
 		del sys.modules['Chempy.score_function']
 		from .score_function import preload_params_mcmc 
-		preload = preload_params_mcmc())
+		preload = preload_params_mcmc()
 		##############
 		
 		# Run MCMC with 27/28 elements. 
@@ -88,11 +88,7 @@ def Hogg_scoring(index):
 		##############
 		
 		# This uses all 28 elements again for predictions
-		elements = []
-		for item in a.elements_to_trace:
-    		if item in preload.wildcard.dtype.names:
-				elements.append(item)
-		
+				
 		# Multiprocess and calculate elemental predictions for each parameter set
 		p = mp.Pool()
 		abundance = list(tqdm.tqdm(p.imap_unordered(element_predictor,positions),total=len(positions)))
@@ -117,10 +113,17 @@ def Hogg_scoring(index):
 			plt.xlabel('[X/Fe] abundance')
 			plt.ylabel('Relative frequency')
 		
-		
-		
-		np.save(directory+'abundance%d.npy' %(i),required_abundance)
-	return None
+		total_err = np.sqrt((preload.star_error_list[i])**2 + sigma**2)
+		likelihood_factor = norm.pdf(mean,loc=preload.star_abundance_list[i],scale=total_err)
+		overall_score *= likelihood_factor
+		factors.append(likelihood_factor)
+		print("Likelihood contribution from %dth element is %.8f" %(i,likelihood_factor))
+	np.savez('Scores/Hogg_beta_elements'+str(a.beta_param)+'.npz',
+				elements=elements,
+				likelihood_factors=factors,
+				element_mean = element_mean,
+				element_sigma = element_sigma)	
+	return overall_score
 
 def element_predictor(params):
 	from .cem_function import posterior_function_mcmc_quick
