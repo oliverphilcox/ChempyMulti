@@ -360,5 +360,5 @@ class ModelParameters(object):
 	# mcimport Integration parameters:	
 	int_samples = 10000 # Number of samples for MC integration
 	
-	list_of_beta_params = [1,2]#np.logspace(0,3,20) # List of beta function parameters used to calculate the score.	
+	list_of_beta_params = np.logspace(0,3,20) # List of beta function parameters used to calculate the score.	
 	

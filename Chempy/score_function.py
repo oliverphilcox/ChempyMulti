@@ -1,4 +1,5 @@
 import numpy as np
+import os
 	
 def Hogg_scoring(index):
 	"""This function will compute the cross-validation abundances for each of the 22 elements,
