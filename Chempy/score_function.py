@@ -260,7 +260,7 @@ def Bayes_score():
 		mean = np.array(init_param)
 		return numnorm(mean,cov_matrix,size=size)
 		
-	print('After %.3f seconds, starting parameter-space integration for beta = ' %(time.time()-init_time, a.beta_param))
+	print('After %.3f seconds, starting parameter-space integration for beta = %.3f' %(time.time()-init_time, a.beta_param))
 	integral,integral_err = mcimport(posterior_mod,a.int_samples,dist)
 
 	print('After %.3f seconds, integration is complete' %(time.time()-init_time))
