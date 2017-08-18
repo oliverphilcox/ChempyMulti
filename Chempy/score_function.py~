@@ -17,6 +17,7 @@ def Hogg_scoring():
 	from Chempy.plot_mcmc import restructure_chain
 	from Chempy.cem_function import posterior_function_mcmc_quick
 	from scipy.stats import norm
+	from .score_function import preload_params_mcmc
 
 	#directory = "Scores/Hogg_"+str(index)+"/"
 	#if not os.path.exists(directory):
@@ -39,7 +40,7 @@ def Hogg_scoring():
 	# Calculate required Chempy elements
 	preload = preload_params_mcmc()
 	elements = preload.elements
-	np.save(directory+"elements.npy",np.array(el_names))
+	np.save('Scores/Hogg_elements.npy',np.array(el_names))
      
 	# Create new parameter names
 	newstr = []

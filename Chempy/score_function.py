@@ -40,7 +40,7 @@ def Hogg_scoring():
 	# Calculate required Chempy elements
 	preload = preload_params_mcmc()
 	elements = preload.elements
-	np.save(directory+"elements.npy",np.array(el_names))
+	np.save('Scores/Hogg_elements.npy',elements)
      
 	# Create new parameter names
 	newstr = []
