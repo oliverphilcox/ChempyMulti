@@ -551,8 +551,10 @@ def mcmc_quick(changing_parameter,elements,preload):
 			result = posterior_function_mcmc_quick(changing_parameter + jitter,elements,preload)
 		chain[i] = changing_parameter + jitter
 
-	sampler = emcee.EnsembleSampler(a.nwalkers,ndim,posterior_function_mcmc_quick,threads=nthreads, args = [elements,preload])
+	pool=mp.Pool()
+	sampler = emcee.EnsembleSampler(a.nwalkers,ndim,posterior_function_mcmc_quick,threads=nthreads, args = [elements,preload],pool=pool)
 	pos,prob,state,blobs = sampler.run_mcmc(chain,a.mburn)
+		
 	
 	mean_prob = mean_prob_beginning = np.zeros((a.m))
 	posterior_list = []
@@ -588,7 +590,7 @@ def mcmc_quick(changing_parameter,elements,preload):
 	posterior_std_list.append(np.std(posterior, axis = 0)[-1])
 	np.save('%s/flatmeanposterior' %(directory), posterior_list)
 	np.save('%s/flatstdposterior' %(directory), posterior_std_list)
-		
+	pool.close()	
 	if a.send_email:
 		send_email(nthreads, i, np.mean(posterior, axis = 0)[0], np.mean(posterior, axis = 0)[-1], a, elapsed1)
 
