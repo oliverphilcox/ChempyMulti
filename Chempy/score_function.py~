@@ -409,7 +409,7 @@ def Hogg_bash(beta_index):
 				
 	return beta_params,score
 	
-def Hogg_stitch:
+def Hogg_stitch():
 	"""
 	Function to load all Hogg predictions and combine into one file
 	"""

@@ -409,7 +409,7 @@ def Hogg_bash(beta_index):
 				
 	return beta_params,score
 	
-def Hogg_stitch:
+def Hogg_stitch():
 	"""
 	Function to load all Hogg predictions and combine into one file
 	"""
@@ -419,7 +419,7 @@ def Hogg_stitch:
 	a = ModelParameters()
 	beta = []
 	score = []
-	for i range(len(a.list_of_beta_params)):
+	for i in range(len(a.list_of_beta_params)):
 		temp=np.load('Scores/Hogg'+str(i)+'.npz')
 		beta.append(temp['beta_param'])
 		score.append(temp['score'])
