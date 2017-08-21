@@ -294,7 +294,7 @@ def Bayes_wrapper():
 				print("\tbeta_param = %.5f" %beta_params[i])
 			else:
 				print(line,end='')
-				
+		fileinput.close()		
 		# Reimport model parameters for new beta 
 		del sys.modules['Chempy.parameter']
 		del sys.modules['Chempy.score_function']
@@ -340,7 +340,7 @@ def Hogg_wrapper():
 				print("\tbeta_param = %.5f" %beta_params[i])
 			else:
 				print(line,end='')
-				
+		fileinput.close()		
 		# Reimport model parameters for new beta 
 		del sys.modules['Chempy.parameter']
 		del sys.modules['Chempy.score_function']

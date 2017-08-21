@@ -1,7 +1,8 @@
 import numpy as np
 
-
 class ModelParameters(object):
+	
+	
 	'''
 	In this class the model parameters are specified. It contains a lot of information which is (not always) necessary to run Chempy.
 	The individual definitions are given as comments.
@@ -27,8 +28,8 @@ class ModelParameters(object):
 	#	stellar_identifier_list.append("Rob_%d" %item)
 	#stellar_identifier_list = ['Proto-sun', 'Arcturus', 'B-stars']
 	# 'prior' can be used as stellar_identifier, then the prior will be sampled with Chempy.wrapper.mcmc() routine
-	stellar_identifier_list = ['Proto-sun']
-	stellar_identifier = 'Proto-sun'
+	stellar_identifier_list = ['Proto-sun_all']#['Proto-sun']
+	stellar_identifier = 'Proto-sun_all'#'Proto-sun'
 
 	# Convergense parameters of minimization and MCMC
 	maxiter_minimization = 500
@@ -43,7 +44,8 @@ class ModelParameters(object):
 	m = 1000 # For 7 free parameters 300 iterations are usually enough. The mcmc routine is stopping after 300 if the posterior mean is converged for more than 200 iterations.
 	error_marginalization = True # Marginalizing over the model error or using the best model error value
 	flat_model_error_prior = [0.,1.,51] # Flat prior for the error marginalization [begin, end, number of evaluations inbetween]
-	beta_param = 30 # Rescalable beta parameter controlling model error (default is 10)
+	beta_param = 2.00000
+	# This is the rescalable beta parameter controlling model error (default is 10)
 	beta_error_distribution = [True, 1, beta_param] # Instead of a flat prior for the error marginalization we use a beta distribution with a = 1 and b = 3 as default (wikipedia and scipy have the same parametrization) putting more weight to small model errors
 	zero_model_error = False # a boolean that can be used to restore the old Chempy behaviour of 0 model error, will only work if error_marginalization is set to False
 	send_email = False
@@ -231,10 +233,10 @@ class ModelParameters(object):
 	#element_names = ['He','C', 'N', 'O', 'F','Ne','Na', 'Mg', 'Al', 'Si', 'P','S', 'Ar','K', 'Ca','Ti', 'V', 'Cr', 'Mn', 'Fe', 'Co', 'Ni']#, 'Zn','Y', 'Ba']# Runs with sun
 
 	# 28 elements	
-	element_names = ['He','C', 'N', 'O', 'F','Ne','Na', 'Mg', 'Al', 'Si', 'P','S', 'Cl','Ar','K', 'Ca','Sc','Ti', 'V', 'Cr', 'Mn', 'Fe', 'Co', 'Ni','Cu','Zn','Ga','Ge']#, 'Zn','Y', 'Ba']# Runs with sun
+	element_names = ['He', 'C', 'N', 'O', 'F','Ne','Na', 'Mg', 'Al', 'Si', 'P','S', 'Cl','Ar','K', 'Ca','Sc','Ti', 'V', 'Cr', 'Mn', 'Fe', 'Co', 'Ni','Cu','Zn','Ga','Ge']#, 'Zn','Y', 'Ba']# Runs with sun
 	
-	elements_to_trace = ['Al', 'Ar', 'B', 'Be', 'C', 'Ca', 'Cl', 'Co', 'Cr', 'Cu', 'F', 'Fe', 'Ga', 'Ge', 'H', 'He', 'K', 'Li', 'Mg', 'Mn', 'N', 'Na', 'Ne', 'Ni', 'O', 'P', 'S', 'Sc', 'Si', 'Ti', 'V', 'Zn']
-		
+	elements_to_trace = ['Al','Ar', 'B', 'Be', 'C', 'Ca', 'Cl', 'Co', 'Cr', 'Cu', 'F', 'Fe', 'Ga', 'Ge', 'H', 'He', 'K', 'Li', 'Mg', 'Mn', 'N', 'Na', 'Ne', 'Ni', 'O', 'P', 'S', 'Sc', 'Si', 'Ti', 'V', 'Zn']
+
 	#observational_constraints_index = ['sol_norm']#['gas_reservoir','sn_ratio','sol_norm']#,'wildcard ','cas','arcturus','stars_at_end', 'plot_processes', 'save_abundances', 'elements']
 	arcturus_age = 7.1# 7.1 +1.5 -1.2
 
@@ -246,8 +248,8 @@ class ModelParameters(object):
 	# If some parameter is in to optimise there needs to be a prior and constraints defined
 	if True:
 		#prior
-		SSP_parameters =  [-2.29 ,-2.75 ,	-0.8 ]#,0.2]#, 0.7, 0.3, 0.0]
-		SSP_parameters_to_optimize = ['high_mass_slope', 'log10_N_0', 'log10_sn1a_time_delay']#,'log10_sfr_factor_for_cosmic_accretion']#,'log10_gas_reservoir_mass_factor','log10_a_parameter','log10_gas_power']
+		SSP_parameters =  [-2.29 ,-2.75 ]#,	-0.8 ]#,0.2]#, 0.7, 0.3, 0.0]
+		SSP_parameters_to_optimize = ['high_mass_slope', 'log10_N_0']#, 'log10_sn1a_time_delay']#,'log10_sfr_factor_for_cosmic_accretion']#,'log10_gas_reservoir_mass_factor','log10_a_parameter','log10_gas_power']
 	else:
 		SSP_parameters = []
 		SSP_parameters_to_optimize = []
@@ -329,21 +331,21 @@ class ModelParameters(object):
 	
 	## Neural network parameters
 	
-	training_size = 5 # no. values per parameter in training set
-	#training_widths = [0.6,0.3,0.3,0.3,0.2,0.2] # Initial gaussian widths for training set
-	training_widths = [0.6,0.6,0.6,0.6,0.2,0.2] # 3 sigma widths
+	training_size = 7 # no. values per parameter in training set
+	#training_widths = [0.6,0.3,0.3,0.2,0.2] # Initial gaussian widths for training set
+	training_widths = [0.6,0.6,0.6,0.2,0.2] # 2 sigma widths
 	verif_test_sizes = [10000,10000] # Size of array for [verification, test] datasets
-	#test_widths = [0.3,0.3,0.3,0.3,0.1,0.1] # Original prior widths for testing/verification
-	test_widths = [0.9,0.9,0.9,0.9,0.3,0.3] # Test widths	
+	#test_widths = [0.3,0.3,0.3,0.1,0.1] # Original prior widths for testing/verification
+	test_widths = [0.9,0.9,0.9,0.3,0.3] # Test widths	
 	
 	neurons = 30 # 20# Number of neurons in layer
 	learning_rate = 0.007  # Default Adam neural network learning rate
 	
-	epochs = 5000 # Number of epochs used in testing
+	epochs = 1000 # Number of epochs used in testing
 	
 	# Create list of elements calculated by neural network
 	# (These are common elements between proto-sun and Chempy traced elements)
-	sol_dat=np.load('Chempy/input/stars/Proto-sun.npy')	
+	sol_dat=np.load('Chempy/input/stars/'+stellar_identifier+'.npy')	
 	neural_names = []
 	for item in elements_to_trace:
 		if item in list(sol_dat.dtype.names):
@@ -351,4 +353,13 @@ class ModelParameters(object):
 
 	color_max = 0.04 # Maximum color in error plots	
 	
-	UseNeural = True # This defines whether to use trained network in place of Chempyimport numpy as np
+	UseNeural = True # This defines whether to use trained network in place of Chempy
+	
+	test_size = 3000 # Number of elements in test set
+	
+	# mcimport Integration parameters:	
+	int_samples = 10000 # Number of samples for MC integration
+	
+	list_of_beta_params = np.logspace(0,3,20) # List of beta function parameters used to calculate the score.	
+	
+	plot_hist = False # controls whether to plot histogram of predicted element abundances using Hogg's method
