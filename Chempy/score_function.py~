@@ -47,7 +47,6 @@ def Hogg_score():
 			newstr.append(orig.replace("'"+str(el)+"', ",""))
 		else:
 			newstr.append(orig.replace("'"+str(el)+"', ",""))
-
 	for index in range(len(elements_init)): # Iterate over removed element
 		for line in fileinput.input("Chempy/parameter.py", inplace=True):
 			if "\telements_to_trace" in line:
@@ -95,6 +94,7 @@ def Hogg_score():
 		# Multiprocess and calculate elemental predictions for each parameter set
 
 		from .score_function import element_predictor
+		p = mp.Pool()
 		indices = np.ones(len(positions))*index
 		abundance = list(tqdm.tqdm(p.imap_unordered(element_predictor,zip(positions,indices)),total=len(positions)))
 		p.close()
