@@ -128,7 +128,8 @@ def Hogg_score():
 		factors.append(likelihood_factor)
 		print("Likelihood contribution from %dth element is %.8f" %(index+1,likelihood_factor))
 		print(overall_score)
-	
+		sys.stdout.flush()
+
 	np.savez('Scores/Hogg_beta_elements'+str(a.beta_param)+'.npz',
 				elements=elements_init,
 				likelihood_factors=factors,

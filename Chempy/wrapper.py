@@ -592,7 +592,7 @@ def mcmc_quick(changing_parameter,elements,preload):
 	if a.send_email:
 		send_email(nthreads, i, np.mean(posterior, axis = 0)[0], np.mean(posterior, axis = 0)[-1], a, elapsed1)
 
-	sampler.reset()
+
 	
 def single_star_optimization():
 	'''
