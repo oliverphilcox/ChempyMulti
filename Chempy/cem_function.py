@@ -1218,16 +1218,14 @@ def posterior_function_mcmc_quick(changing_parameter,error_element_list,preload)
 	#error_weight = beta.pdf(model_errors, a = a.beta_error_distribution[1], b = a.beta_error_distribution[2])
 	#error_weight/= sum(error_weight)
 	error_weight = preload.error_weight
-	#import pyximport; pyximport.install()	
-	#from Chempy.CyChempy import c_gauss
 	for i in range(len(model_errors)):
+		#likelihood_list[i] = likelihood_evaluation_int(e,m,s)
 		#from .data_to_test import likelihood_evaluation
 		#error_temp = np.ones(len(elements))*item
 		#likelihood_list[i] = likelihood_evaluation(error_temp[:,None],star_errors,model_abundances,star_abundances)
 		#err = np.sqrt(np.multiply(error_temp[:,None],error_temp[:,None]) + np.multiply(star_errors,star_errors))
 			
 		## VECTORIZE THIS?
-		#likelihood_list[i] = c_gauss(list(preload.err[i]),list(model_abundances),list(star_abundances))
 		likelihood_list[i] = likelihood_evaluation_int(preload.err[i] , model_abundances,star_abundances)
 	#print(likelihood_list[-1])
 	#print(likelihood_evaluation_int(preload.err[-1],model_abundances,star_abundances))

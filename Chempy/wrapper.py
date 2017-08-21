@@ -582,7 +582,8 @@ def mcmc_quick(changing_parameter,elements,preload):
 	np.save('%s/flatchain' %(directory),sampler.chain)
 	np.save('%s/flatlnprobability' %(directory),sampler.lnprobability)
 	np.save('%s/flatblobs' %(directory),sampler.blobs)
-	posterior = np.load('%s/flatlnprobability.npy' %(directory))
+	posterior = sampler.lnprobability
+	#posterior = np.load('%s/flatlnprobability.npy' %(directory))
 	posterior_list.append(np.mean(posterior, axis = 0)[-1])
 	posterior_std_list.append(np.std(posterior, axis = 0)[-1])
 	np.save('%s/flatmeanposterior' %(directory), posterior_list)
@@ -591,6 +592,8 @@ def mcmc_quick(changing_parameter,elements,preload):
 	if a.send_email:
 		send_email(nthreads, i, np.mean(posterior, axis = 0)[0], np.mean(posterior, axis = 0)[-1], a, elapsed1)
 
+	sampler.reset()
+	
 def single_star_optimization():
 	'''
 	This function will optimize the parameters of a single zone quickly
