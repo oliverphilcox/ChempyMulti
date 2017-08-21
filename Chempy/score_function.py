@@ -10,7 +10,6 @@ def Hogg_score():
 	import importlib
 	import fileinput
 	import sys   
-	import os
 	import multiprocessing as mp
 	import tqdm
 	from Chempy.wrapper import single_star_optimization
@@ -362,5 +361,73 @@ def Hogg_wrapper():
 				score=Hogg_score_list)
 				
 	return beta_params,Hogg_score_list
+
+def Hogg_bash(beta_index):
+	"""
+	This is for a specific beta value only
 	
+	This function calculates the Hogg score as a function of the beta-function parameter (defined in parameter.py)
+	It is not currently parallelized (parallelization is done in MCMC already and for element predictions).
+	"""
+	import time
+	import fileinput
+	import sys
+	from .parameter import ModelParameters
+	from .score_function import Hogg_score
+	beta_index = int(beta_index)
+	print(beta_index)
+
+	a = ModelParameters()
+	beta_params = a.list_of_beta_params[beta_index]
+	Hogg_score_list = []
+	init_time = time.time()
+	
+	#print("Calculating value %d of %d after %.3f seconds" %(i+1,len(beta_params),time.time()-init_time))
+	# Modify beta value
+	for line in fileinput.input("Chempy/parameter.py", inplace=True):
+		if "\tbeta_param" in line:
+			print("\tbeta_param = %.5f" %beta_params)
+		else:
+			print(line,end='')
+	fileinput.close()		
+	# Reimport model parameters for new beta 
+	del sys.modules['Chempy.parameter']
+	del sys.modules['Chempy.score_function']
+	from Chempy.score_function import preload_params_mcmc
+	from Chempy.parameter import ModelParameters
+	a = ModelParameters()
+	
+	# Calculate Bayes score
+	score = Hogg_score()
+	#Hogg_score_list.append(score)
+	np.savez('Scores/Hogg'+str(beta_index)+'.npz',beta_param=beta_params,score=score)
+	
+	# Save output as npz array
+	#np.savez("Scores/Hogg_score - "+str(a.yield_table_name_sn2)+", "+str(a.yield_table_name_agb)+", "+str(a.yield_table_name_1a)+".npz",
+	#			beta_param=beta_params,
+	#			score=Hogg_score_list)
+				
+	return beta_params,score
+	
+def Hogg_stitch:
+	"""
+	Function to load all Hogg predictions and combine into one file
+	"""
+	from .score_function import preload_params_mcmc
+	preload = preload_params_mcmc()
+	from .parameter import ModelParameters
+	a = ModelParameters()
+	beta = []
+	score = []
+	for i range(len(a.list_of_beta_params)):
+		temp=np.load('Scores/Hogg'+str(i)+'.npz')
+		beta.append(temp['beta_param'])
+		score.append(temp['score'])
+		temp.close()
+	np.savez("Scores/Hogg_score - "+str(a.yield_table_name_sn2)+", "+str(a.yield_table_name_agb)+", "+str(a.yield_table_name_1a)+".npz",
+				beta_param=beta,
+				score=score)
+		
+	return beta_param,score
+
 	
