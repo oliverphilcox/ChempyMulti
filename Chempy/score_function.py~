@@ -102,7 +102,7 @@ def Hogg_score():
 		import psutil
 
 		for proc in psutil.process_iter():
-    		print(proc.open_files())			
+			print(proc.open_files())			
 		
 		abundance = np.array(abundance)
 		mean,sigma = norm.fit(abundance)
