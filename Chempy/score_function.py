@@ -428,6 +428,6 @@ def Hogg_stitch():
 				beta_param=beta,
 				score=score)
 		
-	return beta_param,score
+	return beta,score
 
 	
