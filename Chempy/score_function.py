@@ -95,7 +95,7 @@ def Hogg_score():
 		# Multiprocess and calculate elemental predictions for each parameter set
 
 		from .score_function import element_predictor
-		p = mp.Pool()
+		p = mp.Pool(64)
 		indices = np.ones(len(positions))*index
 		abundance = list(tqdm.tqdm(p.imap_unordered(element_predictor,zip(positions,indices)),total=len(positions)))
 		p.close()
