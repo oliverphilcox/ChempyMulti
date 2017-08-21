@@ -39,8 +39,8 @@ def Hogg_score():
 	preload = preload_params_mcmc()
 	elements_init = np.copy(preload.elements)
 	np.save('Scores/Hogg_elements.npy',elements_init)
-     
-   with mp.Pool() as p:   	
+	
+	with mp.Pool() as p:   	
 		# Create new parameter names
 		newstr = []
 		for i,el in enumerate(elements_init):
