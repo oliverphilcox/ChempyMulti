@@ -96,8 +96,8 @@ def Hogg_score():
 		from .score_function import element_predictor
 		indices = np.ones(len(positions))*index
 		abundance = list(tqdm.tqdm(p.imap_unordered(element_predictor,zip(positions,indices)),total=len(positions)))
-		p.close()
-		p.join()		
+		#p.close()
+		#p.join()		
 			
 		
 		abundance = np.array(abundance)
