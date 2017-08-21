@@ -96,10 +96,13 @@ def Hogg_score():
 		from .score_function import element_predictor
 		p = mp.Pool()		
 		indices = np.ones(len(positions))*index
-		abundance = list(tqdm.tqdm(p.map(element_predictor,zip(positions,indices)),total=len(positions)))
+		abundance = list(tqdm.tqdm(p.imap_unordered(element_predictor,zip(positions,indices)),total=len(positions)))
 		p.close()
 		p.join()	
-					
+		import psutil
+
+		for proc in psutil.process_iter():
+    		print(proc.open_files())			
 		
 		abundance = np.array(abundance)
 		mean,sigma = norm.fit(abundance)
