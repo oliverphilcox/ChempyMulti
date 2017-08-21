@@ -55,6 +55,7 @@ def Hogg_score():
 				print(line,end='') # TO TEST
 			else:
 				print(line,end='')
+		fileinput.close()
 		del sys.modules['Chempy.parameter']
 		from Chempy.parameter import ModelParameters
 		a = ModelParameters()
@@ -79,6 +80,7 @@ def Hogg_score():
 				print(orig)
 			else:
 				print(line,end='')
+		fileinput.close()
 		del sys.modules['Chempy.parameter']
 		from Chempy.parameter import ModelParameters
 		del sys.modules['Chempy.score_function']
@@ -96,6 +98,9 @@ def Hogg_score():
 		p = mp.Pool()
 		indices = np.ones(len(positions))*index
 		abundance = list(tqdm.tqdm(p.imap_unordered(element_predictor,zip(positions,indices)),total=len(positions)))
+		p.close()
+		p.join()		
+			
 		
 		abundance = np.array(abundance)
 		mean,sigma = norm.fit(abundance)
@@ -123,7 +128,7 @@ def Hogg_score():
 		likelihood_factor = norm.pdf(mean,loc=preload.star_abundance_list[index],scale=total_err)
 		overall_score *= likelihood_factor
 		factors.append(likelihood_factor)
-		print("Likelihood contribution from %dth element is %.8f" %(index,likelihood_factor))
+		print("Likelihood contribution from %dth element is %.8f" %(index+1,likelihood_factor))
 		print(overall_score)
 	
 	np.savez('Scores/Hogg_beta_elements'+str(a.beta_param)+'.npz',
@@ -294,7 +299,7 @@ def Bayes_wrapper():
 				print("\tbeta_param = %.5f" %beta_params[i])
 			else:
 				print(line,end='')
-				
+		fileinput.close()		
 		# Reimport model parameters for new beta 
 		del sys.modules['Chempy.parameter']
 		del sys.modules['Chempy.score_function']
