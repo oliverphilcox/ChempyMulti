@@ -19,7 +19,7 @@ def Hogg_score():
 	from scipy.stats import norm
 	from .score_function import preload_params_mcmc
 	import matplotlib.pyplot as plt
-	p = mp.Pool()
+	#p = mp.Pool()
 	 
 	## Code to rewrite parameter file for each element in turn, so as to run MCMC for 21/22 elements only
 	# This is definitely not a good implementation (involves rewriting entire parameter file),
@@ -94,11 +94,12 @@ def Hogg_score():
 		# Multiprocess and calculate elemental predictions for each parameter set
 
 		from .score_function import element_predictor
+		p = mp.Pool()		
 		indices = np.ones(len(positions))*index
 		abundance = list(tqdm.tqdm(p.imap_unordered(element_predictor,zip(positions,indices)),total=len(positions)))
 		#p.close()
-		#p.join()		
-			
+		#p.join()	
+		p.terminate()			
 		
 		abundance = np.array(abundance)
 		mean,sigma = norm.fit(abundance)
