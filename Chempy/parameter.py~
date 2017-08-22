@@ -111,7 +111,7 @@ class ModelParameters(object):
 		infall_scale = 3.3
 
 	yield_table_name_sn2_list = ['chieffi04','Nugrid','Nomoto2013','Portinari', 'chieffi04_net', 'Nomoto2013_net']
-	yield_table_name_sn2_index = 2
+	yield_table_name_sn2_index = 5
 	yield_table_name_sn2 = yield_table_name_sn2_list[yield_table_name_sn2_index]
 
 	yield_table_name_hn_list = ['Nomoto2013']
@@ -235,7 +235,7 @@ class ModelParameters(object):
 	# 28 elements	
 	element_names = ['He', 'C', 'N', 'O', 'F','Ne','Na', 'Mg', 'Al', 'Si', 'P','S', 'Cl','Ar','K', 'Ca','Sc','Ti', 'V', 'Cr', 'Mn', 'Fe', 'Co', 'Ni','Cu','Zn','Ga','Ge']#, 'Zn','Y', 'Ba']# Runs with sun
 	
-	elements_to_trace = ['Al', 'Ar', 'B', 'Be', 'C', 'Ca', 'Cl', 'Co', 'Cr', 'Cu', 'F', 'Fe', 'Ga', 'Ge', 'H', 'He', 'K', 'Li', 'Mg', 'Mn', 'N', 'Na', 'Ne', 'Ni', 'O', 'P', 'S', 'Sc', 'Si', 'Ti', 'V', 'Zn']
+	elements_to_trace = ['Al', 'B', 'Be', 'C', 'Ca', 'Cl', 'Co', 'Cr', 'Cu', 'F', 'Fe', 'Ga', 'Ge', 'H', 'He', 'K', 'Li', 'Mg', 'Mn', 'N', 'Na', 'Ne', 'Ni', 'O', 'P', 'S', 'Sc', 'Si', 'Ti', 'V', 'Zn']
 
 	#observational_constraints_index = ['sol_norm']#['gas_reservoir','sn_ratio','sol_norm']#,'wildcard ','cas','arcturus','stars_at_end', 'plot_processes', 'save_abundances', 'elements']
 	arcturus_age = 7.1# 7.1 +1.5 -1.2
@@ -331,7 +331,7 @@ class ModelParameters(object):
 	
 	## Neural network parameters
 	
-	training_size = 7 # no. values per parameter in training set
+	training_size = 10 # no. values per parameter in training set
 	#training_widths = [0.6,0.3,0.3,0.2,0.2] # Initial gaussian widths for training set
 	training_widths = [0.6,0.6,0.6,0.2,0.2] # 2 sigma widths
 	verif_test_sizes = [10000,10000] # Size of array for [verification, test] datasets
@@ -360,6 +360,6 @@ class ModelParameters(object):
 	# mcimport Integration parameters:	
 	int_samples = 10000 # Number of samples for MC integration
 	
-	list_of_beta_params = [1.,2.]#np.logspace(0,3,20) # List of beta function parameters used to calculate the score.	
+	list_of_beta_params = np.logspace(0,3,20) # List of beta function parameters used to calculate the score.	
 	
 	plot_hist = False # controls whether to plot histogram of predicted element abundances using Hogg's method

@@ -15,6 +15,7 @@ def Hogg_score():
 	from Chempy.wrapper import single_star_optimization
 	from Chempy.plot_mcmc import restructure_chain
 	from Chempy.cem_function import posterior_function_mcmc_quick
+	from Chempy.parameter import ModelParameters
 	from scipy.stats import norm
 	from .score_function import preload_params_mcmc
 	import matplotlib.pyplot as plt
@@ -31,26 +32,29 @@ def Hogg_score():
 	factors = []
 	
 	# Starting elements (copied from original parameter file)
-	elements_to_trace = ['Al', 'Ar', 'B', 'Be', 'C', 'Ca', 'Cl', 'Co', 'Cr', 'Cu', 'F', 'Fe', 'Ga', 'Ge', 'H', 'He', 'K', 'Li', 'Mg', 'Mn', 'N', 'Na', 'Ne', 'Ni', 'O', 'P', 'S', 'Sc', 'Si', 'Ti', 'V', 'Zn']
-	orig = "\telements_to_trace = "+str(elements_to_trace) # Original element string
+	b = ModelParameters()
+	starting_el = b.elements_to_trace
+	orig = "\telements_to_trace = "+str(starting_el) # Original element string
+	#print(starting_el)
 
 	# Calculate required Chempy elements
 	preload = preload_params_mcmc()
 	elements_init = np.copy(preload.elements)
 	np.save('Scores/Hogg_elements.npy',elements_init)
-     
+	#print(elements_init) 
+   
 	# Create new parameter names
 	newstr = []
 	for i,el in enumerate(elements_init):
 		if el !='Zn':
 			newstr.append(orig.replace("'"+str(el)+"', ",""))
 		else:
-			newstr.append(orig.replace("'"+str(el)+"', ",""))
+			newstr.append(orig.replace("'"+str(el)+"'",""))
 	for index in range(len(elements_init)): # Iterate over removed element
 		for line in fileinput.input("Chempy/parameter.py", inplace=True):
 			if "\telements_to_trace" in line:
-				#print(newstr[index])
-				print(line,end='') # TO TEST
+				print(newstr[index])
+				#print(line,end='') # TO TEST
 			else:
 				print(line,end='')
 		fileinput.close()
@@ -70,6 +74,7 @@ def Hogg_score():
 		# Create the posterior PDF and load it 
 		restructure_chain('mcmc/')
 		positions = np.load('mcmc/posteriorPDF.npy') # Posterior parameter PDF
+		#print(a.elements_to_trace)
 		
 		##############
 		
@@ -106,7 +111,7 @@ def Hogg_score():
 		
 		element_mean.append(mean)
 		element_sigma.append(sigma)
-		#a.plot_hist=True
+		a.plot_hist=True
 		if a.plot_hist == True:
 			plt.clf()
 			plt.hist(abundance, bins=40, normed=True, alpha=0.6, color='g')
@@ -128,7 +133,7 @@ def Hogg_score():
 		print("Likelihood contribution from %dth element is %.8f with beta param %.4f" %(index+1,likelihood_factor,a.beta_param))
 		print(overall_score)
 		sys.stdout.flush()
-
+		#print(starting_el)
 	np.savez('Scores/Hogg_beta_elements'+str(a.beta_param)+'.npz',
 				elements=elements_init,
 				likelihood_factors=factors,
@@ -429,5 +434,141 @@ def Hogg_stitch():
 				score=score)
 		
 	return beta,score
+	
+
+def Hogg_median():
+	"""
+	This computes the median and percentile values for the sigma elements using cross-validation for each element in turn.
+	One value of the beta parameter is used - this is from the parameter file.
+	"""
+	from Chempy.parameter import ModelParameters
+	import importlib
+	import fileinput
+	import sys   
+	import multiprocessing as mp
+	import tqdm
+	from Chempy.wrapper import single_star_optimization
+	from Chempy.plot_mcmc import restructure_chain
+	from Chempy.cem_function import posterior_function_mcmc_quick
+	from scipy.stats import norm
+	from .score_function import preload_params_mcmc
+	import matplotlib.pyplot as plt
+	 
+	## Code to rewrite parameter file for each element in turn, so as to run MCMC for 21/22 elements only
+	# This is definitely not a good implementation (involves rewriting entire parameter file),
+	# But other steps are far slower
+	
+	# Initialise arrays
+	element_mean = []
+	element_sigma = []
+	overall_score = 1.
+	factors = []
+	
+	# Starting elements (copied from original parameter file)
+	elements_to_trace = ['Al', 'Ar', 'B', 'Be', 'C', 'Ca', 'Cl', 'Co', 'Cr', 'Cu', 'F', 'Fe', 'Ga', 'Ge', 'H', 'He', 'K', 'Li', 'Mg', 'Mn', 'N', 'Na', 'Ne', 'Ni', 'O', 'P', 'S', 'Sc', 'Si', 'Ti', 'V', 'Zn']
+	orig = "\telements_to_trace = "+str(elements_to_trace) # Original element string
+
+	# Calculate required Chempy elements
+	preload = preload_params_mcmc()
+	elements_init = np.copy(preload.elements)
+	np.save('Scores/Hogg_elements.npy',elements_init)
+     
+	# Create new parameter names
+	newstr = []
+	for i,el in enumerate(elements_init):
+		if el !='Zn':
+			newstr.append(orig.replace("'"+str(el)+"', ",""))
+		else:
+			newstr.append(orig.replace("'"+str(el)+"', ",""))
+	for index in range(len(elements_init)): # Iterate over removed element
+		for line in fileinput.input("Chempy/parameter.py", inplace=True):
+			if "\telements_to_trace" in line:
+				#print(newstr[index])
+				print(line,end='') # TO TEST
+			else:
+				print(line,end='')
+		fileinput.close()
+		del sys.modules['Chempy.parameter']
+		from Chempy.parameter import ModelParameters
+		a = ModelParameters()
+		del sys.modules['Chempy.score_function']
+		from .score_function import preload_params_mcmc 
+		preload = preload_params_mcmc()
+		##############
+		
+		# Run MCMC with 27/28 elements. 
+		print('Running MCMC iteration %d of %d' %(index+1,len(elements_init)))
+		#print(a.elements_to_trace)
+		single_star_optimization()
+		
+		# Create the posterior PDF and load it 
+		restructure_chain('mcmc/')
+		positions = np.load('mcmc/posteriorPDF.npy') # Posterior parameter PDF
+		
+		##############
+		
+		for line in fileinput.input("Chempy/parameter.py", inplace=True):
+			if "\telements_to_trace" in line:
+				print(orig)
+			else:
+				print(line,end='')
+		fileinput.close()
+		del sys.modules['Chempy.parameter']
+		from Chempy.parameter import ModelParameters
+		del sys.modules['Chempy.score_function']
+		from .score_function import preload_params_mcmc 
+		a = ModelParameters()
+		preload = preload_params_mcmc()
+		
+		##############
+		
+		# This uses all 28 elements again for predictions
+				
+		# Multiprocess and calculate elemental predictions for each parameter set
+
+		from .score_function import element_predictor
+		p = mp.Pool()		
+		indices = np.ones(len(positions))*index
+		abundance = list(tqdm.tqdm(p.imap_unordered(element_predictor,zip(positions,indices)),total=len(positions)))
+		p.close()
+		p.join()	
+		
+		abundance = np.array(abundance)
+		mean,sigma = norm.fit(abundance)
+		print(mean)
+		print(sigma)
+		
+		element_mean.append(mean)
+		element_sigma.append(sigma)
+		#a.plot_hist=True
+		if a.plot_hist == True:
+			plt.clf()
+			plt.hist(abundance, bins=40, normed=True, alpha=0.6, color='g')
+			#abundance = np.array(abundance) # Unmask array
+			# Plot the PDF.
+			xmin, xmax = plt.xlim()
+			x = np.linspace(xmin, xmax, 100)
+			p = norm.pdf(x, mean, sigma)
+			plt.plot(x, p, c='k', linewidth=2)
+			title = 'Plot of element %d abundance' %(index)
+			plt.title(title)
+			plt.xlabel('[X/Fe] abundance')
+			plt.ylabel('Relative frequency')
+		
+		total_err = np.sqrt((preload.star_error_list[index])**2 + sigma**2)
+		likelihood_factor = norm.pdf(mean,loc=preload.star_abundance_list[index],scale=total_err)
+		overall_score *= likelihood_factor
+		factors.append(likelihood_factor)
+		print("Likelihood contribution from %dth element is %.8f with beta param %.4f" %(index+1,likelihood_factor,a.beta_param))
+		print(overall_score)
+		sys.stdout.flush()
+
+	np.savez('Scores/Hogg_beta_elements'+str(a.beta_param)+'.npz',
+				elements=elements_init,
+				likelihood_factors=factors,
+				element_mean = element_mean,
+				element_sigma = element_sigma)	
+	return overall_score
+
 
 	

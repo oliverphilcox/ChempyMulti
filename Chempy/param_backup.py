@@ -111,7 +111,7 @@ class ModelParameters(object):
 		infall_scale = 3.3
 
 	yield_table_name_sn2_list = ['chieffi04','Nugrid','Nomoto2013','Portinari', 'chieffi04_net', 'Nomoto2013_net']
-	yield_table_name_sn2_index = 2
+	yield_table_name_sn2_index = 5
 	yield_table_name_sn2 = yield_table_name_sn2_list[yield_table_name_sn2_index]
 
 	yield_table_name_hn_list = ['Nomoto2013']
@@ -331,7 +331,7 @@ class ModelParameters(object):
 	
 	## Neural network parameters
 	
-	training_size = 7 # no. values per parameter in training set
+	training_size = 10 # no. values per parameter in training set
 	#training_widths = [0.6,0.3,0.3,0.2,0.2] # Initial gaussian widths for training set
 	training_widths = [0.6,0.6,0.6,0.2,0.2] # 2 sigma widths
 	verif_test_sizes = [10000,10000] # Size of array for [verification, test] datasets
