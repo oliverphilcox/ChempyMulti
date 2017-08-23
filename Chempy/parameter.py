@@ -44,7 +44,7 @@ class ModelParameters(object):
 	m = 1000 # For 7 free parameters 300 iterations are usually enough. The mcmc routine is stopping after 300 if the posterior mean is converged for more than 200 iterations.
 	error_marginalization = True # Marginalizing over the model error or using the best model error value
 	flat_model_error_prior = [0.,1.,51] # Flat prior for the error marginalization [begin, end, number of evaluations inbetween]
-	beta_param = 233.57215
+	beta_param = 78.47600
 	# This is the rescalable beta parameter controlling model error (default is 10)
 	beta_error_distribution = [True, 1, beta_param] # Instead of a flat prior for the error marginalization we use a beta distribution with a = 1 and b = 3 as default (wikipedia and scipy have the same parametrization) putting more weight to small model errors
 	zero_model_error = False # a boolean that can be used to restore the old Chempy behaviour of 0 model error, will only work if error_marginalization is set to False
@@ -120,7 +120,7 @@ class ModelParameters(object):
 
 	##### Karakas2016 needs much more calculational resources (order of magnitude) using 2010 net yields from Karakas are faster and only N is significantly underproduced
 	yield_table_name_agb_list = ['Karakas','Nugrid','Karakas_net_yield','Ventura','Karakas16_net']
-	yield_table_name_agb_index = 2
+	yield_table_name_agb_index = 3
 	yield_table_name_agb = yield_table_name_agb_list[yield_table_name_agb_index]
 
 	yield_table_name_1a_list = ['Iwamoto','Thielemann','Seitenzahl']

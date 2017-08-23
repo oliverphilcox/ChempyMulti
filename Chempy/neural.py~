@@ -212,7 +212,7 @@ def create_network(learning_rate=a.learning_rate,Plot=True):
 		if i % 3 ==0:
 			losslog.append(loss.data[0])
 			epoch.append(i)
-		if i % 1000==0:
+		if i % 100==0:
 			print("Training epoch %d of %d complete" %(i,a.epochs))
 
 	# Convert weights to numpy arrays

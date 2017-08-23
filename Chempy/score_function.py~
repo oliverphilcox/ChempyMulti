@@ -518,8 +518,8 @@ def Hogg_median():
 		tmp_up = np.zeros(len(a.p0))
 		for j in range(len(a.p0)):
 			tmp_med[j]=np.median(positions[:,j])
-			tmp_up[j]] = np.percentile(positions[:,j],100-15.865)
-			tmp_low[j]] = np.percentile(positions[:,j],15.865)
+			tmp_up[j] = np.percentile(positions[:,j],100-15.865)
+			tmp_low[j] = np.percentile(positions[:,j],15.865)
 		posterior_med.append(tmp_med)
 		posterior_up.append(tmp_up)
 		posterior_low.append(tmp_low)

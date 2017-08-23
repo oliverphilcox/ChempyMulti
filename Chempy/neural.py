@@ -340,7 +340,7 @@ def neural_corner_plot(dataset):
           }
 	plt.rcParams.update(params)
 	parameter_names = [r'$\alpha_\mathrm{IMF}$',r'$\log_{10}(\mathrm{N_{Ia}})$',
-                   r'$\log_{10}(\tau_\mathrm{Ia})$',r'$\log_{10}(\mathrm{SFE})$',
+                   r'$\log_{10}(\mathrm{SFE})$',
                    r'$\log_{10}(\mathrm{SFR_{peak}})$',r'x_{out}']
 
 

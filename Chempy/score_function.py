@@ -479,7 +479,6 @@ def Hogg_median():
 	# Calculate required Chempy elements
 	preload = preload_params_mcmc()
 	elements_init = np.copy(preload.elements)
-	#np.save('Scores/Hogg_elements.npy',elements_init)
 	#print(elements_init) 
    
 	# Create new parameter names
