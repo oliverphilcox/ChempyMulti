@@ -44,7 +44,7 @@ class ModelParameters(object):
 	m = 1000 # For 7 free parameters 300 iterations are usually enough. The mcmc routine is stopping after 300 if the posterior mean is converged for more than 200 iterations.
 	error_marginalization = True # Marginalizing over the model error or using the best model error value
 	flat_model_error_prior = [0.,1.,51] # Flat prior for the error marginalization [begin, end, number of evaluations inbetween]
-	beta_param = 78.47600
+	beta_param = 1000.00000
 	# This is the rescalable beta parameter controlling model error (default is 10)
 	beta_error_distribution = [True, 1, beta_param] # Instead of a flat prior for the error marginalization we use a beta distribution with a = 1 and b = 3 as default (wikipedia and scipy have the same parametrization) putting more weight to small model errors
 	zero_model_error = False # a boolean that can be used to restore the old Chempy behaviour of 0 model error, will only work if error_marginalization is set to False
@@ -336,7 +336,7 @@ class ModelParameters(object):
 	training_widths = [0.6,0.6,0.6,0.2,0.2] # 2 sigma widths
 	verif_test_sizes = [10000,10000] # Size of array for [verification, test] datasets
 	#test_widths = [0.3,0.3,0.3,0.1,0.1] # Original prior widths for testing/verification
-	test_widths = [0.9,0.9,0.9,0.3,0.3] # Test widths	
+	#test_widths = [0.9,0.9,0.9,0.3,0.3] # Test widths	
 	
 	neurons = 30 # 20# Number of neurons in layer
 	learning_rate = 0.007  # Default Adam neural network learning rate
@@ -356,6 +356,8 @@ class ModelParameters(object):
 	UseNeural = True # This defines whether to use trained network in place of Chempy
 	
 	test_size = 3000 # Number of elements in test set
+	
+	test_widths = [1.0,2.0,3.0,4.0,4.3]
 	
 	# mcimport Integration parameters:	
 	int_samples = 10000 # Number of samples for MC integration

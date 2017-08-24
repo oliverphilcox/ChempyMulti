@@ -105,7 +105,10 @@ def training_data():
 	return None
 
 def verification_and_testing():
-	""" This will create the verification and testing data-sets for use with the neural network.
+	""" 
+	****THIS IS NO LONGER USED****
+		
+	This will create the verification and testing data-sets for use with the neural network.
 	The data-sets are created randomly from the Gaussian prior distribution, within the bounds set in the parameter file
 
 	Outputs (saved as .npy files in the Neural/ folder):
@@ -577,8 +580,8 @@ def test_dataset(width):
 		param_grid.append(list(param))
 		abundance_grid.append(list(pred))
        
-	np.save('SingleElement/'+str(width)+'_sigma_param_grid.npy',param_grid)
-	np.save('SingleElement/'+str(width)+'_sigma_abundances.npy',abundance_grid)
+	np.save('Neural/'+str(width)+'_sigma_param_grid.npy',param_grid)
+	np.save('Neural/'+str(width)+'_sigma_abundances.npy',abundance_grid)
 
 	return None	
     
@@ -588,3 +591,20 @@ def create_dataset(params):
 	norm_params = (params-a.p0)/a.training_widths
 	return params,norm_params,abundances
 
+def test_set_wrapper():
+	"""
+	Wrapper function to compute test datasets of fixed widths using multiprocessing.
+	Widths are defined in the parameter file.
+	Ouputs are in Neural/ folder
+	"""
+	from .parameter import ModelParameters
+	import multiprocessing as mp
+	from .neural import test_dataset
+	a = ModelParameters()
+	widths = a.test_sigma_widths
+	
+	p = mp.Pool() # Do all 5 in parallel
+	p.imap_unordered(test_dataset,widths)
+	
+	return None
+	
