@@ -233,7 +233,7 @@ class ModelParameters(object):
 	#element_names = ['He','C', 'N', 'O', 'F','Ne','Na', 'Mg', 'Al', 'Si', 'P','S', 'Ar','K', 'Ca','Ti', 'V', 'Cr', 'Mn', 'Fe', 'Co', 'Ni']#, 'Zn','Y', 'Ba']# Runs with sun
 
 	# 28 elements	
-	element_names = ['He', 'C', 'N', 'O', 'F','Ne','Na', 'Mg', 'Al', 'Si', 'P','S', 'Cl','Ar','K', 'Ca','Sc','Ti', 'V', 'Cr', 'Mn', 'Fe', 'Co', 'Ni','Cu','Zn','Ga','Ge']#, 'Zn','Y', 'Ba']# Runs with sun
+	element_names = ['He', 'C', 'N', 'O', 'F','Ne','Na', 'Mg', 'Al', 'Si', 'P','S', 'Cl', 'Ar', 'K', 'Ca', 'Sc', 'Ti', 'V', 'Cr', 'Mn', 'Fe', 'Co', 'Ni','Cu','Zn','Ga','Ge']#, 'Zn','Y', 'Ba']# Runs with sun
 	
 	elements_to_trace = ['Al', 'Ar', 'B', 'Be', 'C', 'Ca', 'Cl', 'Co', 'Cr', 'Cu', 'F', 'Fe', 'Ga', 'Ge', 'H', 'He', 'K', 'Li', 'Mg', 'Mn', 'N', 'Na', 'Ne', 'Ni', 'O', 'P', 'S', 'Si', 'Ti', 'V', 'Zn']
 
@@ -343,7 +343,6 @@ class ModelParameters(object):
 	
 	epochs = 1000 # Number of epochs used in testing
 	
-	# Create list of elements calculated by neural network
 	# (These are common elements between proto-sun and Chempy traced elements)
 	sol_dat=np.load('Chempy/input/stars/'+stellar_identifier+'.npy')	
 	neural_names = []
@@ -351,7 +350,7 @@ class ModelParameters(object):
 		if item in list(sol_dat.dtype.names):
 			neural_names.append(item)
 
-	color_max = 0.04 # Maximum color in error plots	
+	color_max = 0.02 # Maximum color in error plots	
 	
 	UseNeural = True # This defines whether to use trained network in place of Chempy
 	
@@ -365,3 +364,11 @@ class ModelParameters(object):
 	list_of_beta_params = np.logspace(0,3,20) # List of beta function parameters used to calculate the score.	
 	
 	plot_hist = False # controls whether to plot histogram of predicted element abundances using Hogg's method
+	
+	## THIS IS FULL LIST OF NAMES THAT DOES NOT CHANGE IN HOGG SCORING. CHANGE THIS WHEN CHANGING TOTAL NUMBER OF ELEMENTS
+	#full_names = ['Al', 'Ar', 'B', 'Be', 'C', 'Ca', 'Cl', 'Co', 'Cr', 'Cu', 'F', 'Fe', 'Ga', 'Ge', 'H', 'He', 'K', 'Li', 'Mg', 'Mn', 'N', 'Na', 'Ne', 'Ni', 'O', 'P', 'S', 'Sc', 'Si', 'Ti', 'V', 'Zn']
+	# List of all names initially output by neural network
+	initial_neural_names = ['Al', 'Ar', 'C', 'Ca', 'Cl', 'Co', 'Cr', 'Cu', 'F', 'Fe', 'Ga', 'Ge', 'He', 'K', 'Mg', 'Mn', 'N', 'Na', 'Ne', 'Ni', 'O', 'P', 'S', 'Sc', 'Si', 'Ti', 'V', 'Zn']
+
+	
+	

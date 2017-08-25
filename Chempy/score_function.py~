@@ -159,7 +159,7 @@ class preload_params_mcmc():
 	from scipy.stats import beta
 	a = ModelParameters()
 
-	elements_to_trace = list(a.elements_to_trace)
+	elements_to_trace = list(a.full_names)
 	elements_to_trace.append('Zcorona')
 	elements_to_trace.append('SNratio')
 	

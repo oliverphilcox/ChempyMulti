@@ -269,7 +269,13 @@ def neural_output(test_input):
 	hidden1 = np.tanh(np.array(np.dot(w_array_0,norm_data)+b_array_0))
 	output = np.dot(w_array_1, hidden1)+b_array_1
 
-	return output
+	# Return only those elements required - i.e. NOT the missing Hogg elements
+	corrected_output = []
+	for i in range(len(output)):
+		if a.initial_neural_names[i] in a.neural_names:
+			corrected_output.append(output[i])
+
+	return np.array(corrected_output)
 
 def neural_errors(dataset):
 	""" Calculate median absolute error between Chempy and neural network for each set of parameters.
@@ -545,8 +551,14 @@ def neural_output_int(test_input,a,b):
 	# Calculate neural network output
 	hidden1 = np.tanh(np.array(np.dot(b.w_array_0,norm_data)+b.b_array_0))
 	output = np.dot(b.w_array_1, hidden1)+b.b_array_1
+	
+	# Return only those elements required - i.e. NOT the missing Hogg elements
+	corrected_output = []
+	for i in range(len(output)):
+		if a.initial_neural_names[i] in a.neural_names:
+			corrected_output.append(output[i])
 
-	return output
+	return corrected_output
 	
 
 def test_dataset(width):
