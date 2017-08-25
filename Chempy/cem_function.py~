@@ -1092,11 +1092,11 @@ def cem_real2_int(a,b):
 	j=0 # This indexes neural_abundances for ordering
 	for i,name in enumerate(b.elements_to_trace):
 		if name in a.all_neural_names:
-			j+=1
 			if name in a.names_used:
 				abundance_list[i] = neural_abundances[j] # Required elements for later
 			else:
-				abundance_list[i] = 0		
+				abundance_list[i] = 0
+			j+=1
 		else:
 			abundance_list[i] = 0 # All unwanted elements set to arbitrary value
 

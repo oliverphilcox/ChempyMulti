@@ -1091,12 +1091,9 @@ def cem_real2_int(a,b):
 	abundance_list=np.zeros(len(b.elements_to_trace))
 	j=0 # This indexes neural_abundances for ordering
 	for i,name in enumerate(b.elements_to_trace):
-		if name in a.all_neural_names:
-			if name in a.names_used:
-				abundance_list[i] = neural_abundances[j] # Required elements for later
-			else:
-				abundance_list[i] = 0
-			j+=1
+		if name in a.neural_names:
+			abundance_list[i] = neural_abundances[j] # Required elements for later
+			j = j+1
 		else:
 			abundance_list[i] = 0 # All unwanted elements set to arbitrary value
 
@@ -1211,7 +1208,7 @@ def posterior_function_mcmc_quick(changing_parameter,error_element_list,preload)
 	#star_abundances = preload.star_abundance_list
 	#model_abundances = predictions_list
 	elements = preload.elements
-	print("Second time in posterior_function_mcmc_quick:",elements)
+	print("Second time in posterior_function_mcmc_quick:",elements))
 
 	## given model error from error_list is read out and brought into the same element order (compatibility between python 2 and 3 makes the decode method necessary)
 	
