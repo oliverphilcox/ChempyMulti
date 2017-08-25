@@ -15,7 +15,6 @@ def Hogg_score():
 	from Chempy.wrapper import single_star_optimization
 	from Chempy.plot_mcmc import restructure_chain
 	from Chempy.cem_function import posterior_function_mcmc_quick
-	from Chempy.parameter import ModelParameters
 	from scipy.stats import norm
 	from .score_function import preload_params_mcmc
 	import matplotlib.pyplot as plt
@@ -59,10 +58,10 @@ def Hogg_score():
 				print(line,end='')
 		fileinput.close()
 		del sys.modules['Chempy.parameter']
-		from Chempy.parameter import ModelParameters
-		a = ModelParameters()
 		del sys.modules['Chempy.score_function']
+		from Chempy.parameter import ModelParameters
 		from .score_function import preload_params_mcmc 
+		a = ModelParameters()
 		preload = preload_params_mcmc()
 		##############
 		
@@ -74,7 +73,7 @@ def Hogg_score():
 		# Create the posterior PDF and load it 
 		restructure_chain('mcmc/')
 		positions = np.load('mcmc/posteriorPDF.npy') # Posterior parameter PDF
-		#print(a.elements_to_trace)
+		print("In Hogg_score, element list is",a.elements_to_trace)
 		
 		##############
 		
@@ -85,12 +84,11 @@ def Hogg_score():
 				print(line,end='')
 		fileinput.close()
 		del sys.modules['Chempy.parameter']
-		from Chempy.parameter import ModelParameters
 		del sys.modules['Chempy.score_function']
+		from Chempy.parameter import ModelParameters
 		from .score_function import preload_params_mcmc 
 		a = ModelParameters()
-		preload = preload_params_mcmc()
-		
+		preload = preload_params_mcmc()	
 		##############
 		
 		# This uses all 28 elements again for predictions
@@ -399,9 +397,10 @@ def Hogg_bash(beta_index):
 	# Reimport model parameters for new beta 
 	del sys.modules['Chempy.parameter']
 	del sys.modules['Chempy.score_function']
-	from Chempy.score_function import preload_params_mcmc
 	from Chempy.parameter import ModelParameters
+	from Chempy.score_function import preload_params_mcmc
 	a = ModelParameters()
+	preload = preload_params_mcmc()
 	
 	# Calculate Bayes score
 	score = Hogg_score()
