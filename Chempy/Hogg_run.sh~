@@ -1,5 +1,5 @@
 #!/bin/bash
-for INDEX in {0..1}
+for INDEX in {0..19}
 do
 	echo "Running python for beta index $INDEX"
 	python Chempy/Hogg_trial.py $INDEX

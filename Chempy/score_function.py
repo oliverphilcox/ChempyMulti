@@ -73,7 +73,7 @@ def Hogg_score():
 		# Create the posterior PDF and load it 
 		restructure_chain('mcmc/')
 		positions = np.load('mcmc/posteriorPDF.npy') # Posterior parameter PDF
-		print("In Hogg_score, element list is",a.elements_to_trace)
+		#print("In Hogg_score, element list is",a.elements_to_trace)
 		
 		##############
 		

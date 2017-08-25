@@ -1,0 +1,5 @@
+%pylab inline
+from Chempy.parameter import ModelParameters
+a = ModelParameters()
+from Chempy.score_function import preload_params_mcmc
+preload = preload_params_mcmc()
