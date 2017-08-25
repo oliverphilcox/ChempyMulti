@@ -1208,7 +1208,7 @@ def posterior_function_mcmc_quick(changing_parameter,error_element_list,preload)
 	#star_abundances = preload.star_abundance_list
 	#model_abundances = predictions_list
 	elements = preload.elements
-	print("Second time in posterior_function_mcmc_quick:",elements))
+	print("Second time in posterior_function_mcmc_quick:",elements)
 
 	## given model error from error_list is read out and brought into the same element order (compatibility between python 2 and 3 makes the decode method necessary)
 	

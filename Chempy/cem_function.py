@@ -1191,7 +1191,7 @@ def posterior_function_mcmc_quick(changing_parameter,error_element_list,preload)
 	# Here the predictions and observations are brought into the same array form in order to perform the likelihood calculation fast
 	#elements = preload.elements
 	elements = np.unique(np.hstack(elements_list))
-	print("Elements in posterior_function_mcmc_quick are",elements)
+	#print("Elements in posterior_function_mcmc_quick are",elements)
 	# Masking the elements that are not given for specific stars and preparing the likelihood input
 	#star_errors = ma.array(np.zeros((len(elements),len(a.stellar_identifier_list))), mask = True)
 	star_abundances = ma.array(np.zeros((len(elements),len(a.stellar_identifier_list))), mask = True)
@@ -1208,7 +1208,7 @@ def posterior_function_mcmc_quick(changing_parameter,error_element_list,preload)
 	#star_abundances = preload.star_abundance_list
 	#model_abundances = predictions_list
 	elements = preload.elements
-	print("Second time in posterior_function_mcmc_quick:",elements)
+	#print("Second time in posterior_function_mcmc_quick:",elements)
 
 	## given model error from error_list is read out and brought into the same element order (compatibility between python 2 and 3 makes the decode method necessary)
 	
