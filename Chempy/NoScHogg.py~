@@ -23,6 +23,7 @@ for line in fileinput.input("Chempy/parameter.py", inplace=True):
 fileinput.close()		
 
 os.system('Chempy/Hogg_run.sh')
+os.system('mkdir BatchScoresNoSc/Default')
 os.system('scp Scores/* BatchScoresNoSc/Default/')
 os.system('rm -rf Scores/')
 os.system('mkdir Scores')
@@ -38,6 +39,12 @@ for line in fileinput.input("Chempy/parameter.py", inplace=True):
 		print("\tyield_table_name_1a_index = 2") 
 	else:
 		print(line,end='')
-fileinput.close()		
+fileinput.close()	
+os.system('Chempy/Hogg_run.sh')
+os.system('mkdir BatchScoresNoSc/Chieffi')
+os.system('scp Scores/* BatchScoresNoSc/Chieffi/')
+os.system('rm -rf Scores/')
+os.system('mkdir Scores')
+	
 
 print('All processes complete. Outputs are in BatchScoresNoSc/ folder')

@@ -21,6 +21,7 @@ for line in fileinput.input("Chempy/parameter.py", inplace=True):
 fileinput.close()		
 
 os.system('Chempy/Hogg_run.sh')
+os.system('mkdir BatchScores/Default')
 os.system('scp Scores/* BatchScores/Default/')
 os.system('rm -rf Scores/')
 os.system('mkdir Scores')
@@ -39,6 +40,7 @@ for line in fileinput.input("Chempy/parameter.py", inplace=True):
 fileinput.close()		
 
 os.system('Chempy/Hogg_run.sh')
+os.system('mkdir BatchScores/Chieffi')
 os.system('scp Scores/* BatchScores/Chieffi/')
 os.system('rm -rf Scores/')
 os.system('mkdir Scores')
@@ -57,6 +59,7 @@ for line in fileinput.input("Chempy/parameter.py", inplace=True):
 fileinput.close()		
 
 os.system('Chempy/Hogg_run.sh')
+os.system('mkdir BatchScores/Ventura')
 os.system('scp Scores/* BatchScores/Ventura/')
 os.system('rm -rf Scores/')
 os.system('mkdir Scores')
@@ -75,6 +78,7 @@ for line in fileinput.input("Chempy/parameter.py", inplace=True):
 fileinput.close()		
 
 os.system('Chempy/Hogg_run.sh')
+os.system('mkdir BatchScores/Thielemann')
 os.system('scp Scores/* BatchScores/Thielemann/')
 os.system('rm -rf Scores/')
 os.system('mkdir Scores')

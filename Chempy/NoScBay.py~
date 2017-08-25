@@ -4,12 +4,12 @@
 import fileinput
 import os 
 import sys
-os.system('rm -rf BatchScoresNoSc/')
-os.system('mkdir BatchScoresNoSc/')
+os.system('rm -rf BatchScoresNoScBay/')
+os.system('mkdir BatchScoresNoScBay/')
 os.system('rm -rf Scores/')
 os.system('mkdir Scores')
 
-print("1: Default Hogg no Sc Score")
+print("1: Default Bay no Sc Score")
 
 for line in fileinput.input("Chempy/parameter.py", inplace=True):
 	if "\tyield_table_name_sn2_index" in line:
@@ -22,9 +22,10 @@ for line in fileinput.input("Chempy/parameter.py", inplace=True):
 		print(line,end='')
 fileinput.close()		
 
-os.system('Chempy/Hogg_run.sh')
-os.system('mkdir BatchScoresNoSc/Default')
-os.system('scp Scores/* BatchScoresNoSc/Default/')
+from Chempy.score_function import Bayes_wrapper
+Bayes_wrapper()
+os.system('mkdir BatchScoresNoScBay/Default')
+os.system('scp Scores/* BatchScoresNoScBay/Default/')
 os.system('rm -rf Scores/')
 os.system('mkdir Scores')
 
@@ -39,12 +40,13 @@ for line in fileinput.input("Chempy/parameter.py", inplace=True):
 		print("\tyield_table_name_1a_index = 2") 
 	else:
 		print(line,end='')
-fileinput.close()	
-os.system('Chempy/Hogg_run.sh')
-os.system('mkdir BatchScoresNoSc/Chieffi')
-os.system('scp Scores/* BatchScoresNoSc/Chieffi/')
+		
+fileinput.close()		
+from Chempy.score_function import Bayes_wrapper
+Bayes_wrapper()
+os.system('mkdir BatchScoresNoScBay/Chieffi')
+os.system('scp Scores/* BatchScoresNoScBay/Chieffi/')
 os.system('rm -rf Scores/')
 os.system('mkdir Scores')
-	
 
-print('All processes complete. Outputs are in BatchScoresNoSc/ folder')
+print('All processes complete. Outputs are in BatchScoresNoScBay/ folder')
