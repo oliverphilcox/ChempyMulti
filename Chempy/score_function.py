@@ -265,7 +265,7 @@ def Bayes_score():
 		return numnorm(mean,cov_matrix,size=size)
 		
 	print('After %.3f seconds, starting parameter-space integration for beta = %.3f' %(time.time()-init_time, a.beta_param))
-	integral,integral_err = mcimport(posterior_mod,a.int_samples,dist)
+	integral,integral_err = mcimport(posterior_mod,a.int_samples,dist,nprocs=4) # Quad-core processing
 
 	print('After %.3f seconds, integration is complete' %(time.time()-init_time))
 	np.save('Scores/integral_'+str(a.beta_param)+'.npy',integral)
@@ -326,6 +326,7 @@ def Bayes_wrapper():
 	
 def Hogg_wrapper():
 	"""
+	NO LONGER USED
 	This function calculates the Hogg score as a function of the beta-function parameter (defined in parameter.py)
 	It is not currently parallelized (parallelization is done in MCMC already and for element predictions).
 	"""

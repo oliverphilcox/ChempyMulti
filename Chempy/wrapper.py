@@ -734,6 +734,7 @@ def single_star_optimization():
 
 def scoring_wrapper():
 	"""
+	NO LONGER USED 
 	This function will calculate Bayes and Hogg scores for yield set, using the code in score_function.py.
 	
 	The neural network must be trained beforehand using training_data and create_network	
