@@ -1330,7 +1330,7 @@ def posterior_function_quick(changing_parameter,a,preload):
 	star_abundance_list = np.hstack(star_abundance_list)
 	star_error_list = np.hstack(star_error_list)
 	
-	print('In posterior_function_quick elements are',element_list)	
+	#print('In posterior_function_quick elements are',element_list)	
 	
 	model_error = []
 	for i, item in enumerate(element_list):
