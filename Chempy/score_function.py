@@ -109,7 +109,7 @@ def Hogg_score():
 		
 		element_mean.append(mean)
 		element_sigma.append(sigma)
-		a.plot_hist=True
+		#a.plot_hist=True
 		if a.plot_hist == True:
 			plt.clf()
 			plt.hist(abundance, bins=40, normed=True, alpha=0.6, color='g')
@@ -282,6 +282,7 @@ def Bayes_wrapper():
 	import fileinput
 	import sys
 	from .parameter import ModelParameters
+	print('UPDATE NEURAL NETWORK')
 	directory = 'Scores/'
 	if not os.path.exists(directory):
 		os.makedirs(directory)

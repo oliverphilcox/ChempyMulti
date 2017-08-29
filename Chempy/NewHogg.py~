@@ -1,6 +1,8 @@
 #! /usr/bin/python
 
 ## CODE TO RUN HOGG SCORES FOR VARIOUS ELEMENTS
+
+## INCORRECT - THIS DOES NOT USE NEURAL NETWORKS!!! 
 import fileinput
 import os 
 import sys
@@ -78,6 +80,7 @@ for line in fileinput.input("Chempy/parameter.py", inplace=True):
 fileinput.close()		
 
 os.system('Chempy/Hogg_run.sh')
+os.system('mkdir BatchScores/Thielemann')
 os.system('scp Scores/* BatchScores/Thielemann/')
 os.system('rm -rf Scores/')
 os.system('mkdir Scores')

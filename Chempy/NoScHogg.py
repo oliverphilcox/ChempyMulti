@@ -1,6 +1,7 @@
 #! /usr/bin/python
 
 ## CODE TO RUN HOGG SCORES FOR VARIOUS ELEMENTS
+## INCORRECT - THIS DOES NOT USE NEURAL NETWORKS!!! 
 import fileinput
 import os 
 import sys
