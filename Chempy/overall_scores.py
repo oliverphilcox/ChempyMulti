@@ -26,7 +26,7 @@ def overall_Hogg():
 	Convenience function to calculate overall Hogg score, running MCMC over all parameters including beta.
 	NB: must set beta_param / log10_beta priors in parameter file
 	"""
-	
+	import numpy as np
 	from Chempy.parameter import ModelParameters
 	import importlib
 	import fileinput
