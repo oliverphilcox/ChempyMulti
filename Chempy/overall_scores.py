@@ -31,6 +31,7 @@ def overall_Hogg():
 	import importlib
 	import fileinput
 	import sys   
+	import os
 	import multiprocessing as mp
 	import tqdm
 	from Chempy.wrapper import single_star_optimization
@@ -153,7 +154,7 @@ def overall_Hogg():
 		likelihood_factor = norm.pdf(mean,loc=preload.star_abundance_list[index],scale=total_err)
 		overall_score *= likelihood_factor
 		factors.append(likelihood_factor)
-		print("Likelihood contribution from %dth element is %.8f with beta param %.4f" %(index+1,likelihood_factor,a.beta_param))
+		print("Likelihood contribution from %dth element is %.8f" %(index+1,likelihood_factor))
 		print(overall_score)
 		sys.stdout.flush()
 		#print(starting_el)
