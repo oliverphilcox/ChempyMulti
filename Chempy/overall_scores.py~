@@ -1,0 +1,30 @@
+def overall_Bayes():
+	"""
+	Convenience function to calculate the overall Bayes score, marginalizing over all parameters including beta.
+	NB: in parameter.py, we must set the beta_parameter prior. 5+-2.5 is used here in linear space.
+	"""
+	import numpy as np
+	import os
+	from .parameter import ModelParameters
+	from .score_function import Bayes_score
+	
+	directory = 'OverallScores/'
+	if not os.path.exists(directory):
+		os.makedirs(directory)
+		
+	a = ModelParameters()
+	integral,integral_err = Bayes_score()
+	
+	np.savez("OverallScores/Bayes_score - "+str(a.yield_table_name_sn2)+", "+str(a.yield_table_name_agb)+", "+str(a.yield_table_name_1a)+".npz",
+				score=integral,
+				score_err=integral_err)
+	
+	return integral,integral_err
+	
+def overall_Hogg():
+	"""
+	Convenience function to calculate overall Hogg score, running MCMC over all parameters including beta.
+	NB: must set beta_param / log10_beta priors in parameter file
+	"""
+	
+	return None
