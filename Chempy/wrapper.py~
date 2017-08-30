@@ -552,7 +552,7 @@ def mcmc_quick(changing_parameter,elements,preload):
 		chain[i] = changing_parameter + jitter
 
 	pool=mp.Pool()
-	sampler = emcee.EnsembleSampler(a.nwalkers,ndim,posterior_function_mcmc_quick,threads=nthreads, args = [elements,preload],pool=pool)
+	sampler = emcee.EnsembleSampler(a.nwalkers,ndim,posterior_function_mcmc_quick,threads=nthreads, args = [elements,preload])#,pool=pool)
 	pos,prob,state,blobs = sampler.run_mcmc(chain,a.mburn)
 		
 	
@@ -717,7 +717,7 @@ def single_star_optimization():
 	
 	elements = np.unique(a.elements_to_trace,preload.wildcard.dtype.names)
 	changing_parameter = list(result)
-	
+
 	#for i in range(result.shape[0]):
 	#	changing_parameter.append(list(result[i,len(a.SSP_parameters):]))
 	
@@ -734,6 +734,7 @@ def single_star_optimization():
 
 def scoring_wrapper():
 	"""
+	NO LONGER USED 
 	This function will calculate Bayes and Hogg scores for yield set, using the code in score_function.py.
 	
 	The neural network must be trained beforehand using training_data and create_network	

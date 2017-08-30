@@ -109,7 +109,7 @@ def Hogg_score():
 		
 		element_mean.append(mean)
 		element_sigma.append(sigma)
-		a.plot_hist=True
+		#a.plot_hist=True
 		if a.plot_hist == True:
 			plt.clf()
 			plt.hist(abundance, bins=40, normed=True, alpha=0.6, color='g')
@@ -261,8 +261,22 @@ def Bayes_score():
 	# Distribution function for mcmc sampling
 		mean = np.array(init_param)
 		return numnorm(mean,cov_matrix,size=size)
+	
+	if 'beta_param' or 'log10_beta' in a.to_optimize:
+		print('After %.3f seconds, starting parameter-space integration' %(time.time()-init_time))
+		integral,integral_err = mcimport(posterior_mod,a.int_samples,dist,nprocs=4) # Quad-core processing
+
+	else:
+		print('After %.3f seconds, starting parameter-space integration for beta = %.3f' %(time.time()-init_time, a.beta_param))
+		integral,integral_err = mcimport(posterior_mod,a.int_samples,dist,nprocs=4) # Quad-core processing
+
+		print('After %.3f seconds, integration is complete' %(time.time()-init_time))
+		np.save('Scores/integral_'+str(a.beta_param)+'.npy',integral)
+		np.save('Scores/integral_err_'+str(a.beta_param)+'.npy',integral_err)
 		
-	print('After %.3f seconds, starting parameter-space integration for beta = %.3f' %(time.time()-init_time, a.beta_param))
+	
+	else:
+		print('After %.3f seconds, starting parameter-space integration for beta = %.3f' %(time.time()-init_time, a.beta_param))
 	integral,integral_err = mcimport(posterior_mod,a.int_samples,dist,nprocs=4) # Quad-core processing
 
 	print('After %.3f seconds, integration is complete' %(time.time()-init_time))

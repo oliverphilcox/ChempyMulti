@@ -717,7 +717,7 @@ def single_star_optimization():
 	
 	elements = np.unique(a.elements_to_trace,preload.wildcard.dtype.names)
 	changing_parameter = list(result)
-	
+
 	#for i in range(result.shape[0]):
 	#	changing_parameter.append(list(result[i,len(a.SSP_parameters):]))
 	

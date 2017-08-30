@@ -248,8 +248,8 @@ class ModelParameters(object):
 	# If some parameter is in to optimise there needs to be a prior and constraints defined
 	if True:
 		#prior
-		SSP_parameters =  [-2.29 ,-2.75 ]#,	-0.8 ]#,0.2]#, 0.7, 0.3, 0.0]
-		SSP_parameters_to_optimize = ['high_mass_slope', 'log10_N_0']#, 'log10_sn1a_time_delay']#,'log10_sfr_factor_for_cosmic_accretion']#,'log10_gas_reservoir_mass_factor','log10_a_parameter','log10_gas_power']
+		SSP_parameters =  [5.0,-2.29 ,-2.75 ]#,	-0.8 ]#,0.2]#, 0.7, 0.3, 0.0]
+		SSP_parameters_to_optimize = ['beta_param', 'high_mass_slope', 'log10_N_0']#, 'log10_sn1a_time_delay']#,'log10_sfr_factor_for_cosmic_accretion']#,'log10_gas_reservoir_mass_factor','log10_a_parameter','log10_gas_power']
 	else:
 		SSP_parameters = []
 		SSP_parameters_to_optimize = []
@@ -268,6 +268,8 @@ class ModelParameters(object):
 	ndim = len(to_optimize)
 
 	constraints = {
+	'beta_param' : (1.,None),
+	'log10_beta' : (0.,None),
 	'high_mass_slope' : (-4.,-1.),
 	'log10_N_0' : (-5,-1), 
 	'log10_sn1a_time_delay' : (-3,1.),
@@ -303,6 +305,8 @@ class ModelParameters(object):
 	# for functional form 1 read (mean,factor,1)
 	priors = {
 	## gaussian priors
+	'beta_param' : (5.0,2.5,0),
+	'log10_beta' : (1.0,0.5,0),
 	'high_mass_slope' : (-2.3,0.3,0),	
 	'log10_N_0' : (-2.75,0.3,0),
 	'log10_sn1a_time_delay' : (-0.8,0.3,0),
@@ -359,7 +363,7 @@ class ModelParameters(object):
 	test_sigma_widths = [1.0,2.0,3.0,4.0,4.3]
 	
 	# mcimport Integration parameters:	
-	int_samples = 10000 # Number of samples for MC integration
+	int_samples = 50000 # Number of samples for MC integration
 	
 	list_of_beta_params = np.logspace(0,3,20) # List of beta function parameters used to calculate the score.	
 	

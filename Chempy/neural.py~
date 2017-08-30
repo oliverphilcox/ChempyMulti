@@ -263,7 +263,7 @@ def neural_output(test_input):
 	b_array_1 = coeffs['b_array_1']
 
 	# Normalize data for input into network
-	norm_data = (test_input - a.p0)/np.array(a.training_widths)
+	norm_data = (test_input - a.p0)/np.array(a.training_widths) 
 
 	# Calculate neural network output
 	hidden1 = np.tanh(np.array(np.dot(w_array_0,norm_data)+b_array_0))
@@ -546,8 +546,11 @@ def neural_output_int(test_input,a,b):
 	#coeffs = np.load('Neural/neural_model.npz')
 
 	# Normalize data for input into network
-	norm_data = (test_input - a.p0)/np.array(a.training_widths)
-
+	if 'log10_beta' in a.to_optimize:
+		norm_data = (test_input - a.p0[1:])/np.array(a.training_widths) # [1:] removes beta parameter
+	else:
+		norm_data = (test_input - a.p0)/np.array(a.training_widths) 
+	
 	# Calculate neural network output
 	hidden1 = np.tanh(np.array(np.dot(b.w_array_0,norm_data)+b.b_array_0))
 	output = np.dot(b.w_array_1, hidden1)+b.b_array_1

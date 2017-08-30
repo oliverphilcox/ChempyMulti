@@ -672,6 +672,9 @@ def global_optimization_real(changing_parameter, result):
 		if len(cut) == 2:
 			cut = cut[0][0]
 		error_list.append(float(model_errors[cut]))
+	### So that the parameter can be plotted in linear space
+	if 'log10_beta' in a.to_optimize:
+		a.beta_param = np.power(10,a.log10_beta)
 		## Adding the marginalization over the model error (within the prior borders). Taking the average of the likelihoods (they are log likelihoods so exp needs to be called)
 		if a.error_marginalization:
 			likelihood_list.append(logsumexp(error_temp, b = error_weight))
@@ -714,10 +717,10 @@ def extract_parameters_and_priors(changing_parameter, a):
 	for name in a.to_optimize:
 		(lower, upper) = a.constraints.get(name)
 		val = getattr(a, name)
-		if lower is not None and val<lower:
-			assert False, '%s lower border is violated with %.5f' %(name,val)
-		if upper is not None and val>upper:
-			assert False, '%s upper border is violated' %(name)
+	#	if lower is not None and val<lower:
+	#		assert False, '%s lower border is violated with %.5f' %(name,val)
+	#	if upper is not None and val>upper:
+	#		assert False, '%s upper border is violated' %(name)
 	if a.verbose:
 		if not a.testing_output:
 			print(changing_parameter,mp.current_process()._identity[0])#,a.observational_constraints_index
@@ -725,6 +728,11 @@ def extract_parameters_and_priors(changing_parameter, a):
 			print(changing_parameter)
 	
 	### So that the parameter can be plotted in linear space
+	if 'log10_beta' in a.to_optimize:
+		a.beta_param = np.power(10,a.log10_beta)
+		a.beta_error_distribution[2] = np.power(10,a.log10_beta)
+	if 'beta_param' in a.to_optimize:
+		a.beta_error_distribution[2] = a.beta_param
 	if 'log10_N_0' in a.to_optimize:
 		a.N_0 = np.power(10,a.log10_N_0)
 	if 'log10_sn1a_time_delay' in a.to_optimize:
@@ -1084,7 +1092,7 @@ def cem_real2_int(a,b):
 	#if a.UseNeural==True:
 
 	# Alternative path using a Neural network to predict the outcome instead of Chempy
-	param = [a.high_mass_slope,a.log10_N_0,a.log10_starformation_efficiency,a.log10_sfr_scale,a.outflow_feedback_fraction]
+	param = [a.high_mass_slope,a.log10_N_0,a.log10_starformation_efficiency,a.log10_sfr_scale,a.outflow_feedback_fraction] # don't include beta here
 	neural_abundances = neural_output_int(param,a,b)
 	#elements_to_trace.append('Zcorona')
 	#elements_to_trace.append('SNratio')
@@ -1138,6 +1146,7 @@ def posterior_function_mcmc_quick(changing_parameter,error_element_list,preload)
 	This is the actual posterior function for many stars. But the functionality is explained in posterior_function_many_stars.
 	'''
 	from .parameter import ModelParameters
+	from scipy.stats import beta
 	
 	## Initialising the model parameters
 	a = ModelParameters()
@@ -1219,7 +1228,21 @@ def posterior_function_mcmc_quick(changing_parameter,error_element_list,preload)
 	likelihood_list = np.zeros(len(model_errors))
 	#error_weight = beta.pdf(model_errors, a = a.beta_error_distribution[1], b = a.beta_error_distribution[2])
 	#error_weight/= sum(error_weight)
-	error_weight = preload.error_weight
+	
+	if 'beta_param' in a.to_optimize:
+		a.beta_error_distribution[2] = changing_parameter[0] # beta must be FIRST value in a.p0
+	if 'log10_beta' in a.to_optimize:
+		a.beta_error_distribution[2] = np.power(10,changing_parameter[0])	
+		a.beta_param = np.power(10,changing_parameter[0])
+	error_weight = beta.pdf(model_errors, a = a.beta_error_distribution[1], b = a.beta_error_distribution[2])
+	error_weight/= sum(error_weight)
+	
+	# Bug fix to avoid NaN values - fix this to beta = 0 value
+	for i in range(len(error_weight)):
+		if np.isnan(error_weight[i]):
+			error_weight = np.ones(len(error_weight))/len(error_weight)
+	
+	
 	for i in range(len(model_errors)):
 		#likelihood_list[i] = likelihood_evaluation_int(e,m,s)
 		#from .data_to_test import likelihood_evaluation
@@ -1228,11 +1251,11 @@ def posterior_function_mcmc_quick(changing_parameter,error_element_list,preload)
 		#err = np.sqrt(np.multiply(error_temp[:,None],error_temp[:,None]) + np.multiply(star_errors,star_errors))
 			
 		## VECTORIZE THIS?
-		likelihood_list[i] = likelihood_evaluation_int(preload.err[i] , model_abundances,star_abundances)
+		likelihood_list[i] = likelihood_evaluation_int(preload.err[i], model_abundances,star_abundances)
 	#print(likelihood_list[-1])
 	#print(likelihood_evaluation_int(preload.err[-1],model_abundances,star_abundances))
 	likelihood = logsumexp(likelihood_list, b = error_weight)	
-	
+	#print(likelihood)
 	## Prior from all stars is added
 	#prior = sum(log_prior_list)
 	## Prior for global parameters is subtracted
@@ -1330,7 +1353,7 @@ def posterior_function_quick(changing_parameter,a,preload):
 	star_abundance_list = np.hstack(star_abundance_list)
 	star_error_list = np.hstack(star_error_list)
 	
-	print('In posterior_function_quick elements are',element_list)	
+	#print('In posterior_function_quick elements are',element_list)	
 	
 	model_error = []
 	for i, item in enumerate(element_list):

@@ -261,14 +261,19 @@ def Bayes_score():
 	# Distribution function for mcmc sampling
 		mean = np.array(init_param)
 		return numnorm(mean,cov_matrix,size=size)
-		
-	print('After %.3f seconds, starting parameter-space integration for beta = %.3f' %(time.time()-init_time, a.beta_param))
-	integral,integral_err = mcimport(posterior_mod,a.int_samples,dist,nprocs=4) # Quad-core processing
-
-	print('After %.3f seconds, integration is complete' %(time.time()-init_time))
-	np.save('Scores/integral_'+str(a.beta_param)+'.npy',integral)
-	np.save('Scores/integral_err_'+str(a.beta_param)+'.npy',integral_err)
 	
+	if 'beta_param' or 'log10_beta' in a.to_optimize: # don't save output here
+		print('After %.3f seconds, starting parameter-space integration' %(time.time()-init_time))
+		integral,integral_err = mcimport(posterior_mod,a.int_samples,dist,nprocs=4) # Quad-core processing
+
+	else:
+		print('After %.3f seconds, starting parameter-space integration for beta = %.3f' %(time.time()-init_time, a.beta_param))
+		integral,integral_err = mcimport(posterior_mod,a.int_samples,dist,nprocs=4) # Quad-core processing
+
+		print('After %.3f seconds, integration is complete' %(time.time()-init_time))
+		np.save('Scores/integral_'+str(a.beta_param)+'.npy',integral)
+		np.save('Scores/integral_err_'+str(a.beta_param)+'.npy',integral_err)
+		
 	return integral,integral_err	
 	
 def Bayes_wrapper():
