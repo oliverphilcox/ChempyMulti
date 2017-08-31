@@ -169,7 +169,7 @@ def overall_Hogg():
 				
 	return overall_score
 	
-def Hogg_erorrs():
+def Hogg_errors():
 	"""
 	This function computes the overall Hogg score with errors.
 	Median and errors (16/84 percentile) are estimated by running the process 10 times.
