@@ -175,6 +175,8 @@ def Hogg_erorrs():
 	Median and errors (16/84 percentile) are estimated by running the process 10 times.
 	"""
 	from .overall_scores import overall_Hogg	
+	import numpy as np
+	
 	scores = []
 	for _ in range(10):
 		tmp = overall_Hogg()
