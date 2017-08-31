@@ -240,7 +240,6 @@ def Bayes_score():
 	for i,param_name in enumerate(a.to_optimize):
 		sigma.append(a.priors.get(param_name)[1])
 	sigma = np.array(sigma)
-	
 	# Compute covariance matrix
 	print('After %.3f seconds, computing covariance matrix' %(time.time()-init_time))
 	positions = np.load('mcmc/posteriorPDF.npy')

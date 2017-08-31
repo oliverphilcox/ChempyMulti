@@ -168,3 +168,24 @@ def overall_Hogg():
 	","+str(a.yield_table_name_agb)+", "+str(a.yield_table_name_1a)+".npy",overall_score)
 				
 	return overall_score
+	
+def Hogg_erorrs():
+	"""
+	This function computes the overall Hogg score with errors.
+	Median and errors (16/84 percentile) are estimated by running the process 10 times.
+	"""
+	from .overall_scores import overall_Hogg	
+	scores = []
+	for _ in range(10):
+		tmp = overall_Hogg()
+		scores.append(np.log10(tmp))
+			
+	median = np.median(scores)
+	lower = np.percentile(scores,15.865)
+	upper = np.percentile(scores,100-15.865)
+	
+	print("Average LOO-CV score over 10 iterations is %.2f + %.2f - %.2f" %(median,median-lower,upper-median))
+	np.savez("OverallScores/ErrorHogg - "+str(a.yield_table_name_sn2)+", "+str(a.yield_table_name_agb)+", "+str(a.yield_table_name_1a)+".npz",
+				score=integral,
+				score_err=integral_err)
+	return median, median-lower,upper-median

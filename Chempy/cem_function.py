@@ -1265,7 +1265,6 @@ def posterior_function_mcmc_quick(changing_parameter,error_element_list,preload)
 	########
 	#if a.verbose:
 	#	print('prior = ', prior, 'likelihood = ', likelihood)
-
 	return (prior+likelihood,model_abundances)
 	
 def posterior_function_predictions_quick(changing_parameter,a,preload):
