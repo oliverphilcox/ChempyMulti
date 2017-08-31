@@ -251,7 +251,7 @@ def neural_output(test_input):
 	Output:
 		Neural network abundance prediction
 	"""
-	from Chempy.cem_function import posterior_function_returning_predictions
+	#from Chempy.cem_function import posterior_function_returning_predictions
 
 	a = ModelParameters()
 
@@ -261,6 +261,7 @@ def neural_output(test_input):
 	w_array_1 = coeffs['w_array_1']
 	b_array_0 = coeffs['b_array_0']
 	b_array_1 = coeffs['b_array_1']
+	coeffs.close()
 
 	# Normalize data for input into network
 	if 'beta_param' or 'log10_beta' in a.to_optimize:
