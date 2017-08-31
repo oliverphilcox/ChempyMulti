@@ -176,6 +176,8 @@ def Hogg_errors():
 	"""
 	from .overall_scores import overall_Hogg	
 	import numpy as np
+	from .parameter import ModelParameters
+	a = ModelParameters()
 	
 	scores = []
 	for _ in range(10):
