@@ -192,3 +192,37 @@ def Hogg_errors():
 	np.savez("OverallScores/ErrorHogg - "+str(a.yield_table_name_sn2)+", "+str(a.yield_table_name_agb)+", "+str(a.yield_table_name_1a)+".npz",
 				median=median,lower=lower,upper=upper)
 	return median, median-lower,upper-median
+	
+def Hogg_element_predictions():
+	"""
+	This function computes the element predictions from the Hogg scoring.
+	Predictions and sigmas are estimated 10 times over to check for scatter.
+	"""
+	from .overall_scores import overall_Hogg	
+	import numpy as np
+	from .parameter import ModelParameters
+	a = ModelParameters()
+	
+	scores = []
+	el_means=[]
+	el_sigmas=[]
+	el_likelihoods=[]
+	for i in range(10):
+		print('Computing score %d of 10' %(i+1))
+		tmp = overall_Hogg()
+		scores.append(np.log10(tmp))
+		el_dat = np.load('OverallScores/Hogg_element_likelihoods.npz')
+		el_means.append(el_dat['element_mean'])
+		el_sigmas.append(el_dat['element_sigma'])
+		el_likelihoods.append(el_dat['likelihood_factors'])
+		el_dat.close()
+	
+	el_dat = np.load('OverallScores/Hogg_element_likelihoods.npz')
+	el_names = el_dat['elements']
+	el_dat.close()
+	
+	# Save output as npz file - each will be list of identically simulated data
+	np.savez('OverallScores/Hogg_element_predictions_'+str(a.yield_table_name_sn2)+'.npz',
+				mean=el_means,sigma=el_sigmas,elements=el_names,likelihood=el_likelihoods,scores=scores)
+	
+	return None
