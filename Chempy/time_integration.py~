@@ -195,7 +195,7 @@ class ABUNDANCE_MATRIX(object):
 		'''
 		### This aligns the SSP yield such that it becomes a simple vector multiplication with a little memory overhead
 		# self.all_feedback has the following data structure: [element][time_index_of_the_born_ssp][time_index_of_this_ssp_giving_back_the_elements_mass]
-		disp_errors = True # Controls whether we see errors from these processes
+		disp_errors = False # Controls whether we see errors from these processes
 		
 		for i,item in enumerate(self.all_feedback_names):
 			self.all_feedback[item][index-1][index-1:] = ssp_yield[item] 
@@ -275,6 +275,8 @@ class ABUNDANCE_MATRIX(object):
 			if item not in ['H','He']:
 				self.cube['Z'][index] += self.cube[item][index]
 				self.gas_reservoir['Z'][index] += self.gas_reservoir[item][index]
+		if self.cube['gas'][index] == 0:
+			return('err')		
 		self.cube['Z'][index] = self.cube['Z'][index] / float(self.cube['gas'][index])
 		self.gas_reservoir['Z'][index] = self.gas_reservoir['Z'][index] / float(self.gas_reservoir['gas'][index])		
 		# determine alpha enhancement
