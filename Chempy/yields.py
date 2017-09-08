@@ -920,7 +920,7 @@ class SN2_feedback(object):
 						for row in z: # Find required row in table 
 							if row[0] == isotope:
 								element_mass[mass_index]+=row[model_index] # Compute cumulative mass for all isotopes
-				yield_subtable[element]=element_mass # Add entry to subtable
+				yield_subtable[element]=np.divide(element_mass,self.masses) # Add entry to subtable
 		    
 			all_fractions = [row[model_index] for row in z] # This lists all elements (not just up to Ge)
 			total_mass_fraction[mass_index] = np.sum(all_fractions) # Compute total net mass fraction (sums to approximately 0)

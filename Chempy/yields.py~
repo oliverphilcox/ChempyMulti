@@ -930,7 +930,7 @@ class SN2_feedback(object):
 			yield_subtable['unprocessed_mass_in_winds'] = 1.-(yield_subtable['mass_in_remnants']+total_mass_fraction) # This is all mass not from yields/remnants
 			
 			# Add subtable to full table
-			yield_table[metallicity]=np.array(yield_subtable.tolist())
+			yield_table[metallicity]=yield_subtable
 
 		# Define final yield table for output
 		self.table = yield_table
