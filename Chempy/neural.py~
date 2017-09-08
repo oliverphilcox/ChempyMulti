@@ -29,9 +29,13 @@ def training_data():
 	warnings.filterwarnings("ignore")
 
 	a = ModelParameters()
-
+	
+	if 'beta_param' or 'log10_beta' in a.to_optimize:
+		print(a.to_optimize)
+		a.p0=a.p0[1:] # To remove beta parameter for this, since it is not needed in training
+		print('y')
 	N = float(a.training_size) # No. data points per parameter
-	widths = a.training_widths # Gaussian widths for parameters
+	widths = a.training_widths # Gaussian training widths for parameters
 
 	# Create 1d grid of data points equally spaced in probability space
 	prob = np.linspace(1/(N+1), 1-1/(N+1), N)
@@ -104,53 +108,53 @@ def training_data():
 	
 	return None
 
-def verification_and_testing():
-	""" 
-	****THIS IS NO LONGER USED****
-		
-	This will create the verification and testing data-sets for use with the neural network.
-	The data-sets are created randomly from the Gaussian prior distribution, within the bounds set in the parameter file
-
-	Outputs (saved as .npy files in the Neural/ folder):
-		verif_param_grid - Verification parameter data
-		verif_abundances - Verification dataset abundances
-		test_param_grid - Test parameter data
-		test_abundances - Test dataset abundances
-
-	"""
-
-	# FOR TESTING
-	import warnings
-	warnings.filterwarnings("ignore")
-
-	a = ModelParameters()
-	names = ['verif','test'] # Two datasets
-
-	lower = np.zeros(len(a.p0))
-	upper = np.zeros(len(a.p0))
-
-	# Set upper/lower bounds in parameter space
-	for i,param_name in enumerate(a.to_optimize):
-		lower[i], upper[i] = a.constraints.get(param_name)
-
-	for j ,name in enumerate(names): # Create both test sets
-		param_grid = []
-		model_abundances = []
-		for k in range(a.verif_test_sizes[j]):
-			param = np.ones(len(a.p0))*np.inf # To ensure initial value is not in range
-			for i in range(len(a.p0)):
-				param[i] = np.inf
-				while param[i] > upper[i] or param[i] < lower[i]: # Continue until param is in correct range
-					param[i] = np.random.normal(loc=a.p0[i],scale=a.test_widths[i])
-			param_grid.append(param)
-			abundances,_ = posterior_function_returning_predictions((param,a))
-			model_abundances.append(abundances)
-			if k%100==0 :
-				print("Calculating %s abundance set %d of %d" %(name,k,a.verif_test_sizes[j]))
-		np.save("Neural/"+name+"_param_grid.npy",param_grid)
-		np.save("Neural/"+name+"_abundances.npy",model_abundances)
-
-	return None
+#def verification_and_testing():
+#	""" 
+#	****THIS IS NO LONGER USED****
+#		
+#	This will create the verification and testing data-sets for use with the neural network.
+#	The data-sets are created randomly from the Gaussian prior distribution, within the bounds set in the parameter file
+#
+#	Outputs (saved as .npy files in the Neural/ folder):
+#		verif_param_grid - Verification parameter data
+#		verif_abundances - Verification dataset abundances
+#		test_param_grid - Test parameter data
+#		test_abundances - Test dataset abundances
+#
+#	"""
+#
+#	# FOR TESTING
+#	import warnings
+#	warnings.filterwarnings("ignore")
+#
+#	a = ModelParameters()
+#	names = ['verif','test'] # Two datasets
+#
+#	lower = np.zeros(len(a.p0))
+#	upper = np.zeros(len(a.p0))
+#
+#	# Set upper/lower bounds in parameter space
+#	for i,param_name in enumerate(a.to_optimize):
+#		lower[i], upper[i] = a.constraints.get(param_name)
+#
+#	for j ,name in enumerate(names): # Create both test sets
+#		param_grid = []
+#		model_abundances = []
+#		for k in range(a.verif_test_sizes[j]):
+#			param = np.ones(len(a.p0))*np.inf # To ensure initial value is not in range
+#			for i in range(len(a.p0)):
+#				param[i] = np.inf
+#				while param[i] > upper[i] or param[i] < lower[i]: # Continue until param is in correct range
+#					param[i] = np.random.normal(loc=a.p0[i],scale=a.test_widths[i])
+#			param_grid.append(param)
+#			abundances,_ = posterior_function_returning_predictions((param,a))
+#			model_abundances.append(abundances)
+#			if k%100==0 :
+#				print("Calculating %s abundance set %d of %d" %(name,k,a.verif_test_sizes[j]))
+#		np.save("Neural/"+name+"_param_grid.npy",param_grid)
+#		np.save("Neural/"+name+"_abundances.npy",model_abundances)
+#
+#	return None
 
 def create_network(learning_rate=a.learning_rate,Plot=True):
 	""" Function to create and train the neural network - this overwrites any previous network.
@@ -261,6 +265,7 @@ def neural_output(test_input):
 	w_array_1 = coeffs['w_array_1']
 	b_array_0 = coeffs['b_array_0']
 	b_array_1 = coeffs['b_array_1']
+	coeffs.close()
 
 	# Normalize data for input into network
 	if 'beta_param' or 'log10_beta' in a.to_optimize:
