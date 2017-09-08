@@ -110,7 +110,7 @@ class ModelParameters(object):
 		infall_beginning = 0
 		infall_scale = 3.3
 
-	yield_table_name_sn2_list = ['chieffi04','Nugrid','Nomoto2013','Portinari', 'chieffi04_net', 'Nomoto2013_net','Frischknecht16']
+	yield_table_name_sn2_list = ['chieffi04','Nugrid','Nomoto2013','Portinari', 'chieffi04_net', 'Nomoto2013_net','Frischknecht16_net']
 	yield_table_name_sn2_index = 6
 	yield_table_name_sn2 = yield_table_name_sn2_list[yield_table_name_sn2_index]
 
@@ -229,9 +229,7 @@ class ModelParameters(object):
 
 	####### Evaluate model
 	
-	# 22 elements
-	#element_names = ['He','C', 'N', 'O', 'F','Ne','Na', 'Mg', 'Al', 'Si', 'P','S', 'Ar','K', 'Ca','Ti', 'V', 'Cr', 'Mn', 'Fe', 'Co', 'Ni']#, 'Zn','Y', 'Ba']# Runs with sun
-
+	
 	# 28 elements	
 	element_names = ['He', 'C', 'N', 'O', 'F','Ne','Na', 'Mg', 'Al', 'Si', 'P','S', 'Cl', 'Ar', 'K', 'Ca', 'Sc', 'Ti', 'V', 'Cr', 'Mn', 'Fe', 'Co', 'Ni','Cu','Zn','Ga','Ge']#, 'Zn','Y', 'Ba']# Runs with sun
 	
@@ -356,7 +354,7 @@ class ModelParameters(object):
 
 	color_max = 0.02 # Maximum color in error plots	
 	
-	UseNeural = False # This defines whether to use trained network in place of Chempy
+	UseNeural = True # This defines whether to use trained network in place of Chempy
 	
 	test_size = 3000 # Number of elements in test set
 	

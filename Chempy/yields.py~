@@ -826,6 +826,45 @@ class SN2_feedback(object):
 		# Define masses
 		self.masses=  np.array((15,20,25,40))
 		
+		# Define isotope indexing. For radioactive isotopes with half-lives << Chempy time_step they are assigned to their daughter element
+		# NB: we only use elements up to Ge here, as in the paper
+		indexing={}
+		indexing['H']=['p','d']
+		indexing['He'] = ['he3','he4']
+		indexing['Li'] = ['li6','li7']
+		indexing['Be']  = ['be9']
+		indexing['B']  = ['b10','b11']
+		indexing['C']  = ['c12','c13']
+		indexing['N']  = ['n14','n15']
+		indexing['O']  = ['o16','o17','o18']
+		indexing['F']  = ['f19']
+		indexing['Ne']  = ['ne20','ne21','ne22']
+		indexing['Na']  = ['na23']
+		indexing['Mg']  = ['mg24','mg25','mg26','al26']
+		indexing['Al']  = ['al27']
+		indexing['Si']  = ['si28','si29','si30']
+		indexing['P']  = ['p31']
+		indexing['S']  = ['s32','s33','s34','s36']
+		indexing['Cl']  = ['cl35','cl37']
+		indexing['Ar']  = ['ar36','ar38','ar40']
+		indexing['K']  = ['k39','k41']
+		indexing['Ca']  = ['ca40','ca42','ca43','ca44','ca46','ca48']
+		indexing['Sc']  = ['sc45']
+		indexing['Ti']  = ['ti46','ti47','ti48','ti49','ti50']
+		indexing['V']  = ['v50','v51']
+		indexing['Cr']  = ['cr50','cr52','cr53','cr54']
+		indexing['Mn']  = ['mn55']
+		indexing['Fe']  = ['fe54', 'fe56','fe57','fe58']
+		indexing['Co']  = ['fe60', 'co59']
+		indexing['Ni']  = ['ni58','ni60','ni61','ni62','ni64']
+		indexing['Cu']  = ['cu63','cu65']
+		indexing['Zn']  = ['zn64','zn66','zn67','zn68','zn70']
+		indexing['Ga']  = ['ga69','ga71']
+		indexing['Ge']  = ['ge70','ge72','ge73','ge74','ge76']
+  
+		# Define indexed elements 
+		self.elements = list(indexing.keys())
+		
 		# Load yield table dictionary in correct format from npy file if it exists
 		saved_yields = localpath+'input/yields/Frischknecht16_net.npy'
 		if os.path.exists(saved_yields):
@@ -844,44 +883,7 @@ class SN2_feedback(object):
 			# Import full table with correct rows and data-types
 			z = np.genfromtxt(localpath+'input/yields/Frischknecht16/yields_total.txt',skip_header=62,dtype=dt)
 			
-			# Define isotope indexing. For radioactive isotopes with half-lives << Chempy time_step they are assigned to their daughter element
-			# NB: we only use elements up to Ge here, as in the paper
-			indexing={}
-			indexing['H']=['p','d']
-			indexing['He'] = ['he3','he4']
-			indexing['Li'] = ['li6','li7']
-			indexing['Be']  = ['be9']
-			indexing['B']  = ['b10','b11']
-			indexing['C']  = ['c12','c13']
-			indexing['N']  = ['n14','n15']
-			indexing['O']  = ['o16','o17','o18']
-			indexing['F']  = ['f19']
-			indexing['Ne']  = ['ne20','ne21','ne22']
-			indexing['Na']  = ['na23']
-			indexing['Mg']  = ['mg24','mg25','mg26','al26']
-			indexing['Al']  = ['al27']
-			indexing['Si']  = ['si28','si29','si30']
-			indexing['P']  = ['p31']
-			indexing['S']  = ['s32','s33','s34','s36']
-			indexing['Cl']  = ['cl35','cl37']
-			indexing['Ar']  = ['ar36','ar38','ar40']
-			indexing['K']  = ['k39','k41']
-			indexing['Ca']  = ['ca40','ca42','ca43','ca44','ca46','ca48']
-			indexing['Sc']  = ['sc45']
-			indexing['Ti']  = ['ti46','ti47','ti48','ti49','ti50']
-			indexing['V']  = ['v50','v51']
-			indexing['Cr']  = ['cr50','cr52','cr53','cr54']
-			indexing['Mn']  = ['mn55']
-			indexing['Fe']  = ['fe54', 'fe56','fe57','fe58']
-			indexing['Co']  = ['fe60', 'co59']
-			indexing['Ni']  = ['ni58','ni60','ni61','ni62','ni64']
-			indexing['Cu']  = ['cu63','cu65']
-			indexing['Zn']  = ['zn64','zn66','zn67','zn68','zn70']
-			indexing['Ga']  = ['ga69','ga71']
-			indexing['Ge']  = ['ge70','ge72','ge73','ge74','ge76']
-	  
-			# Define indexed elements 
-			self.elements = list(indexing.keys())
+			
 			
 			# Create model dictionary indexed by metallicity, giving relevant model number for each choice of mass
 			# See Frischknecht info_yields.txt file for model information

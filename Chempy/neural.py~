@@ -30,15 +30,13 @@ def training_data():
 
 	a = ModelParameters()
 	
-	if 'beta_param' or 'log10_beta' in a.to_optimize:
-		print(a.to_optimize)
-		a.p0=a.p0[1:] # To remove beta parameter for this, since it is not needed in training
-		print('y')
+	if 'beta_param' in a.to_optimize or 'log10_beta' in a.to_optimize:
+		raise NameError('Remove beta parameter from a.to_optimize in parameter.py to continue')
 	N = float(a.training_size) # No. data points per parameter
 	widths = a.training_widths # Gaussian training widths for parameters
 
 	# Create 1d grid of data points equally spaced in probability space
-	prob = np.linspace(1/(N+1), 1-1/(N+1), N)
+	prob = np.linspace(1/(N+1), 1-1/(N+1), int(N))
 	grids = [gaussian.ppf(prob) for _ in range(len(a.p0))] # Normalize to unit Gaussian
 	norm_grid = np.array(np.meshgrid(*grids)).T.reshape(-1,len(a.p0))
 
@@ -268,7 +266,7 @@ def neural_output(test_input):
 	coeffs.close()
 
 	# Normalize data for input into network
-	if 'beta_param' or 'log10_beta' in a.to_optimize:
+	if 'beta_param' in a.to_optimize or 'log10_beta' in a.to_optimize:
 		norm_data = (test_input-a.p0[1:])/np.array(a.training_widths)
 	else:
 		norm_data = (test_input - a.p0)/np.array(a.training_widths) 

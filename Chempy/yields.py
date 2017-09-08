@@ -865,85 +865,75 @@ class SN2_feedback(object):
 		# Define indexed elements 
 		self.elements = list(indexing.keys())
 		
-		# Load yield table dictionary in correct format from npy file if it exists
-		saved_yields = localpath+'input/yields/Frischknecht16_net.npy'
-		if os.path.exists(saved_yields):
-			self.table = np.load(saved_yields).item()
 		
-		else:
-			# If not, create yield table from .txt file
-			
-			# Define data types
-			dt = np.dtype('U8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8')
-		
-			# Initialise yield table
-			yield_table = {}
-		
-			
-			# Import full table with correct rows and data-types
-			z = np.genfromtxt(localpath+'input/yields/Frischknecht16/yields_total.txt',skip_header=62,dtype=dt)
-			
-			
-			
-			# Create model dictionary indexed by metallicity, giving relevant model number for each choice of mass
-			# See Frischknecht info_yields.txt file for model information
-			model_dict = {}
-			model_dict[0.0134] = [2,8,14,27]
-			model_dict[1e-3]=[4,10,16,28]
-			model_dict[1e-5]=[6,12,18,29]
-			
-			# Import list of remnant masses for each model (from row 32-60, column 6 of .txt file) 
-			# NB: these are in solar masses
-			rem_mass_table = np.loadtxt(localpath+'input/yields/Frischknecht16/yields_total.txt',skiprows=31,usecols=6)[:29]
+		# Define data types
+		dt = np.dtype('U8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8')
 	
-			# Create one subtable for each metallicity 
-			for metallicity in self.metallicities:
-				additional_keys = ['Mass', 'mass_in_remnants','unprocessed_mass_in_winds'] # List of keys for table
-				names = additional_keys + self.elements
-				
-				# Initialise table and arrays   
-				base = np.zeros(len(self.masses))
-				list_of_arrays = []
-				for i in range(len(names)):
-					list_of_arrays.append(base)
-				yield_subtable = np.core.records.fromarrays(list_of_arrays,names=names)
-				mass_in_remnants = np.zeros(len(self.masses))
-				total_mass_fraction = np.zeros(len(self.masses))
+		# Initialise yield table
+		yield_table = {}
+	
+		
+		# Import full table with correct rows and data-types
+		z = np.genfromtxt(localpath+'input/yields/Frischknecht16/yields_total.txt',skip_header=62,dtype=dt)
+		
+		
+		
+		# Create model dictionary indexed by metallicity, giving relevant model number for each choice of mass
+		# See Frischknecht info_yields.txt file for model information
+		model_dict = {}
+		model_dict[0.0134] = [2,8,14,27]
+		model_dict[1e-3]=[4,10,16,28]
+		model_dict[1e-5]=[6,12,18,29]
+		
+		# Import list of remnant masses for each model (from row 32-60, column 6 of .txt file) 
+		# NB: these are in solar masses
+		rem_mass_table = np.loadtxt(localpath+'input/yields/Frischknecht16/yields_total.txt',skiprows=31,usecols=6)[:29]
+
+		# Create one subtable for each metallicity 
+		for metallicity in self.metallicities:
+			additional_keys = ['Mass', 'mass_in_remnants','unprocessed_mass_in_winds'] # List of keys for table
+			names = additional_keys + self.elements
+			
+			# Initialise table and arrays   
+			base = np.zeros(len(self.masses))
+			list_of_arrays = []
+			for i in range(len(names)):
+				list_of_arrays.append(base)
+			yield_subtable = np.core.records.fromarrays(list_of_arrays,names=names)
+			mass_in_remnants = np.zeros(len(self.masses))
+			total_mass_fraction = np.zeros(len(self.masses))
+			element_mass = np.zeros(len(self.masses))
+			
+			# Add masses to table
+			yield_subtable['Mass'] = self.masses
+		    
+		    
+			# Extract remnant masses (in solar masses) for each model:			
+			for mass_index,model_index in enumerate(model_dict[metallicity]):
+				mass_in_remnants[mass_index] = rem_mass_table[model_index-1] 
+		   
+		   # Iterate over all elements 
+			for element in self.elements:
 				element_mass = np.zeros(len(self.masses))
-				
-				# Add masses to table
-				yield_subtable['Mass'] = self.masses
-			    
-			    
-				# Extract remnant masses (in solar masses) for each model:			
-				for mass_index,model_index in enumerate(model_dict[metallicity]):
-					mass_in_remnants[mass_index] = rem_mass_table[model_index-1] 
-			   
-			   # Iterate over all elements 
-				for element in self.elements:
-					element_mass = np.zeros(len(self.masses))
-					for isotope in indexing[element]: # Iterate over isotopes of each element
-						for mass_index,model_index in enumerate(model_dict[metallicity]): # Iterate over masses 
-							for row in z: # Find required row in table 
-								if row[0] == isotope:
-									element_mass[mass_index]+=row[model_index] # Compute cumulative mass for all isotopes
-					yield_subtable[element]=element_mass # Add entry to subtable
-			    
-				all_fractions = [row[model_index] for row in z] # This lists all elements (not just up to Ge)
-				total_mass_fraction[mass_index] = np.sum(all_fractions) # Compute total net mass fraction (sums to approximately 0)
-				
-				# Add fields for remnant mass (now as a mass fraction) and unprocessed mass fraction			
-				yield_subtable['mass_in_remnants']=np.divide(mass_in_remnants,self.masses)                    
-				yield_subtable['unprocessed_mass_in_winds'] = 1.-(yield_subtable['mass_in_remnants']+total_mass_fraction) # This is all mass not from yields/remnants
-				
-				# Add subtable to full table
-				yield_table[metallicity]=yield_subtable
-	
-			# Define final yield table for output
-			self.table = yield_table
+				for isotope in indexing[element]: # Iterate over isotopes of each element
+					for mass_index,model_index in enumerate(model_dict[metallicity]): # Iterate over masses 
+						for row in z: # Find required row in table 
+							if row[0] == isotope:
+								element_mass[mass_index]+=row[model_index] # Compute cumulative mass for all isotopes
+				yield_subtable[element]=element_mass # Add entry to subtable
+		    
+			all_fractions = [row[model_index] for row in z] # This lists all elements (not just up to Ge)
+			total_mass_fraction[mass_index] = np.sum(all_fractions) # Compute total net mass fraction (sums to approximately 0)
 			
-			# Save yield table to avoid reloading each time
-			np.save(saved_yields,self.table)
+			# Add fields for remnant mass (now as a mass fraction) and unprocessed mass fraction			
+			yield_subtable['mass_in_remnants']=np.divide(mass_in_remnants,self.masses)                    
+			yield_subtable['unprocessed_mass_in_winds'] = 1.-(yield_subtable['mass_in_remnants']+total_mass_fraction) # This is all mass not from yields/remnants
+			
+			# Add subtable to full table
+			yield_table[metallicity]=yield_subtable
+
+		# Define final yield table for output
+		self.table = yield_table
 		
 #######################
 class AGB_feedback(object):
