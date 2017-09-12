@@ -1236,7 +1236,8 @@ def posterior_function_mcmc_quick(changing_parameter,error_element_list,preload)
 		a.beta_param = np.power(10,changing_parameter[0])
 	error_weight = beta.pdf(model_errors, a = a.beta_error_distribution[1], b = a.beta_error_distribution[2])
 	error_weight/= sum(error_weight)
-	
+
+
 	# Bug fix to avoid NaN values - fix this to beta = 1 value
 	for i in range(len(error_weight)):
 		if np.isnan(error_weight[i]):

@@ -71,7 +71,7 @@ def overall_Hogg():
 	# Create new parameter names
 	newstr = []
 	for i,el in enumerate(elements_init):
-		if el !='Zn':
+		if el !=starting_el[-1]:
 			newstr.append(orig.replace("'"+str(el)+"', ",""))
 		else:
 			newstr.append(orig.replace("'"+str(el)+"'",""))
@@ -163,11 +163,13 @@ def overall_Hogg():
 				likelihood_factors=factors,
 				element_mean = element_mean,
 				element_sigma = element_sigma)	
+	
+	rescaled_score = np.power(overall_score,1./len(starting_el)	
+			
+	np.save("OverallScores/Hogg_score_rescaled - "+str(a.yield_table_name_sn2)+\
+	","+str(a.yield_table_name_agb)+", "+str(a.yield_table_name_1a)+".npy",rescaled_score)
 				
-	np.save("OverallScores/Hogg_score - "+str(a.yield_table_name_sn2)+\
-	","+str(a.yield_table_name_agb)+", "+str(a.yield_table_name_1a)+".npy",overall_score)
-				
-	return overall_score
+	return rescaled_score
 	
 def Hogg_errors():
 	"""
@@ -193,9 +195,9 @@ def Hogg_errors():
 				median=median,lower=lower,upper=upper)
 	return median, median-lower,upper-median
 	
-def Hogg_element_predictions():
+def Hogg_element_predictions(size=10):
 	"""
-	This function computes the element predictions from the Hogg scoring.
+	This function computes the NORMALISED element predictions from the Hogg scoring.
 	Predictions and sigmas are estimated 10 times over to check for scatter.
 	"""
 	from .overall_scores import overall_Hogg	
@@ -207,8 +209,8 @@ def Hogg_element_predictions():
 	el_means=[]
 	el_sigmas=[]
 	el_likelihoods=[]
-	for i in range(10):
-		print('Computing score %d of 10' %(i+1))
+	for i in range(size):
+		print('Computing score %d of %s' %(i+1,size))
 		tmp = overall_Hogg()
 		scores.append(np.log10(tmp))
 		el_dat = np.load('OverallScores/Hogg_element_likelihoods.npz')
@@ -222,7 +224,7 @@ def Hogg_element_predictions():
 	el_dat.close()
 	
 	# Save output as npz file - each will be list of identically simulated data
-	np.savez('OverallScores/Hogg_element_predictions_'+str(a.yield_table_name_sn2)+'.npz',
-				mean=el_means,sigma=el_sigmas,elements=el_names,likelihood=el_likelihoods,scores=scores)
+	np.savez('OverallScores/Hogg_normalised_element_predictions_'+str(a.yield_table_name_sn2)+'.npz',
+				mean=el_means,sigma=el_sigmas,elements=el_names,likelihood=el_likelihoods,normalised_scores=scores)
 	
 	return None

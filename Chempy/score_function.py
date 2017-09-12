@@ -2,7 +2,7 @@ import numpy as np
 import os
 	
 def Hogg_score():
-	"""This function will compute the cross-validation abundances for each of the 22 elements,
+	"""This function will compute the UNNORMALISED cross-validation abundances for each of the 22 elements,
 	using the best parameter choice for each. 
 	This computes the likelihood contribution, and saves each separately.
 	"""
@@ -45,7 +45,7 @@ def Hogg_score():
 	# Create new parameter names
 	newstr = []
 	for i,el in enumerate(elements_init):
-		if el !='Zn':
+		if el !=starting_el[-1]:
 			newstr.append(orig.replace("'"+str(el)+"', ",""))
 		else:
 			newstr.append(orig.replace("'"+str(el)+"'",""))
@@ -330,7 +330,7 @@ def Bayes_wrapper():
 def Hogg_wrapper():
 	"""
 	NO LONGER USED
-	This function calculates the Hogg score as a function of the beta-function parameter (defined in parameter.py)
+	This function calculates the UNNORMALISED Hogg score as a function of the beta-function parameter (defined in parameter.py)
 	It is not currently parallelized (parallelization is done in MCMC already and for element predictions).
 	"""
 	import time
@@ -409,15 +409,17 @@ def Hogg_bash(beta_index):
 	
 	# Calculate Bayes score
 	score = Hogg_score()
+	
+	rescaled_score = np.power(score,1./len(a.initial_neural_names))
 	#Hogg_score_list.append(score)
-	np.savez('Scores/Hogg'+str(beta_index)+'.npz',beta_param=beta_params,score=score)
+	np.savez('Scores/Hogg'+str(beta_index)+'.npz',beta_param=beta_params,score=score,rescaled_score = rescaled_score)
 	
 	# Save output as npz array
 	#np.savez("Scores/Hogg_score - "+str(a.yield_table_name_sn2)+", "+str(a.yield_table_name_agb)+", "+str(a.yield_table_name_1a)+".npz",
 	#			beta_param=beta_params,
 	#			score=Hogg_score_list)
 				
-	return beta_params,score
+	return beta_params,score,rescaled_score
 	
 def Hogg_stitch():
 	"""
@@ -429,14 +431,16 @@ def Hogg_stitch():
 	a = ModelParameters()
 	beta = []
 	score = []
+	rescaled_score = []
 	for i in range(len(a.list_of_beta_params)):
 		temp=np.load('Scores/Hogg'+str(i)+'.npz')
 		beta.append(temp['beta_param'])
 		score.append(temp['score'])
+		rescaled_score.append(temp['rescaled_score'])
 		temp.close()
 	np.savez("Scores/Hogg_score - "+str(a.yield_table_name_sn2)+", "+str(a.yield_table_name_agb)+", "+str(a.yield_table_name_1a)+".npz",
 				beta_param=beta,
-				score=score)
+				score=score,rescaled_score=rescaled_score)
 		
 	return beta,score
 	
@@ -489,7 +493,7 @@ def Hogg_median():
 	# Create new parameter names
 	newstr = []
 	for i,el in enumerate(elements_init):
-		if el !='Zn':
+		if el !=starting_el[-1]:
 			newstr.append(orig.replace("'"+str(el)+"', ",""))
 		else:
 			newstr.append(orig.replace("'"+str(el)+"'",""))
