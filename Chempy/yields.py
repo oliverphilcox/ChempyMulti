@@ -432,7 +432,7 @@ class SN2_feedback(object):
 		self.table = yield_tables_final_structure
 
 		#############################################
-	def Nugrid(self):
+	def OldNugrid(self):
 		'''
 		loading the Nugrid sn2 stellar yields NuGrid stellar data set. I. Stellar yields from H to Bi for stars with metallicities Z = 0.02 and Z = 0.01
 		The wind yields need to be added to the *exp* explosion yields.
@@ -540,8 +540,8 @@ class SN2_feedback(object):
 
 			yield_tables_final_structure[metallicity] = yield_tables_final_structure_subtable#[::-1]
 		self.table = yield_tables_final_structure
-
-
+		
+	
 	def one_parameter(self, elements, element_fractions):
 		"""
 		This function was introduced in order to find best-fit yield sets where each element has just a single yield (no metallicity or mass dependence).
@@ -813,7 +813,8 @@ class SN2_feedback(object):
 		self.table = yield_tables_final_structure
 
 	def Frischknecht16_net(self):
-		"""SN2 yields from Frischknecht et al. 2016. These are implemented for masses of 15-40Msun, for rotating stars.
+		""" DO NOT USE!!
+		pre-SN2 yields from Frischknecht et al. 2016. These are implemented for masses of 15-40Msun, for rotating stars.
 		Yields from stars with 'normal' rotations are used here.
 		These are net yields automatically, so no conversions need to be made
 		"""
@@ -934,7 +935,102 @@ class SN2_feedback(object):
 
 		# Define final yield table for output
 		self.table = yield_table
+	
+	def NuGrid_net(self):
+		""" This gives the net SNII yields from the NuGrid collaboration (Ritter et al. 2017 (in prep))
+		Either rapid or delay SN2 yields (Fryer et al. 2012) can be used - changeable via the parameter.
 		
+		Delay models are chosen for good match with the Fe yields of Nomoto et al. (2006) and Chieffi & Limongi (2004)		
+		"""
+		
+		model_type = 'delay' # Controls model type - this can be 'delay' or 'rapid'
+		
+		# Create list of masses and metallicites:
+		self.masses = [12.0,15.0,20.0,25.0]
+		self.metallicities = [0.02,0.01,0.006,0.001,0.0001]		
+		
+		# First define names of yield tables and the remnant masses for each metallicity (in solar masses)
+		if model_type == 'delay':
+			filename=localpath+'input/yields/NuGrid/H NuGrid yields delay_total.txt'
+			remnants = {}
+			remnants[0.02] = [1.61,1.61,2.73,5.71] # This gives remnant masses for each mass
+			remnants[0.01] = [1.61,1.61,2.77,6.05]
+			remnants[0.006] = [1.62,1.62,2.79,6.18]
+			remnants[0.001] = [1.62,1.62,2.81,6.35]
+			remnants[0.0001] = [1.62,1.62,2.82,6.38]
+		elif model_type == 'rapid':
+			filename = localpath+'input/yields/NuGrid/H NuGrid yields rapid total.txt'
+			remants = {}
+			remnants[0.02] = [1.44,1.44,2.70,12.81] # Define remnants from metallicities
+			remnants[0.01] = [1.44,1.44,1.83,9.84]
+			remnants[0.006] = [1.44, 1.44, 1.77, 7.84]
+			remnants[0.001] = [1.44,1.44,1.76,5.88]
+			remnants[0.0001] = [1.44,1.44,1.76,5.61]
+		else:
+			raise ValueError('Wrong type: must be delay or rapid')
+    
+		# Define which lines in the .txt files to use. 
+		# This defines cuts starting at each relevant table
+		cuts={}
+		for z in self.metallicities:
+			cuts[z] = [] 
+			for mass in self.masses:
+				txtfile=open(filename,"r")
+				for line_no,line in enumerate(txtfile):
+					if str(mass) in line and str(z) in line:
+						cuts[z].append(line_no)
+                
+		line_end = line_no # Final line
+		
+		# Create list of elements taken from data-file (from first relevant table)
+		data = np.genfromtxt(filename,skip_header=int(cuts[0.02][0])+4,
+                             skip_footer=line_end-int(cuts[0.02][0])-83,
+                    dtype=['<U8','<U15','<U15','<U15'])
+                    
+		self.elements = [str(line[0][1:]) for line in data]
+	
+		self.table={} # Initialize final output
+		
+		for z in self.metallicities: # Produce subtable for each metallicity
+			yield_subtable={}
+			yield_subtable['Mass'] = self.masses
+			yield_subtable['mass_in_remnants'] = np.divide(np.asarray(remnants[z]),self.masses) # Initialize lists
+			for el in self.elements:
+				yield_subtable[el] = []
+             
+			for m_index,mass in enumerate(self.masses): # Create data array for each mass
+				unprocessed_mass = mass-remnants[z][m_index] # Mass not in remnants in Msun
+				data = np.genfromtxt(filename,skip_header=int(cuts[z][m_index])+4,
+					skip_footer=line_end-int(cuts[z][m_index])-83,dtype=['<U8','<U15','<U15','<U15']) # Read from data file
+				
+				# Now iterate over data-file and read in element names
+				# NB: [1:]s are necessary as each element in txt file starts with &   		
+				for line in data:
+					el_name = str(line[0][1:]) # Name of element
+					el_yield = float(line[1][1:]) # Yield in Msun
+					el_init = float(line[2][1:]) # Initial mass fraction 
+					
+					yield_subtable[el_name].append(el_yield/unprocessed_mass-el_init) # Net mass fraction
+					  			
+	  		# Calculate summed net yield - should be approximately 0	
+			summed_yields = np.zeros(len(self.masses))
+			for el in self.elements:
+				yield_subtable[el] = np.asarray(yield_subtable[el])
+				summed_yields+=yield_subtable[el]
+			
+			# Compute mass not in remnants with summed net yield small correction		
+			yield_subtable['unprocessed_mass_in_winds'] = 1.0-yield_subtable['mass_in_remnants']-summed_yields
+    		
+    		# Restructure dictionary into record array for output
+			all_keys = ['Mass','mass_in_remnants','unprocessed_mass_in_winds']+self.elements
+			list_of_arrays = [yield_subtable[key] for key in all_keys]
+			restructure_subtable = np.core.records.fromarrays(list_of_arrays,names=all_keys)
+    		
+			self.table[z] = restructure_subtable # This is output table for specific z
+    		
+		# Yield table output is self.table
+    	
+    	
 #######################
 class AGB_feedback(object):
 	def __init__(self):   
