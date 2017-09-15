@@ -356,7 +356,7 @@ class GCHWH13(AbuModel):
         to solar.
         """
 
-        silent = True#kw.setdefault('silent', False)
+        silent = kw.setdefault('silent', False)
         self.setup_logger(silent = silent)
 
         check = kw.get('check', False)

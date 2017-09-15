@@ -24,12 +24,7 @@ def _set_method(
         extra_kw = None):
     if extra_kw is None:
         extra_kw = {}
-    if t == 'f16':
-    	dt = 'float64'
-    elif t == 'c32':
-    	dt = 'complex128'
-    else:
-    	dt = np.dtype(t)
+    dt = np.dtype(t)
     dn = np.dtype(dt).name
     pt = re.findall('[a-z]+', dn)[0]
     pt = _type_map.get(pt, pt)

@@ -818,9 +818,10 @@ class SN2_feedback(object):
 		
 		Only elements up to Ge are implemented here - but original table has all up to Pb"""
 		
-		data = np.genfromtxt('ertl.txt')	
+		data = np.genfromtxt(localpath+'input/yields/West15/ertl.txt')	
 		
 		# Index elements
+		indexing = {}
 		indexing['H'] =  ['H1', 'H2']
 		indexing['He'] =  ['He3', 'He4']
 		indexing['Li'] =  ['Li6', 'Li7']
