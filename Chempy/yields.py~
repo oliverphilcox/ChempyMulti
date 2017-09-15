@@ -812,6 +812,45 @@ class SN2_feedback(object):
 			yield_tables_final_structure[metallicity] = np.load(localpath + 'input/yields/Nomoto2013/nomoto_net_met_ind_%d.npy' %(metallicity_index))
 		self.table = yield_tables_final_structure
 
+
+	def West15_net(self):
+		""" CC-SN data from the ertl.txt file from Chris West (2015) provided by Alexander Heger
+		
+		Only elements up to Ge are implemented here - but original table has all up to Pb"""
+		
+		data = np.genfromtxt('ertl.txt')	
+		
+		# Index elements
+		indexing['H'] =  ['H1', 'H2']
+		indexing['He'] =  ['He3', 'He4']
+		indexing['Li'] =  ['Li6', 'Li7']
+		indexing['Be'] =  ['Be9']
+		indexing['B'] =  ['B10', 'B11']
+		indexing['C'] =  ['C12', 'C13']
+		indexing['N'] =  ['N14', 'N15']
+		indexing['O'] =  ['O16', 'O17', 'O18']
+		indexing['F'] =  ['F19']
+		indexing['Ne'] =  ['Ne20', 'Ne21', 'Ne22']
+		indexing['Na'] =  ['Na23']
+		indexing['Mg'] =  ['Mg24', 'Mg25', 'Mg26']
+		indexing['Al'] =  ['Al27']
+		indexing['Si'] =  ['Si28', 'Si29', 'Si30']
+		indexing['P'] =  ['P31']
+		indexing['S'] =  ['S32','S33','S34','S36']
+		indexing['Cl'] =  ['Cl35', 'Cl37']
+		indexing['Ar'] =  ['Ar36', 'Ar38', 'Ar40']
+		indexing['K'] =  ['K39', 'K40', 'K41']
+		indexing['Ca'] =  ['Ca40', 'Ca42', 'Ca43', 'Ca44', 'Ca46', 'Ca48']
+		indexing['Sc'] =  ['Sc45']
+		indexing['Ti'] =  ['Ti46', 'Ti47', 'Ti48', 'Ti49', 'Ti50']
+		indexing['V'] =  ['V50', 'V51']
+		indexing['Cr'] =  ['Cr50', 'Cr52', 'Cr53', 'Cr54']
+		indexing['Ni'] =  ['Ni58', 'Ni60', 'Ni61', 'Ni62', 'Ni64']
+		indexing['Cu'] =  ['Cu63', 'Cu65']
+		indexing['Zn'] =  ['Zn64', 'Zn66', 'Zn67', 'Zn68', 'Zn70']
+		indexing['Ga'] =  ['Ga69', 'Ga71']
+		indexing['Ge'] =  ['Ge70', 'Ge72', 'Ge73', 'Ge74', 'Ge76']
+		
 	def Frischknecht16_net(self):
 		""" DO NOT USE!!
 		pre-SN2 yields from Frischknecht et al. 2016. These are implemented for masses of 15-40Msun, for rotating stars.
@@ -960,7 +999,7 @@ class SN2_feedback(object):
 			remnants[0.0001] = [1.62,1.62,2.82,6.38]
 		elif model_type == 'rapid':
 			filename = localpath+'input/yields/NuGrid/H NuGrid yields rapid total.txt'
-			remants = {}
+			remnants = {}
 			remnants[0.02] = [1.44,1.44,2.70,12.81] # Define remnants from metallicities
 			remnants[0.01] = [1.44,1.44,1.83,9.84]
 			remnants[0.006] = [1.44, 1.44, 1.77, 7.84]
@@ -983,7 +1022,7 @@ class SN2_feedback(object):
 		line_end = line_no # Final line
 		
 		# Create list of elements taken from data-file (from first relevant table)
-		data = np.genfromtxt(name,skip_header=int(cuts[0.02][0])+4,
+		data = np.genfromtxt(filename,skip_header=int(cuts[0.02][0])+4,
                              skip_footer=line_end-int(cuts[0.02][0])-83,
                     dtype=['<U8','<U15','<U15','<U15'])
                     

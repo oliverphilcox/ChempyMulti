@@ -274,9 +274,7 @@ class ABUNDANCE_MATRIX(object):
 		for i,item in enumerate(self.elements):
 			if item not in ['H','He']:
 				self.cube['Z'][index] += self.cube[item][index]
-				self.gas_reservoir['Z'][index] += self.gas_reservoir[item][index]
-		if self.gas_reservoir['gas'][index] == 0:
-			return('err')		
+				self.gas_reservoir['Z'][index] += self.gas_reservoir[item][index]	
 		self.cube['Z'][index] = self.cube['Z'][index] / float(self.cube['gas'][index])
 		self.gas_reservoir['Z'][index] = self.gas_reservoir['Z'][index] / float(self.gas_reservoir['gas'][index])		
 		# determine alpha enhancement
