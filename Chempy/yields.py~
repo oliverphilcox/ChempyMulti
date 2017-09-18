@@ -818,8 +818,6 @@ class SN2_feedback(object):
 		
 		Only elements up to Ge are implemented here - but original table has all up to Pb"""
 		
-		data = np.genfromtxt(localpath+'input/yields/West15/ertl.txt')	
-		
 		# Index elements
 		indexing = {}
 		indexing['H'] =  ['H1', 'H2']
@@ -840,17 +838,106 @@ class SN2_feedback(object):
 		indexing['S'] =  ['S32','S33','S34','S36']
 		indexing['Cl'] =  ['Cl35', 'Cl37']
 		indexing['Ar'] =  ['Ar36', 'Ar38', 'Ar40']
-		indexing['K'] =  ['K39', 'K40', 'K41']
-		indexing['Ca'] =  ['Ca40', 'Ca42', 'Ca43', 'Ca44', 'Ca46', 'Ca48']
+		indexing['K'] =  ['K39', 'K41']
+		indexing['Ca'] =  ['K40','Ca40', 'Ca42', 'Ca43', 'Ca44', 'Ca46', 'Ca48']
 		indexing['Sc'] =  ['Sc45']
 		indexing['Ti'] =  ['Ti46', 'Ti47', 'Ti48', 'Ti49', 'Ti50']
 		indexing['V'] =  ['V50', 'V51']
 		indexing['Cr'] =  ['Cr50', 'Cr52', 'Cr53', 'Cr54']
+		indexing['Mn'] =  ['Mn55']
+		indexing['Fe'] =  ['Fe54', 'Fe56', 'Fe57', 'Fe58']
+		indexing['Co'] =  ['Co59']
 		indexing['Ni'] =  ['Ni58', 'Ni60', 'Ni61', 'Ni62', 'Ni64']
 		indexing['Cu'] =  ['Cu63', 'Cu65']
 		indexing['Zn'] =  ['Zn64', 'Zn66', 'Zn67', 'Zn68', 'Zn70']
 		indexing['Ga'] =  ['Ga69', 'Ga71']
 		indexing['Ge'] =  ['Ge70', 'Ge72', 'Ge73', 'Ge74', 'Ge76']
+			  
+		# Load data
+		data = np.genfromtxt('Chempy/input/yields/West15/ertl.txt',skip_header=102,names=True)
+		
+		# Load model parameters
+		z_solar = 0.0153032
+		self.masses = np.unique(data['mass'])
+		scaled_z = np.unique(data['metallicity']) # scaled to solar
+		self.metallicities = scaled_z*z_solar # actual metallicities
+		
+		self.elements = [key for key in indexing.keys()] # list of elements
+				
+		# Output table
+		self.table = {}
+		
+		# Create initial abundances
+		init_abun = {}
+		
+		import os
+		
+		if os.path.exists('Chempy/input/yields/West15/init_abun.npz'):
+			init_file = np.load('Chempy/input/yields/West15/init_abun.npz')
+			for z_in,sc_z in enumerate(scaled_z):
+				init_abun[sc_z] = {}
+				for k,key in enumerate(init_file['keys']):
+					init_abun[sc_z][key] = init_file['datfile'][z_in][k]
+		else: # If not already saved
+			
+			# Import initial abundance package
+			os.chdir('Chempy/input/yields/West15')
+			import gch_wh13
+			os.chdir('../../../../')
+			
+			init_dat = []
+			from matplotlib.cbook import flatten
+			all_isotopes=list(flatten(list(indexing.values())))	
+			for sc_z in scaled_z:
+				init_abun[sc_z] = gch_wh13.GCHWH13(sc_z)
+				init_dat.append(init_abun[sc_z].abu)
+			np.savez('Chempy/input/yields/West15/init_abun.npz',datfile=init_dat,keys=all_isotopes)
+		
+		for z_index,z in enumerate(self.metallicities): # Define table for each metallicity
+		
+			# Initialise subtables
+			yield_subtable = {}
+			yield_subtable['mass_in_remnants'] = []
+			yield_subtable['Mass'] = self.masses
+			for el in self.elements:
+				yield_subtable[el]=[]
+			
+			# Find correct row in table
+			for mass in self.masses:
+				for r,row in enumerate(data):
+					if row['mass'] == mass and row['metallicity']==scaled_z[z_index]:
+						row_index = r
+						break
+				
+				# Add remnant mass fraction
+				remnant = data['remnant'][row_index]
+				yield_subtable['mass_in_remnants'].append(remnant/mass)
+				
+				# Add each isotope into table
+				for element in self.elements:
+					el_net_yield = 0
+					for isotope in indexing[element]: # Sum contributions from each element
+						isotope_net_yield = data[isotope][r]/(mass-remnant)-init_abun[scaled_z[z_index]][isotope]
+						el_net_yield +=isotope_net_yield # combine for total isotope yield
+					yield_subtable[element].append(el_net_yield)
+				   
+			
+			summed_yields = np.zeros(len(self.masses)) # Total net yield - should be approx 1
+			for element in self.elements:
+				yield_subtable[element] = np.asarray(yield_subtable[element])
+				summed_yields+=yield_subtable[element]
+			
+			# Write into yield table
+			yield_subtable['mass_in_remnants'] = np.asarray(yield_subtable['mass_in_remnants'])
+			yield_subtable['unprocessed_mass_in_winds'] = 1.0-yield_subtable['mass_in_remnants']-summed_yields
+					
+			# Restructure table
+			all_keys = ['Mass','mass_in_remnants','unprocessed_mass_in_winds']+self.elements
+			
+			list_of_arrays = [yield_subtable[key] for key in all_keys]
+			restructure_subtable = np.core.records.fromarrays(list_of_arrays,names=all_keys)
+					
+			self.table[z] = restructure_subtable
 		
 	def Frischknecht16_net(self):
 		""" DO NOT USE!!
@@ -976,14 +1063,13 @@ class SN2_feedback(object):
 		# Define final yield table for output
 		self.table = yield_table
 	
-	def NuGrid_net(self):
+	def NuGrid_net(self,model_type='delay'):
 		""" This gives the net SNII yields from the NuGrid collaboration (Ritter et al. 2017 (in prep))
 		Either rapid or delay SN2 yields (Fryer et al. 2012) can be used - changeable via the parameter.
 		
 		Delay models are chosen for good match with the Fe yields of Nomoto et al. (2006) and Chieffi & Limongi (2004)		
 		"""
 		
-		model_type = 'delay' # Controls model type - this can be 'delay' or 'rapid'
 		
 		# Create list of masses and metallicites:
 		self.masses = [12.0,15.0,20.0,25.0]

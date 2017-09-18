@@ -838,8 +838,8 @@ class SN2_feedback(object):
 		indexing['S'] =  ['S32','S33','S34','S36']
 		indexing['Cl'] =  ['Cl35', 'Cl37']
 		indexing['Ar'] =  ['Ar36', 'Ar38', 'Ar40']
-		indexing['K'] =  ['K39', 'K40', 'K41']
-		indexing['Ca'] =  ['Ca40', 'Ca42', 'Ca43', 'Ca44', 'Ca46', 'Ca48']
+		indexing['K'] =  ['K39', 'K41']
+		indexing['Ca'] =  ['K40','Ca40', 'Ca42', 'Ca43', 'Ca44', 'Ca46', 'Ca48']
 		indexing['Sc'] =  ['Sc45']
 		indexing['Ti'] =  ['Ti46', 'Ti47', 'Ti48', 'Ti49', 'Ti50']
 		indexing['V'] =  ['V50', 'V51']
@@ -1063,14 +1063,13 @@ class SN2_feedback(object):
 		# Define final yield table for output
 		self.table = yield_table
 	
-	def NuGrid_net(self):
+	def NuGrid_net(self,model_type='delay'):
 		""" This gives the net SNII yields from the NuGrid collaboration (Ritter et al. 2017 (in prep))
-		Either rapid or delay SN2 yields (Fryer et al. 2012) can be used - changeable via the parameter.
+		Either rapid or delay SN2 yields (Fryer et al. 2012) can be used - changeable via the model_type parameter.
 		
 		Delay models are chosen for good match with the Fe yields of Nomoto et al. (2006) and Chieffi & Limongi (2004)		
 		"""
 		
-		model_type = 'delay' # Controls model type - this can be 'delay' or 'rapid'
 		
 		# Create list of masses and metallicites:
 		self.masses = [12.0,15.0,20.0,25.0]
