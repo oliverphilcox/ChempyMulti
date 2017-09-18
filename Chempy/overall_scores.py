@@ -164,7 +164,7 @@ def overall_Hogg():
 				element_mean = element_mean,
 				element_sigma = element_sigma)	
 	
-	rescaled_score = np.power(overall_score,1./len(starting_el)	
+	rescaled_score = np.power(overall_score,1./len(starting_el))
 			
 	np.save("OverallScores/Hogg_score_rescaled - "+str(a.yield_table_name_sn2)+\
 	","+str(a.yield_table_name_agb)+", "+str(a.yield_table_name_1a)+".npy",rescaled_score)

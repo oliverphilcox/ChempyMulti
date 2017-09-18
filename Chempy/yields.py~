@@ -1065,7 +1065,7 @@ class SN2_feedback(object):
 	
 	def NuGrid_net(self,model_type='delay'):
 		""" This gives the net SNII yields from the NuGrid collaboration (Ritter et al. 2017 (in prep))
-		Either rapid or delay SN2 yields (Fryer et al. 2012) can be used - changeable via the parameter.
+		Either rapid or delay SN2 yields (Fryer et al. 2012) can be used - changeable via the model_type parameter.
 		
 		Delay models are chosen for good match with the Fe yields of Nomoto et al. (2006) and Chieffi & Limongi (2004)		
 		"""
@@ -1157,6 +1157,71 @@ class SN2_feedback(object):
 		# Yield table output is self.table
     	
     	
+	def TNG_net(self):
+		""" This loads the CC-SN yields used in the Illustris TNG simulation.
+		This includes Kobayashi (2006) and Portinari (1998) tables - see Pillepich et al. 2017"""  
+		
+		import h5py as h5
+		filename = localpath+'input/yields/TNG/SNII.hdf5'
+		# Read H5 file
+		f = h5.File(filename, "r")
+		
+		# Define element indexing			
+		indexing = {}
+		indexing['H'] = 'Hydrogen'
+		indexing['He'] = 'Helium'
+		indexing['C'] = 'Carbon'
+		indexing['N']= 'Nitrogen'
+		indexing['O'] = 'Oxygen'
+		indexing['Ne'] = 'Neon'
+		indexing['Mg'] = 'Magnesium'
+		indexing['Si'] = 'Silicon'
+		indexing['S'] = 'Sulphur' # Not used by TNG simulation
+		indexing['Ca'] = 'Calcium' # Not used by TNG simulation
+		indexing['Fe'] = 'Iron'
+		
+		self.elements = list(indexing.keys())
+		
+		self.table = {}
+		
+		# Define masses / metallicities
+		self.metallicities = list(f['Metallicities'].value)
+		self.masses = f['Masses'].value
+
+ 	
+		for z_index,z in enumerate(self.metallicities):
+		    
+			yield_subtable = {}
+		    
+			z_name = f['Yield_names'].value[z_index].decode('utf-8')
+			z_data = f['Yields/'+z_name+'/Yield']
+		     
+			ejecta_mass = f['Yields/'+z_name+'/Ejected_mass'].value
+		    
+			yield_subtable['Mass'] = self.masses
+			remnants = self.masses-ejecta_mass
+			yield_subtable['mass_in_remnants'] = np.divide(remnants,self.masses)
+			for el in list(indexing.keys()):
+				yield_subtable[el] = np.zeros(len(self.masses))
+		     
+			summed_yields = np.zeros(len(self.masses))
+		        
+			for m_index,mass in enumerate(self.masses):
+				for el_index,el in enumerate(self.elements):
+					el_yield_fraction = z_data[el_index][m_index]/(mass-remnants[m_index]) # Find fraction of ejecta per element
+					summed_yields[m_index]+=el_yield_fraction # Compute total yield
+		         
+			yield_subtable['unprocessed_mass_in_winds'] = 1.-summed_yields-yield_subtable['mass_in_remnants']
+		    
+		     
+			# Restructure table
+			all_keys = ['Mass','mass_in_remnants','unprocessed_mass_in_winds']+self.elements
+		
+			list_of_arrays = [yield_subtable[key] for key in all_keys]
+			restructure_subtable = np.core.records.fromarrays(list_of_arrays,names=all_keys)
+		
+			self.table[z] = restructure_subtable
+			    
 #######################
 class AGB_feedback(object):
 	def __init__(self):   
