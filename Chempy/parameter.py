@@ -344,7 +344,7 @@ class ModelParameters(object):
 	neurons = 30 # 20# Number of neurons in layer
 	learning_rate = 0.007  # Default Adam neural network learning rate
 	
-	epochs = 1000 # Number of epochs used in testing
+	epochs = 5000 # Number of epochs used in testing
 	
 	# (These are common elements between proto-sun and Chempy traced elements)
 	sol_dat=np.load('Chempy/input/stars/'+stellar_identifier+'.npy')	
