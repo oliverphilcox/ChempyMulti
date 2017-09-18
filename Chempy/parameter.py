@@ -233,8 +233,8 @@ class ModelParameters(object):
 	# 28 elements	
 	element_names = ['He', 'C', 'N', 'O', 'F','Ne','Na', 'Mg', 'Al', 'Si', 'P','S', 'Cl', 'Ar', 'K', 'Ca', 'Sc', 'Ti', 'V', 'Cr', 'Mn', 'Fe', 'Co', 'Ni','Cu','Zn','Ga','Ge']#, 'Zn','Y', 'Ba']# Runs with sun
 	
-	#elements_to_trace = ['Al', 'Ar', 'C', 'Ca', 'Cl', 'Co', 'Cr', 'Cu', 'F', 'Fe', 'Ga', 'Ge', 'H', 'He', 'K', 'Mg', 'Mn', 'N', 'Na', 'Ne', 'Ni', 'O', 'P', 'S', 'Sc', 'Si', 'Ti', 'V', 'Zn']
-	elements_to_trace=['C','Fe','H','He','Mg','N','Ne','O','Si']
+	elements_to_trace = ['Al', 'Ar', 'C', 'Ca', 'Cl', 'Co', 'Cr', 'Cu', 'F', 'Fe', 'Ga', 'Ge', 'H', 'He', 'K', 'Mg', 'Mn', 'N', 'Na', 'Ne', 'Ni', 'O', 'P', 'S', 'Sc', 'Si', 'Ti', 'V', 'Zn']
+	#elements_to_trace=['C','Fe','H','He','Mg','N','Ne','O','Si']
 
 	#observational_constraints_index = ['sol_norm']#['gas_reservoir','sn_ratio','sol_norm']#,'wildcard ','cas','arcturus','stars_at_end', 'plot_processes', 'save_abundances', 'elements']
 	arcturus_age = 7.1# 7.1 +1.5 -1.2
@@ -247,7 +247,7 @@ class ModelParameters(object):
 	# If some parameter is in to optimise there needs to be a prior and constraints defined
 	if True:
 		#prior
-		SSP_parameters =  [1.0,-2.29,-2.75]#[5.0,-2.29 ,-2.75 ]#,	-0.8 ]#,0.2]#, 0.7, 0.3, 0.0]
+		SSP_parameters =  [-2.29,-2.75]#[5.0,-2.29 ,-2.75 ]#,	-0.8 ]#,0.2]#, 0.7, 0.3, 0.0]
 		SSP_parameters_to_optimize = ['log10_beta','high_mass_slope','log10_N_0']#['beta_param', 'high_mass_slope', 'log10_N_0']#, 'log10_sn1a_time_delay']#,'log10_sfr_factor_for_cosmic_accretion']#,'log10_gas_reservoir_mass_factor','log10_a_parameter','log10_gas_power']
 	else:
 		SSP_parameters = []
@@ -255,7 +255,7 @@ class ModelParameters(object):
 	assert len(SSP_parameters) == len(SSP_parameters_to_optimize)
 	if True:
 		#prior
-		ISM_parameters =  [-0.3, 0.55,	0.5]#, 0.3]#,0.2]#, 0.7, 0.3, 0.0]
+		ISM_parameters =  [0.55,	0.5]#, 0.3]#,0.2]#, 0.7, 0.3, 0.0]
 		ISM_parameters_to_optimize = ['log10_starformation_efficiency', 'log10_sfr_scale', 'outflow_feedback_fraction']#,'log10_gas_reservoir_mass_factor']#,'log10_sfr_factor_for_cosmic_accretion']#,'log10_gas_reservoir_mass_factor','log10_a_parameter','log10_gas_power']
 	else:
 		ISM_parameters = []
@@ -355,7 +355,7 @@ class ModelParameters(object):
 
 	color_max = 0.02 # Maximum color in error plots	
 	
-	UseNeural = True # This defines whether to use trained network in place of Chempy
+	UseNeural = False # This defines whether to use trained network in place of Chempy
 	
 	test_size = 3000 # Number of elements in test set
 	
@@ -371,8 +371,8 @@ class ModelParameters(object):
 	## THIS IS FULL LIST OF NAMES THAT DOES NOT CHANGE IN HOGG SCORING. CHANGE THIS WHEN CHANGING TOTAL NUMBER OF ELEMENTS
 	#full_names = ['Al', 'Ar', 'B', 'Be', 'C', 'Ca', 'Cl', 'Co', 'Cr', 'Cu', 'F', 'Fe', 'Ga', 'Ge', 'H', 'He', 'K', 'Li', 'Mg', 'Mn', 'N', 'Na', 'Ne', 'Ni', 'O', 'P', 'S', 'Sc', 'Si', 'Ti', 'V', 'Zn']
 	# List of all names initially output by neural network
-	#initial_neural_names = ['Al', 'Ar', 'C', 'Ca', 'Cl', 'Co', 'Cr', 'Cu', 'F', 'Fe', 'Ga', 'Ge', 'He', 'K', 'Mg', 'Mn', 'N', 'Na', 'Ne', 'Ni', 'O', 'P', 'S', 'Sc', 'Si', 'Ti', 'V', 'Zn']
-	initial_neural_names = ['C','Fe','He','Mg','N','Ne','O','Si']
+	initial_neural_names = ['Al', 'Ar', 'C', 'Ca', 'Cl', 'Co', 'Cr', 'Cu', 'F', 'Fe', 'Ga', 'Ge', 'He', 'K', 'Mg', 'Mn', 'N', 'Na', 'Ne', 'Ni', 'O', 'P', 'S', 'Sc', 'Si', 'Ti', 'V', 'Zn']
+	#initial_neural_names = ['C','Fe','He','Mg','N','Ne','O','Si']
 	
 	
 	

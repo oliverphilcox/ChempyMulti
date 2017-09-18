@@ -917,7 +917,7 @@ class SN2_feedback(object):
 				for element in self.elements:
 					el_net_yield = 0
 					for isotope in indexing[element]: # Sum contributions from each element
-						isotope_net_yield = data[isotope][r]/(mass-remnant)-init_abun[scaled_z[z_index]][isotope]
+						isotope_net_yield = data[isotope][r]/mass-init_abun[scaled_z[z_index]][isotope]*(mass-remnant)/mass
 						el_net_yield +=isotope_net_yield # combine for total isotope yield
 					yield_subtable[element].append(el_net_yield)
 				   
@@ -1134,8 +1134,8 @@ class SN2_feedback(object):
 					el_name = str(line[0][1:]) # Name of element
 					el_yield = float(line[1][1:]) # Yield in Msun
 					el_init = float(line[2][1:]) # Initial mass fraction 
-					
-					yield_subtable[el_name].append(el_yield/unprocessed_mass-el_init) # Net mass fraction
+					el_net = el_yield-el_init*unprocessed_mass
+					yield_subtable[el_name].append(el_net/mass) # Net mass fraction
 					  			
 	  		# Calculate summed net yield - should be approximately 0	
 			summed_yields = np.zeros(len(self.masses))
@@ -1207,7 +1207,7 @@ class SN2_feedback(object):
 		        
 			for m_index,mass in enumerate(self.masses):
 				for el_index,el in enumerate(self.elements):
-					el_yield_fraction = z_data[el_index][m_index]/(mass-remnants[m_index]) # Find fraction of ejecta per element
+					el_yield_fraction = z_data[el_index][m_index]/mass #(mass-remnants[m_index]) # Find fraction of ejecta per element
 					yield_subtable[el][m_index] = el_yield_fraction					
 					summed_yields[m_index]+=el_yield_fraction # Compute total yield
 		         
