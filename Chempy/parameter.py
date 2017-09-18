@@ -255,7 +255,7 @@ class ModelParameters(object):
 	assert len(SSP_parameters) == len(SSP_parameters_to_optimize)
 	if True:
 		#prior
-		ISM_parameters =  [0.55,	0.5]#, 0.3]#,0.2]#, 0.7, 0.3, 0.0]
+		ISM_parameters =  [-0.3,0.55,	0.5]#, 0.3]#,0.2]#, 0.7, 0.3, 0.0]
 		ISM_parameters_to_optimize = ['log10_starformation_efficiency', 'log10_sfr_scale', 'outflow_feedback_fraction']#,'log10_gas_reservoir_mass_factor']#,'log10_sfr_factor_for_cosmic_accretion']#,'log10_gas_reservoir_mass_factor','log10_a_parameter','log10_gas_power']
 	else:
 		ISM_parameters = []
