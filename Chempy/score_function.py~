@@ -440,7 +440,7 @@ def Hogg_stitch():
 		temp.close()
 	np.savez("Scores/Hogg_score - "+str(a.yield_table_name_sn2)+", "+str(a.yield_table_name_agb)+", "+str(a.yield_table_name_1a)+".npz",
 				beta_param=beta,
-				score=score)
+				score=score,rescaled_score=rescaled_score)
 		
 	return beta,score
 	
