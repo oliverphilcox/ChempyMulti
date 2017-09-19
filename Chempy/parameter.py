@@ -45,7 +45,7 @@ class ModelParameters(object):
 	error_marginalization = True # Marginalizing over the model error or using the best model error value
 	flat_model_error_prior = [0.,1.,51] # Flat prior for the error marginalization [begin, end, number of evaluations inbetween]
 	
-	beta_param = 'y'#np.inf#1. # This can be set as constant here, or let to vary in the below prior
+	beta_param = 'not fixed'#np.inf#1. # This can be set as constant here, or let to vary in the below prior
 	
 	# This is the rescalable beta parameter controlling model error (default is 10)
 	beta_error_distribution = [True, 1, beta_param] # Instead of a flat prior for the error marginalization we use a beta distribution with a = 1 and b = 3 as default (wikipedia and scipy have the same parametrization) putting more weight to small model errors
@@ -79,7 +79,7 @@ class ModelParameters(object):
 		S_0 = 1#45.07488
 		a_parameter = 2
 		sfr_beginning = 0
-		sfr_scale = 3.5 # SFR peak in Gyr for a = 2
+		sfr_scale = 10**0.55 #3.5 # SFR peak in Gyr for a = 2
 	elif basic_sfr_name == 'prescribed':
 		mass_factor = 1.
 		name_of_file = 'input/Daniel_Weisz/ic1613.lcid.final.sfh'
@@ -95,7 +95,7 @@ class ModelParameters(object):
 	basic_infall_name_list = ["exponential","constant","sfr_related","peaked_sfr","gamma_function"]
 	basic_infall_index = 2
 	basic_infall_name = basic_infall_name_list[basic_infall_index]
-	starformation_efficiency = 0.
+	starformation_efficiency = 10**-0.3 #0.
 	gas_power = 0.
 	if basic_infall_name == 'sfr_related':
 		starformation_efficiency = np.power(10,-0.3)
@@ -113,7 +113,7 @@ class ModelParameters(object):
 		infall_scale = 3.3
 
 	yield_table_name_sn2_list = ['chieffi04','Nugrid','Nomoto2013','Portinari', 'chieffi04_net', 'Nomoto2013_net','Frischknecht16_net','NuGrid_net','West17_net','TNG_net']
-	yield_table_name_sn2_index = 7
+	yield_table_name_sn2_index = 9
 	yield_table_name_sn2 = yield_table_name_sn2_list[yield_table_name_sn2_index]
 
 	yield_table_name_hn_list = ['Nomoto2013']
@@ -122,11 +122,11 @@ class ModelParameters(object):
 
 	##### Karakas2016 needs much more calculational resources (order of magnitude) using 2010 net yields from Karakas are faster and only N is significantly underproduced
 	yield_table_name_agb_list = ['Karakas','Nugrid','Karakas_net_yield','Ventura','Karakas16_net','TNG_net']
-	yield_table_name_agb_index = 2
+	yield_table_name_agb_index = 4
 	yield_table_name_agb = yield_table_name_agb_list[yield_table_name_agb_index]
 
 	yield_table_name_1a_list = ['Iwamoto','Thielemann','Seitenzahl','TNG']
-	yield_table_name_1a_index = 2
+	yield_table_name_1a_index = 3
 	yield_table_name_1a = yield_table_name_1a_list[yield_table_name_1a_index]
 
 	mmin = 0.1
@@ -180,7 +180,7 @@ class ModelParameters(object):
 	sn2_to_hn = 1.
 
 	sn2mmin = 8.
-	sn2mmax = 40.
+	sn2mmax = 100.#40.
 
 	bhmmin = float(sn2mmax) ## maximum of hypernova
 	bhmmax = float(mmax) ## maximum of the IMF
@@ -198,7 +198,7 @@ class ModelParameters(object):
 	time_delay_functional_form = time_delay_functional_form_list[time_delay_index]
 	if time_delay_functional_form == 'maoz':
 		N_0 = np.power(10,-2.75)
-		sn1a_time_delay = np.power(10,-0.8)
+		sn1a_time_delay = 0.04#np.power(10,-0.8)
 		sn1a_exponent = 1.12
 		dummy = 0.0
 		sn1a_parameter = [N_0,sn1a_time_delay,sn1a_exponent,dummy]
@@ -249,7 +249,7 @@ class ModelParameters(object):
 	# If some parameter is in to optimise there needs to be a prior and constraints defined
 	if True:
 		#prior
-		SSP_parameters =  [1.0,-2.29,-2.75]#[5.0,-2.29 ,-2.75 ]#,	-0.8 ]#,0.2]#, 0.7, 0.3, 0.0]
+		SSP_parameters =  [1.0,-2.3,-2.75]#[5.0,-2.29 ,-2.75 ]#,	-0.8 ]#,0.2]#, 0.7, 0.3, 0.0]
 		SSP_parameters_to_optimize = ['log10_beta','high_mass_slope','log10_N_0']#['beta_param', 'high_mass_slope', 'log10_N_0']#, 'log10_sn1a_time_delay']#,'log10_sfr_factor_for_cosmic_accretion']#,'log10_gas_reservoir_mass_factor','log10_a_parameter','log10_gas_power']
 	else:
 		SSP_parameters = []
@@ -257,8 +257,8 @@ class ModelParameters(object):
 	assert len(SSP_parameters) == len(SSP_parameters_to_optimize)
 	if True:
 		#prior
-		ISM_parameters =  [-0.3,0.55,	0.5]#, 0.3]#,0.2]#, 0.7, 0.3, 0.0]
-		ISM_parameters_to_optimize = ['log10_starformation_efficiency', 'log10_sfr_scale', 'outflow_feedback_fraction']#,'log10_gas_reservoir_mass_factor']#,'log10_sfr_factor_for_cosmic_accretion']#,'log10_gas_reservoir_mass_factor','log10_a_parameter','log10_gas_power']
+		ISM_parameters =  []#[-0.3,0.55,	0.5]#, 0.3]#,0.2]#, 0.7, 0.3, 0.0]
+		ISM_parameters_to_optimize = []#['log10_starformation_efficiency', 'log10_sfr_scale', 'outflow_feedback_fraction']#,'log10_gas_reservoir_mass_factor']#,'log10_sfr_factor_for_cosmic_accretion']#,'log10_gas_reservoir_mass_factor','log10_a_parameter','log10_gas_power']
 	else:
 		ISM_parameters = []
 		ISM_parameters_to_optimize = []
