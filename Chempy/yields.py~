@@ -917,7 +917,7 @@ class SN2_feedback(object):
 				for element in self.elements:
 					el_net_yield = 0
 					for isotope in indexing[element]: # Sum contributions from each element
-						isotope_net_yield = data[isotope][r]/(mass-remnant)-init_abun[scaled_z[z_index]][isotope]
+						isotope_net_yield = data[isotope][r]/mass-init_abun[scaled_z[z_index]][isotope]*(mass-remnant)/mass
 						el_net_yield +=isotope_net_yield # combine for total isotope yield
 					yield_subtable[element].append(el_net_yield)
 				   

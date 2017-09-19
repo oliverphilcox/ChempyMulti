@@ -1229,6 +1229,76 @@ class AGB_feedback(object):
 		This is the object that holds the feedback table for agb stars.
                 The different methods load different tables from the literature. They are in the input/yields/ folder.
 		"""
+		
+	def TNG_net(self):
+		""" This gives the yields used in the IllustrisTNG simulation (see Pillepich et al. 2017)
+		These are net yields, and a combination of Karakas (2006), Doherty et al. (2014) & Fishlock et al. (2014)
+		These were provided by Annalisa herself.		
+		"""
+		import h5py as h5
+		filename = 'AGB.hdf5'
+		# Read H5 file
+		f = h5.File(filename, "r")
+
+		indexing = {}
+		indexing['H'] = 'Hydrogen'
+		indexing['He'] = 'Helium'
+		indexing['C'] = 'Carbon'
+		indexing['N']= 'Nitrogen'
+		indexing['O'] = 'Oxygen'
+		indexing['Ne'] = 'Neon'
+		indexing['Mg'] = 'Magnesium'
+		indexing['Si'] = 'Silicon'
+		indexing['S'] = 'Sulphur' # Not used by TNG simulation
+		indexing['Ca'] = 'Calcium' # Not used by TNG simulation
+		indexing['Fe'] = 'Iron'
+
+		elements = list(indexing.keys())
+		
+		table = {}
+		
+		metallicities = list(f['Metallicities'].value)
+		masses = f['Masses'].value
+		
+
+		for z_index,z in enumerate(metallicities):
+ 
+			yield_subtable = {}
+			 
+			z_name = f['Yield_names'].value[z_index].decode('utf-8')
+			z_data = f['Yields/'+z_name+'/Yield']
+			  
+			ejecta_mass = f['Yields/'+z_name+'/Ejected_mass'].value
+			 
+			yield_subtable['Mass'] = masses
+			remnants = masses-ejecta_mass
+			yield_subtable['mass_in_remnants'] = np.divide(remnants,masses)
+			for el in list(indexing.keys()):
+				yield_subtable[el] = np.zeros(len(masses))
+			  
+			summed_yields = np.zeros(len(masses))
+			  
+			for m_index,mass in enumerate(masses):
+				for el_index,el in enumerate(elements):
+					el_yield = z_data[el_index][m_index]
+					el_yield_fraction = el_yield/mass
+					yield_subtable[el][m_index] = el_yield_fraction
+					summed_yields[m_index]+=el_yield_fraction
+			 
+			yield_subtable['unprocessed_mass_in_winds'] = 1.-summed_yields-yield_subtable['mass_in_remnants']
+			 
+			 
+			table[z.astype(float)] = yield_subtable
+			 
+			# Restructure table
+			all_keys = ['Mass','mass_in_remnants','unprocessed_mass_in_winds']+elements
+			
+			list_of_arrays = [yield_subtable[key] for key in all_keys]
+			restructure_subtable = np.core.records.fromarrays(list_of_arrays,names=all_keys)
+			
+			table[z] = restructure_subtable
+			
+			
 	def Ventura(self):
 		"""
 		Ventura 2013 net yields from Paolo himself
