@@ -198,7 +198,7 @@ class ModelParameters(object):
 	time_delay_functional_form = time_delay_functional_form_list[time_delay_index]
 	if time_delay_functional_form == 'maoz':
 		N_0 = np.power(10,-2.75)
-		sn1a_time_delay = np.power(10,-0.8)
+		sn1a_time_delay = 0.04#np.power(10,-0.8)
 		sn1a_exponent = 1.12
 		dummy = 0.0
 		sn1a_parameter = [N_0,sn1a_time_delay,sn1a_exponent,dummy]
