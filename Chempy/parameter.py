@@ -357,7 +357,7 @@ class ModelParameters(object):
 
 	color_max = 0.02 # Maximum color in error plots	
 	
-	UseNeural = True # This defines whether to use trained network in place of Chempy
+	UseNeural = False # This defines whether to use trained network in place of Chempy
 	
 	test_size = 3000 # Number of elements in test set
 	
