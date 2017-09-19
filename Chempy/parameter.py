@@ -32,8 +32,8 @@ class ModelParameters(object):
 	stellar_identifier = 'Proto-sun_all'#'Proto-sun'
 
 	# Convergense parameters of minimization and MCMC
-	maxiter_minimization = 500
-	min_mcmc_iterations = 300
+	maxiter_minimization = 500#500
+	min_mcmc_iterations = 300#300
 	mcmc_tolerance = 0.5
 	gibbs_sampler_tolerance = 1e-1
 	gibbs_sampler_maxiter = 10
@@ -41,7 +41,7 @@ class ModelParameters(object):
 	nwalkers = 64
 	mburn = 1
 	save_state_every = 1
-	m = 1000 # For 7 free parameters 300 iterations are usually enough. The mcmc routine is stopping after 300 if the posterior mean is converged for more than 200 iterations.
+	m = 1000#1000 # For 7 free parameters 300 iterations are usually enough. The mcmc routine is stopping after 300 if the posterior mean is converged for more than 200 iterations.
 	error_marginalization = True # Marginalizing over the model error or using the best model error value
 	flat_model_error_prior = [0.,1.,51] # Flat prior for the error marginalization [begin, end, number of evaluations inbetween]
 	beta_param = 1.
@@ -61,7 +61,7 @@ class ModelParameters(object):
 	testing_output = False
 	summary_pdf = False
 	name_string = 'Chempy_default'
-	parameter_names = [r'$\alpha_\mathrm{IMF}$',r'$\log_{10}\left(\mathrm{N}_\mathrm{Ia}\right)$',r'$\log_{10}\left(\tau_\mathrm{Ia}\right)$',r'$\log_{10}\left(\mathrm{SFE}\right)$',r'$\log_{10}\left(\mathrm{SFR}_\mathrm{peak}\right)$',r'$\mathrm{x}_\mathrm{out}$']
+	parameter_names = [r'$\log_{10}\beta$',r'$\alpha_\mathrm{IMF}$',r'$\log_{10}\left(\mathrm{N}_\mathrm{Ia}\right)$',r'$\log_{10}\left(\mathrm{SFE}\right)$',r'$\log_{10}\left(\mathrm{SFR}_\mathrm{peak}\right)$',r'$\mathrm{x}_\mathrm{out}$']
 	# SFR still model A from Just&Jahreiss 2010 should be changed
 	# arbitrary function can be implemented here
 	basic_sfr_name_list = ['model_A','gamma_function','prescribed', 'doubly_peaked']
@@ -111,7 +111,7 @@ class ModelParameters(object):
 		infall_scale = 3.3
 
 	yield_table_name_sn2_list = ['chieffi04','Nugrid','Nomoto2013','Portinari', 'chieffi04_net', 'Nomoto2013_net','Frischknecht16_net','NuGrid_net','West17_net','TNG_net']
-	yield_table_name_sn2_index = 9
+	yield_table_name_sn2_index = 7
 	yield_table_name_sn2 = yield_table_name_sn2_list[yield_table_name_sn2_index]
 
 	yield_table_name_hn_list = ['Nomoto2013']
@@ -119,11 +119,11 @@ class ModelParameters(object):
 	yield_table_name_hn = yield_table_name_hn_list[yield_table_name_hn_index]
 
 	##### Karakas2016 needs much more calculational resources (order of magnitude) using 2010 net yields from Karakas are faster and only N is significantly underproduced
-	yield_table_name_agb_list = ['Karakas','Nugrid','Karakas_net_yield','Ventura','Karakas16_net']
+	yield_table_name_agb_list = ['Karakas','Nugrid','Karakas_net_yield','Ventura','Karakas16_net','TNG_net']
 	yield_table_name_agb_index = 2
 	yield_table_name_agb = yield_table_name_agb_list[yield_table_name_agb_index]
 
-	yield_table_name_1a_list = ['Iwamoto','Thielemann','Seitenzahl']
+	yield_table_name_1a_list = ['Iwamoto','Thielemann','Seitenzahl','TNG']
 	yield_table_name_1a_index = 2
 	yield_table_name_1a = yield_table_name_1a_list[yield_table_name_1a_index]
 

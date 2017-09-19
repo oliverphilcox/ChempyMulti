@@ -2,9 +2,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 import os
 from . import localpath
+from .parameter import ModelParameters
+param = ModelParameters()
 
-def restructure_chain(directory , parameter_names = [r'$\alpha_\mathrm{IMF}$',r'$\log_{10}\left(\mathrm{N}_\mathrm{Ia}\right)$',r'$\log_{10}\left(\tau_\mathrm{Ia}\right)$',r'$\log_{10}\left(\mathrm{SFE}\right)$',r'$\log_{10}\left(\mathrm{SFR}_\mathrm{peak}\right)$',r'$\mathrm{x}_\mathrm{out}$']):
-	'''
+def restructure_chain(directory ,parameter_names=param.parameter_names): #parameter_names = [r'$\alpha_\mathrm{IMF}$',r'$\log_{10}\left(\mathrm{N}_\mathrm{Ia}\right)$',r'$\log_{10}\left(\tau_\mathrm{Ia}\right)$',r'$\log_{10}\left(\mathrm{SFE}\right)$',r'$\log_{10}\left(\mathrm{SFR}_\mathrm{peak}\right)$',r'$\mathrm{x}_\mathrm{out}$']):	'''
 	This function restructures the chains and blobs coming from the emcee routine so that we have a flattened posterior PDF in the end.
 	
 	The following files need to be there: flatchain, flatlnprobability, flatmeanposterior and flatstdposterior. flatblobs is optional
@@ -330,7 +331,7 @@ def plot_mcmc_chain_with_prior(directory, use_prior = False, only_first_star = T
 
 	if use_prior:
 		from Chempy.cem_function import gaussian
-		prior = [[-2.3, 0.3],[-2.75,0.3],[-0.8,0.3],[-0.3,0.3],[0.55,0.1],[0.5,0.1]]
+		prior = [[1.0,0.5],[-2.3, 0.3],[-2.75,0.3],[-0.3,0.3],[0.55,0.1],[0.5,0.1]]
 		prior = np.array(prior)
 
 	import corner

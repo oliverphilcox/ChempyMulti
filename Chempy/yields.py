@@ -28,6 +28,88 @@ class SN1a_feedback(object):
 		
 		         'elements' yield in Msun normalised to Mass. i.e. integral over all elements is unity 
 		"""
+	
+	
+	def TNG(self):
+		""" IllustrisTNG yield tables from Pillepich et al. 2017.
+		These are the 1997 Nomoto W7 models, and sum all isotopes (not just stable)"""
+		
+		import h5py as h5
+		filename = localpath+'input/yields/TNG/SNIa.hdf5'
+		# Read H5 file
+		f = h5.File(filename, "r")
+		
+		indexing = {}
+		indexing['H'] = 'Hydrogen'
+		indexing['He'] = 'Helium'
+		indexing['Li'] = 'Lithium'
+		indexing['Be'] = 'Beryllium'
+		indexing['B'] = 'Boron'
+		indexing['C'] = 'Carbon'
+		indexing['N'] = 'Nitrogen'
+		indexing['O'] = 'Oxygen'
+		indexing['F'] = 'Fluorine'
+		indexing['Ne'] = 'Neon'
+		indexing['Na'] = 'Sodium'
+		indexing['Mg'] = 'Magnesium'
+		indexing['Al'] = 'Aluminum'
+		indexing['Si'] = 'Silicon'
+		indexing['P'] = 'Phosphorus'
+		indexing['S'] = 'Sulphur'
+		indexing['Cl'] = 'Chlorine'
+		indexing['Ar'] = 'Argon'
+		indexing['K'] = 'Potassium'
+		indexing['Ca'] = 'Calcium'
+		indexing['Sc'] = 'Scandium'
+		indexing['Ti'] = 'Titanium'
+		indexing['V'] = 'Vanadium'
+		indexing['Cr'] = 'Chromium'
+		indexing['Mn'] = 'Manganese'
+		indexing['Fe'] = 'Iron'
+		indexing['Co'] = 'Cobalt'
+		indexing['Ni'] = 'Nickel'
+		indexing['Cu'] = 'Copper'
+		indexing['Zn'] = 'Zinc'
+		indexing['Ga'] = 'Gallium'
+		indexing['Ge'] = 'Germanium'
+		indexing['As'] = 'Arsenic'
+		indexing['Se'] = 'Selenium'
+		indexing['Br'] = 'Bromine'
+		indexing['Kr'] = 'Krypton'
+		indexing['Rb'] = 'Rubidium'
+		indexing['Sr'] = 'Strontium'
+		indexing['Y'] = 'Yttrium'
+		indexing['Zr'] = 'Zirconium'
+		indexing['Nb'] = 'Niobium'
+		indexing['Mo'] = 'Molybdenum'
+		
+		
+		self.elements = list(indexing.keys())
+		
+		self.table = {}
+		
+		self.metallicities = list([0.02]) # arbitrary since only one value
+		self.masses = list([np.sum(f['Yield'].value)]) # sum of all yields
+		
+		names = ['Mass','mass_in_remnants']+self.elements
+		
+		yield_subtable = {}
+		
+		base = np.zeros(len(self.masses))
+		list_of_arrays = []
+		for i in range(len(names)):
+		    list_of_arrays.append(base)
+		    
+		yield_subtable = np.core.records.fromarrays(list_of_arrays,names=names)
+		
+		yield_subtable['Mass'] = self.masses
+		yield_subtable['mass_in_remnants'] = [-1*m for m in self.masses]
+		
+		for el_index,el in enumerate(self.elements):
+		    yield_subtable[el] = np.divide(f['Yield'][el_index],self.masses)
+		
+		self.table[self.metallicities[0]] = yield_subtable	
+	
 	def Seitenzahl(self):
 		"""
 		Seitenzahl 2013 from Ivo txt
@@ -1233,10 +1315,12 @@ class AGB_feedback(object):
 	def TNG_net(self):
 		""" This gives the yields used in the IllustrisTNG simulation (see Pillepich et al. 2017)
 		These are net yields, and a combination of Karakas (2006), Doherty et al. (2014) & Fishlock et al. (2014)
-		These were provided by Annalisa herself.		
+		These were provided by Annalisa herself.	
+		
+		This is indexing backwards in mass (high to low) to match with Karakas tables	
 		"""
 		import h5py as h5
-		filename = 'AGB.hdf5'
+		filename = localpath+'input/yields/TNG/AGB.hdf5'
 		# Read H5 file
 		f = h5.File(filename, "r")
 
@@ -1253,15 +1337,15 @@ class AGB_feedback(object):
 		indexing['Ca'] = 'Calcium' # Not used by TNG simulation
 		indexing['Fe'] = 'Iron'
 
-		elements = list(indexing.keys())
+		self.elements = list(indexing.keys())
 		
-		table = {}
+		self.table = {}
 		
-		metallicities = list(f['Metallicities'].value)
-		masses = f['Masses'].value
+		self.metallicities = list(f['Metallicities'].value)
+		self.masses = f['Masses'].value
 		
 
-		for z_index,z in enumerate(metallicities):
+		for z_index,z in enumerate(self.metallicities):
  
 			yield_subtable = {}
 			 
@@ -1270,17 +1354,17 @@ class AGB_feedback(object):
 			  
 			ejecta_mass = f['Yields/'+z_name+'/Ejected_mass'].value
 			 
-			yield_subtable['Mass'] = masses
-			remnants = masses-ejecta_mass
-			yield_subtable['mass_in_remnants'] = np.divide(remnants,masses)
+			yield_subtable['Mass'] = list(reversed(self.masses))
+			remnants = self.masses-ejecta_mass
+			yield_subtable['mass_in_remnants'] = np.divide(list(reversed(remnants)),yield_subtable['Mass'])
 			for el in list(indexing.keys()):
-				yield_subtable[el] = np.zeros(len(masses))
+				yield_subtable[el] = np.zeros(len(self.masses))
 			  
-			summed_yields = np.zeros(len(masses))
+			summed_yields = np.zeros(len(self.masses))
 			  
-			for m_index,mass in enumerate(masses):
-				for el_index,el in enumerate(elements):
-					el_yield = z_data[el_index][m_index]
+			for m_index,mass in enumerate(yield_subtable['Mass']):
+				for el_index,el in enumerate(self.elements):
+					el_yield = z_data[el_index][len(self.masses)-m_index-1]
 					el_yield_fraction = el_yield/mass
 					yield_subtable[el][m_index] = el_yield_fraction
 					summed_yields[m_index]+=el_yield_fraction
@@ -1288,15 +1372,15 @@ class AGB_feedback(object):
 			yield_subtable['unprocessed_mass_in_winds'] = 1.-summed_yields-yield_subtable['mass_in_remnants']
 			 
 			 
-			table[z.astype(float)] = yield_subtable
+			self.table[z.astype(float)] = yield_subtable
 			 
 			# Restructure table
-			all_keys = ['Mass','mass_in_remnants','unprocessed_mass_in_winds']+elements
+			all_keys = ['Mass','mass_in_remnants','unprocessed_mass_in_winds']+self.elements
 			
 			list_of_arrays = [yield_subtable[key] for key in all_keys]
 			restructure_subtable = np.core.records.fromarrays(list_of_arrays,names=all_keys)
 			
-			table[z] = restructure_subtable
+			self.table[z] = restructure_subtable
 			
 			
 	def Ventura(self):
