@@ -977,6 +977,12 @@ def posterior_function_many_stars_real(changing_parameter,error_list,error_eleme
 		likelihood_list = []
 		model_errors = np.linspace(a.flat_model_error_prior[0],a.flat_model_error_prior[1],a.flat_model_error_prior[2])
 		if a.beta_error_distribution[0]:
+			if 'log10_beta' in a.to_optimize:
+				beta_param = 10**changing_parameter[0] # must be first value in parameter list
+			elif 'beta_param' in a.to_optimize:
+				beta_param = changing_parameter[0]
+			else:
+				beta_param = a.beta_param 
 			error_weight = beta.pdf(model_errors, a = a.beta_error_distribution[1], b = a.beta_error_distribution[2])
 			error_weight/= sum(error_weight)
 		else:
