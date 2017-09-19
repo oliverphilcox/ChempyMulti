@@ -190,10 +190,10 @@ class preload_params_mcmc():
 	star_error_list = np.hstack(star_error_list)
 	elements = np.hstack(elements)
 	
-	err=[]
-	for i,item in enumerate(model_errors):
-		error_temp = np.ones(len(elements))*item
-		err.append(np.sqrt(np.multiply(error_temp[:,None],error_temp[:,None]).T + np.multiply(star_error_list,star_error_list)).T)
+	#err=[]
+	#for i,item in enumerate(model_errors):
+	#	error_temp = np.ones(len(elements))*item
+	#	err.append(np.sqrt(np.multiply(error_temp[:,None],error_temp[:,None]).T + np.multiply(star_error_list,star_error_list)).T)
 	
 def Bayes_score():
 	"""

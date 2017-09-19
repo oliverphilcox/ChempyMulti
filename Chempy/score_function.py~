@@ -172,9 +172,9 @@ class preload_params_mcmc():
 	coeffs.close()
 	
 	# Beta function calculations
-	model_errors = np.linspace(a.flat_model_error_prior[0],a.flat_model_error_prior[1],a.flat_model_error_prior[2])
-	error_weight = beta.pdf(model_errors, a = a.beta_error_distribution[1], b = a.beta_error_distribution[2])
-	error_weight/= sum(error_weight)
+	#model_errors = np.linspace(a.flat_model_error_prior[0],a.flat_model_error_prior[1],a.flat_model_error_prior[2])
+	#error_weight = beta.pdf(model_errors, a = a.beta_error_distribution[1], b = a.beta_error_distribution[2])
+	#error_weight/= sum(error_weight)
 
 	wildcard = np.load('Chempy/input/stars/'+a.stellar_identifier+'.npy')	
 	
