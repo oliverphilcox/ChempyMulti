@@ -45,7 +45,7 @@ class ModelParameters(object):
 	error_marginalization = True # Marginalizing over the model error or using the best model error value
 	flat_model_error_prior = [0.,1.,51] # Flat prior for the error marginalization [begin, end, number of evaluations inbetween]
 	
-	beta_param = np.inf#1. # This can be set as constant here, or let to vary in the below prior
+	beta_param = 'y'#np.inf#1. # This can be set as constant here, or let to vary in the below prior
 	
 	# This is the rescalable beta parameter controlling model error (default is 10)
 	beta_error_distribution = [True, 1, beta_param] # Instead of a flat prior for the error marginalization we use a beta distribution with a = 1 and b = 3 as default (wikipedia and scipy have the same parametrization) putting more weight to small model errors
