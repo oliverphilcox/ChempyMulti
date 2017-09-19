@@ -139,7 +139,7 @@ def Chempy(a):
 		for item in elements_to_trace:
 			element_fractions.append(float(np.copy(cube.cube[item][max(i-1,0)]/cube.cube['gas'][max(i-1,0)])))## gas element fractions from one time step before	
 		metallicity = float(cube.cube['Z'][i])
-		print(metallicity)		
+		#print(metallicity)		
 				
 		time_steps = np.copy(basic_sfr.t[:j])
 		basic_ssp.calculate_feedback(float(metallicity), list(elements_to_trace), list(element_fractions), np.copy(time_steps))	

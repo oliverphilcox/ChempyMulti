@@ -451,7 +451,7 @@ def mcmc_multi(changing_parameter, error_list, elements):
 
 	sampler = emcee.EnsembleSampler(a.nwalkers,ndim,posterior_function_many_stars,threads=nthreads, args = [error_list,elements])
 	pos,prob,state,blobs = sampler.run_mcmc(chain,a.mburn)
-	
+	print('5')
 	mean_prob = mean_prob_beginning = np.zeros((a.m))
 	posterior_list = []
 	posterior_std_list = []
