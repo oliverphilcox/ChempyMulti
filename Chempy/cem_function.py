@@ -1110,7 +1110,22 @@ def cem_real2_int(a,b):
 	#if a.UseNeural==True:
 
 	# Alternative path using a Neural network to predict the outcome instead of Chempy
-	param = [a.high_mass_slope,a.log10_N_0,a.log10_starformation_efficiency,a.log10_sfr_scale,a.outflow_feedback_fraction] # don't include beta here
+	param = []
+	if 'high_mass_slope' in a.to_optimize:
+		param.append(a.high_mass_slope)
+	if 'log10_N_0' in a.to_optimize:
+		param.append(a.log10_N_0)
+	if 'log10_starformation_efficiency' in a.to_optimize:
+		param.append(a.log10_starformation_efficiency)
+	if 'log10_sfr_scale' in a.to_optimize:
+		param.append(a.log10_sfr_scale)
+	if 'outflow_feedback_fraction' in a.to_optimize:
+		param.append(a.outflow_feedback_fraction)
+	#if 'log10_starformation_efficiency' not in a.to_optimize:
+	#	a.log10_starformation_efficiency = np.log10(a.starformation_efficiency)
+	#if 'log10_sfr_scale' not in a.to_optimize:
+	#	a.log10_sfr_scale = np.log10(a.sfr_scale)
+	#param = [a.high_mass_slope,a.log10_N_0,a.log10_starformation_efficiency,a.log10_sfr_scale,a.outflow_feedback_fraction] # don't include beta here
 	neural_abundances = neural_output_int(param,a,b)
 	#elements_to_trace.append('Zcorona')
 	#elements_to_trace.append('SNratio')
