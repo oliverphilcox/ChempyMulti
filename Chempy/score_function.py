@@ -172,7 +172,7 @@ class preload_params_mcmc():
 	coeffs.close()
 	
 	# Beta function calculations
-	#model_errors = np.linspace(a.flat_model_error_prior[0],a.flat_model_error_prior[1],a.flat_model_error_prior[2])
+	model_errors = np.linspace(a.flat_model_error_prior[0],a.flat_model_error_prior[1],a.flat_model_error_prior[2])
 	#error_weight = beta.pdf(model_errors, a = a.beta_error_distribution[1], b = a.beta_error_distribution[2])
 	#error_weight/= sum(error_weight)
 
@@ -190,10 +190,10 @@ class preload_params_mcmc():
 	star_error_list = np.hstack(star_error_list)
 	elements = np.hstack(elements)
 	
-	#err=[]
-	#for i,item in enumerate(model_errors):
-	#	error_temp = np.ones(len(elements))*item
-	#	err.append(np.sqrt(np.multiply(error_temp[:,None],error_temp[:,None]).T + np.multiply(star_error_list,star_error_list)).T)
+	err=[]
+	for i,item in enumerate(model_errors):
+		error_temp = np.ones(len(elements))*item
+		err.append(np.sqrt(np.multiply(error_temp[:,None],error_temp[:,None]).T + np.multiply(star_error_list,star_error_list)).T)
 	
 def Bayes_score():
 	"""

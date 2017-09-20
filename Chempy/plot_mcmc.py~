@@ -5,7 +5,9 @@ from . import localpath
 from .parameter import ModelParameters
 param = ModelParameters()
 
-def restructure_chain(directory ,parameter_names=param.parameter_names): #parameter_names = [r'$\alpha_\mathrm{IMF}$',r'$\log_{10}\left(\mathrm{N}_\mathrm{Ia}\right)$',r'$\log_{10}\left(\tau_\mathrm{Ia}\right)$',r'$\log_{10}\left(\mathrm{SFE}\right)$',r'$\log_{10}\left(\mathrm{SFR}_\mathrm{peak}\right)$',r'$\mathrm{x}_\mathrm{out}$']):	'''
+def restructure_chain(directory ,parameter_names=param.parameter_names): #parameter_names = [r'$\alpha_\mathrm{IMF}$',r'$\log_{10}\left(\mathrm{N}_\mathrm{Ia}\right)$',r'$\log_{10}\left(\tau_\mathrm{Ia}\right)$',r'$\log_{10}\left(\mathrm{SFE}\right)$',r'$\log_{10}\left(\mathrm{SFR}_\mathrm{peak}\right)$',r'$\mathrm{x}_\mathrm{out}$']):	
+
+'''
 	This function restructures the chains and blobs coming from the emcee routine so that we have a flattened posterior PDF in the end.
 	
 	The following files need to be there: flatchain, flatlnprobability, flatmeanposterior and flatstdposterior. flatblobs is optional
