@@ -8,6 +8,129 @@ class ModelParameters(object):
 	The individual definitions are given as comments.
 	'''
 	
+
+	############## Key parameters for scoring yield tables #########################################################################	
+
+	## Chempy start and end times in Gyr	
+	start = 0 # birth of disc, always set to 0
+	end = 13.5	
+	
+	elements_to_trace = ['Al', 'Ar', 'C', 'Ca', 'Cl', 'Co', 'Cr', 'Cu', 'F', 'Fe', 'Ga', 'Ge', 'H', 'He', 'K', 'Mg', 'Mn', 'N', 'Na', 'Ne', 'Ni', 'O', 'P', 'S', 'Sc', 'Si', 'Ti', 'V', 'Zn']
+	#elements_to_trace = ['C', 'Fe', 'H', 'He', 'Mg', 'N', 'Ne', 'O', 'Si']
+	
+	## List of all names initially output by neural network
+	initial_neural_names = ['Al', 'Ar', 'C', 'Ca', 'Cl', 'Co', 'Cr', 'Cu', 'F', 'Fe', 'Ga', 'Ge', 'He', 'K', 'Mg', 'Mn', 'N', 'Na', 'Ne', 'Ni', 'O', 'P', 'S', 'Sc', 'Si', 'Ti', 'V', 'Zn']
+	#initial_neural_names = ['C','Fe','He','Mg','N','Ne','O','Si']
+	
+	## Choice of yield sets
+	yield_table_name_sn2_list = ['chieffi04','Nugrid','Nomoto2013','Portinari', 'chieffi04_net', 'Nomoto2013_net','NuGrid_net','West17_net','TNG_net']#'Frischknecht16_net'
+	yield_table_name_sn2_index = 7
+	yield_table_name_sn2 = yield_table_name_sn2_list[yield_table_name_sn2_index]
+
+	yield_table_name_hn_list = ['Nomoto2013']
+	yield_table_name_hn_index = 0
+	yield_table_name_hn = yield_table_name_hn_list[yield_table_name_hn_index]
+
+	yield_table_name_agb_list = ['Karakas','Nugrid','Karakas_net_yield','Ventura','Karakas16_net'] # Karakas2016 needs much more calculational resources (order of magnitude) using 2010 net yields from Karakas are faster and only N is significantly underproduced
+	yield_table_name_agb_index = 2
+	yield_table_name_agb = yield_table_name_agb_list[yield_table_name_agb_index]
+
+	yield_table_name_1a_list = ['Iwamoto','Thielemann','Seitenzahl']
+	yield_table_name_1a_index = 2
+	yield_table_name_1a = yield_table_name_1a_list[yield_table_name_1a_index]
+
+	## Neural network parameters
+	UseNeural = False # This defines whether to use trained network in place of Chempy
+	training_size = 10 # no. values per parameter in training set
+	training_widths = [0.6,0.6,0.6,0.2,0.2] # 2 sigma widths
+	neurons = 30 # Number of neurons in layer
+	learning_rate = 0.007  # Default Adam neural network learning rate
+	epochs = 5000 # Number of epochs used in testing
+	
+
+
+	## Free parameters - if some parameter is in to optimise there needs to be a prior and constraints defined
+	
+	SSP_parameters =  [-2.29,-2.75]#[5.0,,1.0,-2.29 ,-2.75,	-0.8 ,0.2, 0.7, 0.3, 0.0]
+	SSP_parameters_to_optimize = ['high_mass_slope','log10_N_0'] #['beta_param', 'log10_beta','high_mass_slope', 'log10_N_0' 'log10_sn1a_time_delay','log10_sfr_factor_for_cosmic_accretion','log10_gas_reservoir_mass_factor','log10_a_parameter','log10_gas_power']
+	assert len(SSP_parameters) == len(SSP_parameters_to_optimize)
+	ISM_parameters =  [-0.3,0.55,	0.5]#, 0.3,0.2, 0.7, 0.3, 0.0]
+	ISM_parameters_to_optimize = ['log10_starformation_efficiency', 'log10_sfr_scale', 'outflow_feedback_fraction']#,'log10_gas_reservoir_mass_factor','log10_sfr_factor_for_cosmic_accretion','log10_a_parameter','log10_gas_power']
+	assert len(ISM_parameters) == len(ISM_parameters_to_optimize)
+
+	p0 = np.hstack((SSP_parameters,ISM_parameters))
+	to_optimize = np.array(SSP_parameters_to_optimize + ISM_parameters_to_optimize)
+	ndim = len(to_optimize)
+
+	constraints = {
+	'beta_param' : (1.,None),
+	'log10_beta' : (0.,None),
+	'high_mass_slope' : (-4.,-1.),
+	'log10_N_0' : (-5,-1), 
+	'log10_sn1a_time_delay' : (-3,1.),
+	'log10_starformation_efficiency' : (-3,2),
+	'log10_sfr_scale' : (0.085,1),
+	'sfr_scale' : (0.0,None),
+	'outflow_feedback_fraction' : (0.,1.),
+	'log10_gas_reservoir_mass_factor': (None,None),
+	
+
+	'N_0' : (0.,1.),
+	'sn1a_time_delay' : (0.,end),
+	'a_parameter' : (0.,None),
+	'starformation_efficiency' : (0.,None), 
+	'gas_power': (1.,2.),
+	'log10_a_parameter' : (None,None),
+	'log10_gas_power' : (None,None),
+	'log10_gas_reservoir_mass_factor': (None,None),
+	'log10_sfr_factor_for_cosmic_accretion': (None,None),
+
+	'mass_factor' : (0,None),
+	'norm_infall' : (0.,2.),
+	'tau_infall' : (None,None),
+	'c_infall' : (None,None),
+	'gas_at_start' : (0.,2.),
+	'gas_reservoir_mass_factor' : (0.,20.),
+	'infall_scale' : (0.0,end),
+	'sn1a_norm' : (0.,None),
+	'sn1a_scale' : (0.,None),
+	}
+	# the prior entry is (mean,std,0)
+	# functional form 0 is a gaussian with log values and 1 is for fractions where the sigma distances are in factors from the mean (see cem_function.py)
+	# for functional form 1 read (mean,factor,1)
+	priors = {
+	## gaussian priors
+	'beta_param' : (5.0,2.5,0),
+	'log10_beta' : (1.0,0.5,0),
+	'high_mass_slope' : (-2.3,0.3,0),	
+	'log10_N_0' : (-2.75,0.3,0),
+	'log10_sn1a_time_delay' : (-0.8,0.3,0),
+	'log10_starformation_efficiency' : (-0.3,0.3,0),
+	'log10_sfr_scale' : (0.55,0.1,0),
+	'sfr_scale' : (3.5,1.5,0),
+	'outflow_feedback_fraction' : (0.5,0.1,0),
+	'log10_gas_reservoir_mass_factor' : (0.3,0.3,0),
+
+	'a_parameter' : (3.,3.,0),
+	'infall_scale' : (3.3,0.5,0),
+	'gas_power': (1.5,0.2,0),
+	'log10_sfr_factor_for_cosmic_accretion': (0.2,0.3,0),
+	'log10_a_parameter' : (0.3,0.2,0),
+	'log10_gas_power' : (0,0.15,0),
+	
+	## Priors on factors
+	'starformation_efficiency' : (0.5,3.,1), 
+	'mass_factor' : (1.,1.2,1),
+	'norm_infall' : (1.,1.2,1),
+	'sn1a_time_delay' : (0.3,3.,1),
+	'N_0' : (0.001,3.,1),
+	'gas_at_start' : (0.1,2.,1),
+	'gas_reservoir_mass_factor' : (3.,2.,1),
+	}	
+	
+	################################# Other Chempy parameters #####################################################################
+
+	
 	# Which zero point of abundances shall be used. Asplund 2005 is corrected to VESTA abundances
 	solar_abundance_name_list = ['Lodders09','Asplund09','Asplund05_pure_solar','Asplund05_apogee_correction']
 	solar_abundance_name_index = 1
@@ -28,6 +151,7 @@ class ModelParameters(object):
 	#	stellar_identifier_list.append("Rob_%d" %item)
 	#stellar_identifier_list = ['Proto-sun', 'Arcturus', 'B-stars']
 	# 'prior' can be used as stellar_identifier, then the prior will be sampled with Chempy.wrapper.mcmc() routine
+	
 	stellar_identifier_list = ['Proto-sun_all']#['Proto-sun']
 	stellar_identifier = 'Proto-sun_all'#'Proto-sun'
 
@@ -52,8 +176,7 @@ class ModelParameters(object):
 	
 	verbose = 0
 	# Time discretization, so far only linear time-steps are implemented
-	start = 0 # birth of disc, always set to 0
-	end = 13.5
+	
 	time_steps = 28#541#241#35#1401
 	total_mass = 1#45.07
 	stochastic_IMF = False
@@ -109,23 +232,6 @@ class ModelParameters(object):
 		infall_a_parameter = 2
 		infall_beginning = 0
 		infall_scale = 3.3
-
-	yield_table_name_sn2_list = ['chieffi04','Nugrid','Nomoto2013','Portinari', 'chieffi04_net', 'Nomoto2013_net','Frischknecht16_net','NuGrid_net','West17_net','TNG_net']
-	yield_table_name_sn2_index = 8
-	yield_table_name_sn2 = yield_table_name_sn2_list[yield_table_name_sn2_index]
-
-	yield_table_name_hn_list = ['Nomoto2013']
-	yield_table_name_hn_index = 0
-	yield_table_name_hn = yield_table_name_hn_list[yield_table_name_hn_index]
-
-	##### Karakas2016 needs much more calculational resources (order of magnitude) using 2010 net yields from Karakas are faster and only N is significantly underproduced
-	yield_table_name_agb_list = ['Karakas','Nugrid','Karakas_net_yield','Ventura','Karakas16_net']
-	yield_table_name_agb_index = 2
-	yield_table_name_agb = yield_table_name_agb_list[yield_table_name_agb_index]
-
-	yield_table_name_1a_list = ['Iwamoto','Thielemann','Seitenzahl']
-	yield_table_name_1a_index = 2
-	yield_table_name_1a = yield_table_name_1a_list[yield_table_name_1a_index]
 
 	mmin = 0.1
 	mmax = 100
@@ -233,9 +339,7 @@ class ModelParameters(object):
 	# 28 elements	
 	element_names = ['He', 'C', 'N', 'O', 'F','Ne','Na', 'Mg', 'Al', 'Si', 'P','S', 'Cl', 'Ar', 'K', 'Ca', 'Sc', 'Ti', 'V', 'Cr', 'Mn', 'Fe', 'Co', 'Ni','Cu','Zn','Ga','Ge']#, 'Zn','Y', 'Ba']# Runs with sun
 	
-	#elements_to_trace = ['Al', 'Ar', 'C', 'Ca', 'Cl', 'Co', 'Cr', 'Cu', 'F', 'Fe', 'Ga', 'Ge', 'H', 'He', 'K', 'Mg', 'Mn', 'N', 'Na', 'Ne', 'Ni', 'O', 'P', 'S', 'Sc', 'Si', 'Ti', 'V', 'Zn']
-	elements_to_trace = ['C', 'Fe', 'H', 'He', 'Mg', 'N', 'Ne', 'O', 'Si']
-
+	
 	#observational_constraints_index = ['sol_norm']#['gas_reservoir','sn_ratio','sol_norm']#,'wildcard ','cas','arcturus','stars_at_end', 'plot_processes', 'save_abundances', 'elements']
 	arcturus_age = 7.1# 7.1 +1.5 -1.2
 
@@ -244,107 +348,8 @@ class ModelParameters(object):
 	error_inflation = 1.
 
 
-	# If some parameter is in to optimise there needs to be a prior and constraints defined
-	if True:
-		#prior
-		SSP_parameters =  [1.0,-2.29,-2.75]#[5.0,-2.29 ,-2.75 ]#,	-0.8 ]#,0.2]#, 0.7, 0.3, 0.0]
-		SSP_parameters_to_optimize = ['log10_beta','high_mass_slope','log10_N_0']#['beta_param', 'high_mass_slope', 'log10_N_0']#, 'log10_sn1a_time_delay']#,'log10_sfr_factor_for_cosmic_accretion']#,'log10_gas_reservoir_mass_factor','log10_a_parameter','log10_gas_power']
-	else:
-		SSP_parameters = []
-		SSP_parameters_to_optimize = []
-	assert len(SSP_parameters) == len(SSP_parameters_to_optimize)
-	if True:
-		#prior
-		ISM_parameters =  [-0.3,0.55,	0.5]#, 0.3]#,0.2]#, 0.7, 0.3, 0.0]
-		ISM_parameters_to_optimize = ['log10_starformation_efficiency', 'log10_sfr_scale', 'outflow_feedback_fraction']#,'log10_gas_reservoir_mass_factor']#,'log10_sfr_factor_for_cosmic_accretion']#,'log10_gas_reservoir_mass_factor','log10_a_parameter','log10_gas_power']
-	else:
-		ISM_parameters = []
-		ISM_parameters_to_optimize = []
-	assert len(ISM_parameters) == len(ISM_parameters_to_optimize)
 
-	p0 = np.hstack((SSP_parameters,ISM_parameters))
-	to_optimize = np.array(SSP_parameters_to_optimize + ISM_parameters_to_optimize)
-	ndim = len(to_optimize)
-
-	constraints = {
-	'beta_param' : (1.,None),
-	'log10_beta' : (0.,None),
-	'high_mass_slope' : (-4.,-1.),
-	'log10_N_0' : (-5,-1), 
-	'log10_sn1a_time_delay' : (-3,1.),
-	'log10_starformation_efficiency' : (-3,2),
-	'log10_sfr_scale' : (0.085,1),
-	'sfr_scale' : (0.0,None),
-	'outflow_feedback_fraction' : (0.,1.),
-	'log10_gas_reservoir_mass_factor': (None,None),
 	
-
-	'N_0' : (0.,1.),
-	'sn1a_time_delay' : (0.,end),
-	'a_parameter' : (0.,None),
-	'starformation_efficiency' : (0.,None), 
-	'gas_power': (1.,2.),
-	'log10_a_parameter' : (None,None),
-	'log10_gas_power' : (None,None),
-	'log10_gas_reservoir_mass_factor': (None,None),
-	'log10_sfr_factor_for_cosmic_accretion': (None,None),
-
-	'mass_factor' : (0,None),
-	'norm_infall' : (0.,2.),
-	'tau_infall' : (None,None),
-	'c_infall' : (None,None),
-	'gas_at_start' : (0.,2.),
-	'gas_reservoir_mass_factor' : (0.,20.),
-	'infall_scale' : (0.0,end),
-	'sn1a_norm' : (0.,None),
-	'sn1a_scale' : (0.,None),
-	}
-	# the prior entry is (mean,std,0)
-	# functional form 0 is a gaussian with log values and 1 is for fractions where the sigma distances are in factors from the mean (see cem_function.py)
-	# for functional form 1 read (mean,factor,1)
-	priors = {
-	## gaussian priors
-	'beta_param' : (5.0,2.5,0),
-	'log10_beta' : (1.0,0.5,0),
-	'high_mass_slope' : (-2.3,0.3,0),	
-	'log10_N_0' : (-2.75,0.3,0),
-	'log10_sn1a_time_delay' : (-0.8,0.3,0),
-	'log10_starformation_efficiency' : (-0.3,0.3,0),
-	'log10_sfr_scale' : (0.55,0.1,0),
-	'sfr_scale' : (3.5,1.5,0),
-	'outflow_feedback_fraction' : (0.5,0.1,0),
-	'log10_gas_reservoir_mass_factor' : (0.3,0.3,0),
-
-	'a_parameter' : (3.,3.,0),
-	'infall_scale' : (3.3,0.5,0),
-	'gas_power': (1.5,0.2,0),
-	'log10_sfr_factor_for_cosmic_accretion': (0.2,0.3,0),
-	'log10_a_parameter' : (0.3,0.2,0),
-	'log10_gas_power' : (0,0.15,0),
-	
-	## Priors on factors
-	'starformation_efficiency' : (0.5,3.,1), 
-	'mass_factor' : (1.,1.2,1),
-	'norm_infall' : (1.,1.2,1),
-	'sn1a_time_delay' : (0.3,3.,1),
-	'N_0' : (0.001,3.,1),
-	'gas_at_start' : (0.1,2.,1),
-	'gas_reservoir_mass_factor' : (3.,2.,1),
-	}
-	
-	## Neural network parameters
-	
-	training_size = 10 # no. values per parameter in training set
-	#training_widths = [0.6,0.3,0.3,0.2,0.2] # Initial gaussian widths for training set
-	training_widths = [0.6,0.6,0.6,0.2,0.2] # 2 sigma widths
-	verif_test_sizes = [10000,10000] # Size of array for [verification, test] datasets
-	#test_widths = [0.3,0.3,0.3,0.1,0.1] # Original prior widths for testing/verification
-	#test_widths = [0.9,0.9,0.9,0.3,0.3] # Test widths	
-	
-	neurons = 30 # 20# Number of neurons in layer
-	learning_rate = 0.007  # Default Adam neural network learning rate
-	
-	epochs = 5000 # Number of epochs used in testing
 	
 	# (These are common elements between proto-sun and Chempy traced elements)
 	sol_dat=np.load('Chempy/input/stars/'+stellar_identifier+'.npy')	
@@ -355,7 +360,10 @@ class ModelParameters(object):
 
 	color_max = 0.02 # Maximum color in error plots	
 	
-	UseNeural = True # This defines whether to use trained network in place of Chempy
+	verif_test_sizes = [10000,10000] # Size of array for [verification, test] datasets
+	#test_widths = [0.3,0.3,0.3,0.1,0.1] # Original prior widths for testing/verification
+	#test_widths = [0.9,0.9,0.9,0.3,0.3] # Test widths	
+	
 	
 	test_size = 3000 # Number of elements in test set
 	
@@ -367,13 +375,4 @@ class ModelParameters(object):
 	list_of_beta_params = np.logspace(0,3,20) # List of beta function parameters used to calculate the score.	
 	
 	plot_hist = False # controls whether to plot histogram of predicted element abundances using Hogg's method
-	
-	## THIS IS FULL LIST OF NAMES THAT DOES NOT CHANGE IN HOGG SCORING. CHANGE THIS WHEN CHANGING TOTAL NUMBER OF ELEMENTS
-	#full_names = ['Al', 'Ar', 'B', 'Be', 'C', 'Ca', 'Cl', 'Co', 'Cr', 'Cu', 'F', 'Fe', 'Ga', 'Ge', 'H', 'He', 'K', 'Li', 'Mg', 'Mn', 'N', 'Na', 'Ne', 'Ni', 'O', 'P', 'S', 'Sc', 'Si', 'Ti', 'V', 'Zn']
-	# List of all names initially output by neural network
-	#initial_neural_names = ['Al', 'Ar', 'C', 'Ca', 'Cl', 'Co', 'Cr', 'Cu', 'F', 'Fe', 'Ga', 'Ge', 'He', 'K', 'Mg', 'Mn', 'N', 'Na', 'Ne', 'Ni', 'O', 'P', 'S', 'Sc', 'Si', 'Ti', 'V', 'Zn']
-	initial_neural_names = ['C','Fe','He','Mg','N','Ne','O','Si']
-	
-	
-	
 	
