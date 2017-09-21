@@ -1,4 +1,4 @@
-# Chempy - Evolution Modelling + Yield Table Scoring
+# ChempyScoring - Evolution Modelling + Yield Table Scoring
 Flexible one-zone open-box chemical evolution modeling. Abundance fitting and stellar feedback calculation. Parameter optimization for simulations and yield table scoring
 
 ## Installation
