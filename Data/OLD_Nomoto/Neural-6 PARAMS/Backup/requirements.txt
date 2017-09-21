@@ -1,7 +1,0 @@
-numpy
-matplotlib
-emcee
-corner
-multiprocessing
-scipy
-pytorch
