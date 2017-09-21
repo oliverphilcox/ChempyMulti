@@ -29,7 +29,7 @@ os.system('scp Scores/* BatchScoresNoScBay/Default/')
 os.system('rm -rf Scores/')
 os.system('mkdir Scores')
 
-print("2: Chieffi Hogg no Sc Score")
+print("2: Chieffi CV no Sc Score")
 
 for line in fileinput.input("Chempy/parameter.py", inplace=True):
 	if "\tyield_table_name_sn2_index" in line:

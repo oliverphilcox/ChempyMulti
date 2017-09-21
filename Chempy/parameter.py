@@ -374,5 +374,5 @@ class ModelParameters(object):
 	
 	list_of_beta_params = np.logspace(0,3,20) # List of beta function parameters used to calculate the score.	
 	
-	plot_hist = False # controls whether to plot histogram of predicted element abundances using Hogg's method
+	plot_hist = False # controls whether to plot histogram of predicted element abundances using CV's method
 	

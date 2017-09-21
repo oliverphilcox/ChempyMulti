@@ -2,5 +2,5 @@
 for INDEX in {0..19}
 do
 	echo "Running python for beta index $INDEX"
-	python Chempy/Hogg_trial.py $INDEX
+	python Chempy/CV_trial.py $INDEX
 done

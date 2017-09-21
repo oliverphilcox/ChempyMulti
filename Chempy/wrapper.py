@@ -737,7 +737,7 @@ def single_star_optimization():
 def scoring_wrapper():
 	"""
 	NO LONGER USED 
-	This function will calculate Bayes and Hogg scores for yield set, using the code in score_function.py.
+	This function will calculate Bayes and CV scores for yield set, using the code in score_function.py.
 	
 	The neural network must be trained beforehand using training_data and create_network	
 	
@@ -748,7 +748,7 @@ def scoring_wrapper():
 	from Chempy.neural import training_data,create_network
 	import time
 	from Chempy.parameter import ModelParameters
-	from Chempy.score_function import Hogg_wrapper, Bayes_wrapper
+	from Chempy.score_function import CV_wrapper, Bayes_wrapper
 	init_time = time.time()
 	a = ModelParameters()
 	
@@ -756,7 +756,7 @@ def scoring_wrapper():
 	Bayes_wrapper()
 	
 	print('Step 2 (at time %.2f s): Calculate cross-validation score' %(time.time()-init_time))
-	Hogg_wrapper()
+	CV_wrapper()
 	
 	print('Process complete in time %.2f s' %(time.time()-init_time))	
 	return None	

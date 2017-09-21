@@ -9,7 +9,7 @@ import sys
 os.system('rm -rf BatchScores/')
 os.system('mkdir BatchScores/')
 
-print("1: Default Hogg Score")
+print("1: Default CV Score")
 
 for line in fileinput.input("Chempy/parameter.py", inplace=True):
 	if "\tyield_table_name_sn2_index" in line:
@@ -22,13 +22,13 @@ for line in fileinput.input("Chempy/parameter.py", inplace=True):
 		print(line,end='')
 fileinput.close()		
 
-os.system('Chempy/Hogg_run.sh')
+os.system('Chempy/CV_run.sh')
 os.system('mkdir BatchScores/Default')
 os.system('scp Scores/* BatchScores/Default/')
 os.system('rm -rf Scores/')
 os.system('mkdir Scores')
 
-print("2: Chieffi Hogg Score")
+print("2: Chieffi CV Score")
 
 for line in fileinput.input("Chempy/parameter.py", inplace=True):
 	if "\tyield_table_name_sn2_index" in line:
@@ -41,13 +41,13 @@ for line in fileinput.input("Chempy/parameter.py", inplace=True):
 		print(line,end='')
 fileinput.close()		
 
-os.system('Chempy/Hogg_run.sh')
+os.system('Chempy/CV_run.sh')
 os.system('mkdir BatchScores/Chieffi')
 os.system('scp Scores/* BatchScores/Chieffi/')
 os.system('rm -rf Scores/')
 os.system('mkdir Scores')
 
-print("3: Ventura Hogg Score")
+print("3: Ventura CV Score")
 
 for line in fileinput.input("Chempy/parameter.py", inplace=True):
 	if "\tyield_table_name_sn2_index" in line:
@@ -60,13 +60,13 @@ for line in fileinput.input("Chempy/parameter.py", inplace=True):
 		print(line,end='')
 fileinput.close()		
 
-os.system('Chempy/Hogg_run.sh')
+os.system('Chempy/CV_run.sh')
 os.system('mkdir BatchScores/Ventura')
 os.system('scp Scores/* BatchScores/Ventura/')
 os.system('rm -rf Scores/')
 os.system('mkdir Scores')
 
-print("4: Thielemann Hogg Score")
+print("4: Thielemann CV Score")
 
 for line in fileinput.input("Chempy/parameter.py", inplace=True):
 	if "\tyield_table_name_sn2_index" in line:
@@ -79,7 +79,7 @@ for line in fileinput.input("Chempy/parameter.py", inplace=True):
 		print(line,end='')
 fileinput.close()		
 
-os.system('Chempy/Hogg_run.sh')
+os.system('Chempy/CV_run.sh')
 os.system('mkdir BatchScores/Thielemann')
 os.system('scp Scores/* BatchScores/Thielemann/')
 os.system('rm -rf Scores/')

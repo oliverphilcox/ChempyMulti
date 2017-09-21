@@ -366,7 +366,7 @@ class ModelParameters(object):
 	
 	list_of_beta_params = np.logspace(0,3,20) # List of beta function parameters used to calculate the score.	
 	
-	plot_hist = False # controls whether to plot histogram of predicted element abundances using Hogg's method
+	plot_hist = False # controls whether to plot histogram of predicted element abundances using CV's method
 	
 	## THIS IS FULL LIST OF NAMES THAT DOES NOT CHANGE IN HOGG SCORING. CHANGE THIS WHEN CHANGING TOTAL NUMBER OF ELEMENTS
 	#full_names = ['Al', 'Ar', 'B', 'Be', 'C', 'Ca', 'Cl', 'Co', 'Cr', 'Cu', 'F', 'Fe', 'Ga', 'Ge', 'H', 'He', 'K', 'Li', 'Mg', 'Mn', 'N', 'Na', 'Ne', 'Ni', 'O', 'P', 'S', 'Sc', 'Si', 'Ti', 'V', 'Zn']

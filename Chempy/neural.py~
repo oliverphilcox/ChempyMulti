@@ -277,7 +277,7 @@ def neural_output(test_input):
 	hidden1 = np.tanh(np.array(np.dot(w_array_0,norm_data)+b_array_0))
 	output = np.dot(w_array_1, hidden1)+b_array_1
 
-	# Return only those elements required - i.e. NOT the missing Hogg elements
+	# Return only those elements required - i.e. NOT the missing CV elements
 	corrected_output = []
 	for i in range(len(output)):
 		if a.initial_neural_names[i] in a.neural_names:
@@ -563,7 +563,7 @@ def neural_output_int(test_input,a,b):
 	hidden1 = np.tanh(np.array(np.dot(b.w_array_0,norm_data)+b.b_array_0))
 	output = np.dot(b.w_array_1, hidden1)+b.b_array_1
 	
-	# Return only those elements required - i.e. NOT the missing Hogg elements
+	# Return only those elements required - i.e. NOT the missing CV elements
 	corrected_output = []
 	for i in range(len(output)):
 		if a.initial_neural_names[i] in a.neural_names:

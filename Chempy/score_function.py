@@ -1,7 +1,7 @@
 import numpy as np
 import os
 	
-def Hogg_score():
+def CV_score():
 	"""This function will compute the UNNORMALISED cross-validation abundances for each of the 22 elements,
 	using the best parameter choice for each. 
 	This computes the likelihood contribution, and saves each separately.
@@ -39,7 +39,7 @@ def Hogg_score():
 	# Calculate required Chempy elements
 	preload = preload_params_mcmc()
 	elements_init = np.copy(preload.elements)
-	np.save('Scores/Hogg_elements.npy',elements_init)
+	np.save('Scores/CV_elements.npy',elements_init)
 	#print(elements_init) 
    
 	# Create new parameter names
@@ -73,7 +73,7 @@ def Hogg_score():
 		# Create the posterior PDF and load it 
 		restructure_chain('mcmc/')
 		positions = np.load('mcmc/posteriorPDF.npy') # Posterior parameter PDF
-		#print("In Hogg_score, element list is",a.elements_to_trace)
+		#print("In CV_score, element list is",a.elements_to_trace)
 		
 		##############
 		
@@ -132,7 +132,7 @@ def Hogg_score():
 		print(overall_score)
 		sys.stdout.flush()
 		#print(starting_el)
-	np.savez('Scores/Hogg_beta_elements'+str(a.beta_param)+'.npz',
+	np.savez('Scores/CV_beta_elements'+str(a.beta_param)+'.npz',
 				elements=elements_init,
 				likelihood_factors=factors,
 				element_mean = element_mean,
@@ -327,21 +327,21 @@ def Bayes_wrapper():
 				
 	return beta_params,score,score_err
 	
-def Hogg_wrapper():
+def CV_wrapper():
 	"""
 	NO LONGER USED
-	This function calculates the UNNORMALISED Hogg score as a function of the beta-function parameter (defined in parameter.py)
+	This function calculates the UNNORMALISED CV score as a function of the beta-function parameter (defined in parameter.py)
 	It is not currently parallelized (parallelization is done in MCMC already and for element predictions).
 	"""
 	import time
 	import fileinput
 	import sys
 	from .parameter import ModelParameters
-	from .score_function import Hogg_score
+	from .score_function import CV_score
 	
 	a = ModelParameters()
 	beta_params = a.list_of_beta_params
-	Hogg_score_list = []
+	CV_score_list = []
 	init_time = time.time()
 	
 	for i in range(len(beta_params)): # Iterate over beta parameters
@@ -361,34 +361,34 @@ def Hogg_wrapper():
 		a = ModelParameters()
 		
 		# Calculate Bayes score
-		score = Hogg_score()
-		Hogg_score_list.append(score)
+		score = CV_score()
+		CV_score_list.append(score)
 	
 	# Save output as npz array
-	np.savez("Scores/Hogg_score - "+str(a.yield_table_name_sn2)+", "+str(a.yield_table_name_agb)+", "+str(a.yield_table_name_1a)+".npz",
+	np.savez("Scores/CV_score - "+str(a.yield_table_name_sn2)+", "+str(a.yield_table_name_agb)+", "+str(a.yield_table_name_1a)+".npz",
 				beta_param=beta_params,
-				score=Hogg_score_list)
+				score=CV_score_list)
 				
-	return beta_params,Hogg_score_list
+	return beta_params,CV_score_list
 
-def Hogg_bash(beta_index):
+def CV_bash(beta_index):
 	"""
 	This is for a specific beta value only
 	
-	This function calculates the Hogg score as a function of the beta-function parameter (defined in parameter.py)
+	This function calculates the CV score as a function of the beta-function parameter (defined in parameter.py)
 	It is not currently parallelized (parallelization is done in MCMC already and for element predictions).
 	"""
 	import time
 	import fileinput
 	import sys
 	from .parameter import ModelParameters
-	from .score_function import Hogg_score
+	from .score_function import CV_score
 	beta_index = int(beta_index)
 	print(beta_index)
 
 	a = ModelParameters()
 	beta_params = a.list_of_beta_params[beta_index]
-	Hogg_score_list = []
+	CV_score_list = []
 	init_time = time.time()
 	
 	#print("Calculating value %d of %d after %.3f seconds" %(i+1,len(beta_params),time.time()-init_time))
@@ -408,22 +408,22 @@ def Hogg_bash(beta_index):
 	preload = preload_params_mcmc()
 	
 	# Calculate Bayes score
-	score = Hogg_score()
+	score = CV_score()
 	
 	rescaled_score = np.power(score,1./len(a.initial_neural_names))
-	#Hogg_score_list.append(score)
-	np.savez('Scores/Hogg'+str(beta_index)+'.npz',beta_param=beta_params,score=score,rescaled_score = rescaled_score)
+	#CV_score_list.append(score)
+	np.savez('Scores/CV'+str(beta_index)+'.npz',beta_param=beta_params,score=score,rescaled_score = rescaled_score)
 	
 	# Save output as npz array
-	#np.savez("Scores/Hogg_score - "+str(a.yield_table_name_sn2)+", "+str(a.yield_table_name_agb)+", "+str(a.yield_table_name_1a)+".npz",
+	#np.savez("Scores/CV_score - "+str(a.yield_table_name_sn2)+", "+str(a.yield_table_name_agb)+", "+str(a.yield_table_name_1a)+".npz",
 	#			beta_param=beta_params,
-	#			score=Hogg_score_list)
+	#			score=CV_score_list)
 				
 	return beta_params,score,rescaled_score
 	
-def Hogg_stitch():
+def CV_stitch():
 	"""
-	Function to load all Hogg predictions and combine into one file
+	Function to load all CV predictions and combine into one file
 	"""
 	from .score_function import preload_params_mcmc
 	preload = preload_params_mcmc()
@@ -433,18 +433,18 @@ def Hogg_stitch():
 	score = []
 	rescaled_score = []
 	for i in range(len(a.list_of_beta_params)):
-		temp=np.load('Scores/Hogg'+str(i)+'.npz')
+		temp=np.load('Scores/CV'+str(i)+'.npz')
 		beta.append(temp['beta_param'])
 		score.append(temp['score'])
 		rescaled_score.append(temp['rescaled_score'])
 		temp.close()
-	np.savez("Scores/Hogg_score - "+str(a.yield_table_name_sn2)+", "+str(a.yield_table_name_agb)+", "+str(a.yield_table_name_1a)+".npz",
+	np.savez("Scores/CV_score - "+str(a.yield_table_name_sn2)+", "+str(a.yield_table_name_agb)+", "+str(a.yield_table_name_1a)+".npz",
 				beta_param=beta,
 				score=score,rescaled_score=rescaled_score)
 		
 	return beta,score
 	
-def Hogg_median():
+def CV_median():
 	"""
 	Function to compute the median and 15/85 percentiles of the posterior parameters.
 	This is calculated for each element cross-validation.
@@ -554,7 +554,7 @@ def Hogg_median():
 		
 		sys.stdout.flush()
 		
-	np.savez('Scores/Hogg_medians'+str(a.beta_param)+'.npz',
+	np.savez('Scores/CV_medians'+str(a.beta_param)+'.npz',
 				elements=elements_init,
 				median = posterior_med,
 				upper = posterior_up,

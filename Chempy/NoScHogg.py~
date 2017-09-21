@@ -9,7 +9,7 @@ os.system('mkdir BatchScoresNoSc/')
 os.system('rm -rf Scores/')
 os.system('mkdir Scores')
 
-print("1: Default Hogg no Sc Score")
+print("1: Default CV no Sc Score")
 
 for line in fileinput.input("Chempy/parameter.py", inplace=True):
 	if "\tyield_table_name_sn2_index" in line:
@@ -22,13 +22,13 @@ for line in fileinput.input("Chempy/parameter.py", inplace=True):
 		print(line,end='')
 fileinput.close()		
 
-os.system('Chempy/Hogg_run.sh')
+os.system('Chempy/CV_run.sh')
 os.system('mkdir BatchScoresNoSc/Default')
 os.system('scp Scores/* BatchScoresNoSc/Default/')
 os.system('rm -rf Scores/')
 os.system('mkdir Scores')
 
-print("2: Chieffi Hogg no Sc Score")
+print("2: Chieffi CV no Sc Score")
 
 for line in fileinput.input("Chempy/parameter.py", inplace=True):
 	if "\tyield_table_name_sn2_index" in line:
@@ -40,7 +40,7 @@ for line in fileinput.input("Chempy/parameter.py", inplace=True):
 	else:
 		print(line,end='')
 fileinput.close()	
-os.system('Chempy/Hogg_run.sh')
+os.system('Chempy/CV_run.sh')
 os.system('mkdir BatchScoresNoSc/Chieffi')
 os.system('scp Scores/* BatchScoresNoSc/Chieffi/')
 os.system('rm -rf Scores/')

@@ -21,9 +21,9 @@ def overall_Bayes():
 	
 	return integral,integral_err
 	
-def overall_Hogg():
+def overall_CV():
 	"""
-	Convenience function to calculate overall Hogg score, running MCMC over all parameters including beta.
+	Convenience function to calculate overall CV score, running MCMC over all parameters including beta.
 	NB: must set beta_param / log10_beta priors in parameter file
 	"""
 	import numpy as np
@@ -65,7 +65,7 @@ def overall_Hogg():
 	# Calculate required Chempy elements
 	preload = preload_params_mcmc()
 	elements_init = np.copy(preload.elements)
-	np.save('Scores/Hogg_elements.npy',elements_init)
+	np.save('Scores/CV_elements.npy',elements_init)
 	#print(elements_init) 
    
 	# Create new parameter names
@@ -99,7 +99,7 @@ def overall_Hogg():
 		# Create the posterior PDF and load it 
 		restructure_chain('mcmc/')
 		positions = np.load('mcmc/posteriorPDF.npy') # Posterior parameter PDF
-		#print("In Hogg_score, element list is",a.elements_to_trace)
+		#print("In CV_score, element list is",a.elements_to_trace)
 		
 		##############
 		
@@ -158,7 +158,7 @@ def overall_Hogg():
 		print(overall_score)
 		sys.stdout.flush()
 		#print(starting_el)
-	np.savez('OverallScores/Hogg_element_likelihoods.npz',
+	np.savez('OverallScores/CV_element_likelihoods.npz',
 				elements=elements_init,
 				likelihood_factors=factors,
 				element_mean = element_mean,
@@ -166,24 +166,24 @@ def overall_Hogg():
 	
 	rescaled_score = np.power(overall_score,1./len(starting_el)	
 			
-	np.save("OverallScores/Hogg_score_rescaled - "+str(a.yield_table_name_sn2)+\
+	np.save("OverallScores/CV_score_rescaled - "+str(a.yield_table_name_sn2)+\
 	","+str(a.yield_table_name_agb)+", "+str(a.yield_table_name_1a)+".npy",rescaled_score)
 				
 	return rescaled_score
 	
-def Hogg_errors():
+def CV_errors():
 	"""
-	This function computes the overall Hogg score with errors.
+	This function computes the overall CV score with errors.
 	Median and errors (16/84 percentile) are estimated by running the process 10 times.
 	"""
-	from .overall_scores import overall_Hogg	
+	from .overall_scores import overall_CV	
 	import numpy as np
 	from .parameter import ModelParameters
 	a = ModelParameters()
 	
 	scores = []
 	for _ in range(10):
-		tmp = overall_Hogg()
+		tmp = overall_CV()
 		scores.append(np.log10(tmp))
 			
 	median = np.median(scores)
@@ -191,16 +191,16 @@ def Hogg_errors():
 	upper = np.percentile(scores,100-15.865)
 	
 	print("Average LOO-CV score over 10 iterations is %.2f + %.2f - %.2f" %(median,median-lower,upper-median))
-	np.savez("OverallScores/ErrorHogg - "+str(a.yield_table_name_sn2)+", "+str(a.yield_table_name_agb)+", "+str(a.yield_table_name_1a)+".npz",
+	np.savez("OverallScores/ErrorCV - "+str(a.yield_table_name_sn2)+", "+str(a.yield_table_name_agb)+", "+str(a.yield_table_name_1a)+".npz",
 				median=median,lower=lower,upper=upper)
 	return median, median-lower,upper-median
 	
-def Hogg_element_predictions(size=10):
+def CV_element_predictions(size=10):
 	"""
-	This function computes the NORMALISED element predictions from the Hogg scoring.
+	This function computes the NORMALISED element predictions from the CV scoring.
 	Predictions and sigmas are estimated 10 times over to check for scatter.
 	"""
-	from .overall_scores import overall_Hogg	
+	from .overall_scores import overall_CV	
 	import numpy as np
 	from .parameter import ModelParameters
 	a = ModelParameters()
@@ -211,20 +211,20 @@ def Hogg_element_predictions(size=10):
 	el_likelihoods=[]
 	for i in range(size):
 		print('Computing score %d of %s' %(i+1,size))
-		tmp = overall_Hogg()
+		tmp = overall_CV()
 		scores.append(np.log10(tmp))
-		el_dat = np.load('OverallScores/Hogg_element_likelihoods.npz')
+		el_dat = np.load('OverallScores/CV_element_likelihoods.npz')
 		el_means.append(el_dat['element_mean'])
 		el_sigmas.append(el_dat['element_sigma'])
 		el_likelihoods.append(el_dat['likelihood_factors'])
 		el_dat.close()
 	
-	el_dat = np.load('OverallScores/Hogg_element_likelihoods.npz')
+	el_dat = np.load('OverallScores/CV_element_likelihoods.npz')
 	el_names = el_dat['elements']
 	el_dat.close()
 	
 	# Save output as npz file - each will be list of identically simulated data
-	np.savez('OverallScores/Hogg_normalised_element_predictions_'+str(a.yield_table_name_sn2)+'.npz',
+	np.savez('OverallScores/CV_normalised_element_predictions_'+str(a.yield_table_name_sn2)+'.npz',
 				mean=el_means,sigma=el_sigmas,elements=el_names,likelihood=el_likelihoods,normalised_scores=scores)
 	
 	return None
