@@ -22,8 +22,8 @@ If you want this to be permanent, you can add the last line to your `.bashrc`.
 
 
 ## Authors
-- Jan Rybizki (MPIA, rybizki@mpia.de) *Original Chempy*
-- Oliver Philcox (IoA, ohep2@cam.ac.uk) *Yield table scoring*
+- Jan Rybizki (MPIA, rybizki@mpia.de) - *Original Chempy*
+- Oliver Philcox (IoA, ohep2@cam.ac.uk) - *Yield table scoring*
 
 ## Collaborators
 - Hans-Walter Rix (MPIA)
@@ -40,7 +40,7 @@ The jupyter [tutorial](https://github.com/oliverphilcox/Chempy/tree/master/tutor
 
 To run it interactively first clone the repository with
 ```
-git clone https://github.com/oliverphilcox/ChempyScoring.git@v0.1
+git clone https://github.com/oliverphilcox/ChempyScoring.git
 ```
 Then you can ```jupyter notebook``` from within the tutorial folder (it will run if you have installed *ChempyScoring*). 
 If you did not install ChempyScoring you can still run the tutorial but need to point to the files in the Chempy folder. Basically you have to ```cd ../ChempyScoring/``` and then replace each ```from Chempy import ...``` with ```from . import ...```.
