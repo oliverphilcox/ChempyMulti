@@ -1240,7 +1240,10 @@ class SN2_feedback(object):
     	
 	def TNG_net(self):
 		""" This loads the CC-SN yields used in the Illustris TNG simulation.
-		This includes Kobayashi (2006) and Portinari (1998) tables - see Pillepich et al. 2017"""  
+		This includes Kobayashi (2006) and Portinari (1998) tables - see Pillepich et al. 2017
+		
+		THIS ONLY WORKS FOR IMF SLOPE IS -2.3 - DO NOT OPTIMIZE OVER THIS
+		"""  
 		
 		import h5py as h5
 		filename = localpath+'input/yields/TNG/SNII.hdf5'

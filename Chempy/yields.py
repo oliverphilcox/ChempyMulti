@@ -302,7 +302,7 @@ class SN2_feedback(object):
 		"""
 	def Portinari(self):
 		'''
-		Loading the yield table from Portinari1998.
+		Loading the yield table from Portinari1998. These are presented as net yields in solar masses.
 		'''
 		self.metallicities = [0.0004,0.004,0.008,0.02,0.05]
 		x = np.genfromtxt(localpath + 'input/yields/Portinari_1998/0.02.txt',names=True)
