@@ -333,7 +333,7 @@ def plot_mcmc_chain_with_prior(directory, use_prior = False, only_first_star = T
 
 	if use_prior:
 		from Chempy.cem_function import gaussian
-		prior = [[1.0,0.5],[-2.75,0.3],[-0.3,0.3],[0.55,0.1],[0.5,0.1]]
+		prior = [[1.0,0.5],[-2.3,0.3],[-2.75,0.3],[-0.3,0.3],[0.55,0.1],[0.5,0.1]]
 		prior = np.array(prior)
 
 	import corner

@@ -23,24 +23,25 @@ class ModelParameters(object):
 	#initial_neural_names = ['C','Fe','He','Mg','N','Ne','O','Si']
 	
 	## Choice of yield sets
-	yield_table_name_sn2_list = ['chieffi04','Nugrid','Nomoto2013','Portinari', 'chieffi04_net', 'Nomoto2013_net','NuGrid_net','West17_net','TNG_net']#'Frischknecht16_net'
-	yield_table_name_sn2_index = 7
+	yield_table_name_sn2_list = ['chieffi04','Nugrid','Nomoto2013','Portinari_net', 'chieffi04_net', 'Nomoto2013_net','NuGrid_net','West17_net','TNG_net']#'Frischknecht16_net'
+	yield_table_name_sn2_index = 3
 	yield_table_name_sn2 = yield_table_name_sn2_list[yield_table_name_sn2_index]
 
 	yield_table_name_hn_list = ['Nomoto2013']
 	yield_table_name_hn_index = 0
 	yield_table_name_hn = yield_table_name_hn_list[yield_table_name_hn_index]
 
-	yield_table_name_agb_list = ['Karakas','Nugrid','Karakas_net_yield','Ventura','Karakas16_net'] # Karakas2016 needs much more calculational resources (order of magnitude) using 2010 net yields from Karakas are faster and only N is significantly underproduced
+	yield_table_name_agb_list = ['Karakas','Nugrid','Karakas_net_yield','Ventura_net','Karakas16_net','TNG_net'] # Karakas2016 needs much more calculational resources (order of magnitude) using 2010 net yields from Karakas are faster and only N is significantly underproduced
 	yield_table_name_agb_index = 2
 	yield_table_name_agb = yield_table_name_agb_list[yield_table_name_agb_index]
 
-	yield_table_name_1a_list = ['Iwamoto','Thielemann','Seitenzahl']
+	yield_table_name_1a_list = ['Iwamoto','Thielemann','Seitenzahl', 'TNG']
 	yield_table_name_1a_index = 2
 	yield_table_name_1a = yield_table_name_1a_list[yield_table_name_1a_index]
 
 	## Neural network parameters
-	UseNeural = False # This defines whether to use trained network in place of Chempy
+	UseNeural = True # This defines whether to use trained network in place of Chempy
+	
 	training_size = 10 # no. values per parameter in training set
 	training_widths = [0.6,0.6,0.6,0.2,0.2] # 2 sigma widths
 	neurons = 30 # Number of neurons in layer
@@ -51,8 +52,8 @@ class ModelParameters(object):
 
 	## Free parameters - if some parameter is in to optimise there needs to be a prior and constraints defined
 	
-	SSP_parameters =  [-2.29,-2.75]#[5.0,,1.0,-2.29 ,-2.75,	-0.8 ,0.2, 0.7, 0.3, 0.0]
-	SSP_parameters_to_optimize = ['high_mass_slope','log10_N_0'] #['beta_param', 'log10_beta','high_mass_slope', 'log10_N_0' 'log10_sn1a_time_delay','log10_sfr_factor_for_cosmic_accretion','log10_gas_reservoir_mass_factor','log10_a_parameter','log10_gas_power']
+	SSP_parameters =  [1.0,-2.29,-2.75]#[5.0,,1.0,-2.29 ,-2.75,	-0.8 ,0.2, 0.7, 0.3, 0.0]
+	SSP_parameters_to_optimize = ['log10_beta','high_mass_slope','log10_N_0'] #['beta_param', 'log10_beta','high_mass_slope', 'log10_N_0' 'log10_sn1a_time_delay','log10_sfr_factor_for_cosmic_accretion','log10_gas_reservoir_mass_factor','log10_a_parameter','log10_gas_power']
 	assert len(SSP_parameters) == len(SSP_parameters_to_optimize)
 	ISM_parameters =  [-0.3,0.55,	0.5]#, 0.3,0.2, 0.7, 0.3, 0.0]
 	ISM_parameters_to_optimize = ['log10_starformation_efficiency', 'log10_sfr_scale', 'outflow_feedback_fraction']#,'log10_gas_reservoir_mass_factor','log10_sfr_factor_for_cosmic_accretion','log10_a_parameter','log10_gas_power']

@@ -300,38 +300,55 @@ class SN2_feedback(object):
 		This is the object that holds the feedback table for CC-SN.
                 Different tables can be loaded by the methods.
 		"""
-	def Portinari(self):
+
+	def Portinari_net(self):
 		'''
-		Loading the yield table from Portinari1998. These are presented as net yields in solar masses.
+		Loading the yield table from Portinari1998. 
+		These are presented as net yields in fractions of initial stellar mass.
 		'''
-		self.metallicities = [0.0004,0.004,0.008,0.02,0.05]
+		  
+		# Define metallicities in table
+		self.metallicities = [0.0004,0.004,0.008,0.02,0.05] 
+		
+		# Load one table
 		x = np.genfromtxt(localpath + 'input/yields/Portinari_1998/0.02.txt',names=True)
-		self.masses = list(x['Mass'])
+		 
+		# Define masses and elements in yield tables
+		self.masses = list(x['Mass']) # In solar masses
 		self.elements = list(x.dtype.names[3:])
 		
-		yield_tables_final_structure = {}
+		self.table = {} # Output dictionary for yield tables
+		  
 		for metallicity in self.metallicities:
-			additional_keys = ['Mass', 'mass_in_remnants','unprocessed_mass_in_winds']
-			names = additional_keys + self.elements
+			additional_keys = ['Mass', 'mass_in_remnants','unprocessed_mass_in_winds'] 
+			names = additional_keys + self.elements # These are fields in dictionary
+			
+			# Create empty record array of correct size
 			base = np.zeros(len(self.masses))
 			list_of_arrays = []
 			for i in range(len(names)):
-				list_of_arrays.append(base)
-			yield_tables_final_structure_subtable = np.core.records.fromarrays(list_of_arrays,names=names)
-			yield_tables_final_structure_subtable['Mass'] = np.array(self.masses)
+			    list_of_arrays.append(base)
+			yield_subtable = np.core.records.fromarrays(list_of_arrays,names=names)
 			
-			x = np.genfromtxt(localpath + 'input/yields/Portinari_1998/%s.txt' %(metallicity),names=True)	
+			# Add mass field to subtable (in solar masses)
+			yield_subtable['Mass'] = np.array(self.masses)
+			
+			# Read in yield tbale
+			x = np.genfromtxt(localpath + 'input/yields/Portinari_1998/%s.txt' %(metallicity),names=True)
+			
+			# Read in element yields
 			for item in self.elements:
-				yield_tables_final_structure_subtable[item] = np.divide(x[item],x['Mass'])
-			yield_tables_final_structure_subtable['mass_in_remnants'] = np.divide(x['Mass'] - x['ejected_mass'], x['Mass'])
+			    yield_subtable[item] = np.divide(x[item],x['Mass']) # Yields must be in mass fraction
 			
+			# Add fractional mass in remnants
+			yield_subtable['mass_in_remnants'] = np.divide(x['Mass'] - x['ejected_mass'], x['Mass'])
+			
+			# Add unprocessed mass as 1-remnants (with correction if summed net yields are not exactly zero)
 			for i,item in enumerate(self.masses):
-				yield_tables_final_structure_subtable['unprocessed_mass_in_winds'][i] = 1. - (yield_tables_final_structure_subtable['mass_in_remnants'][i] + sum(list(yield_tables_final_structure_subtable[self.elements][i])))
-
-			yield_tables_final_structure[metallicity] = yield_tables_final_structure_subtable
-
-		self.table = yield_tables_final_structure
-
+			    yield_subtable['unprocessed_mass_in_winds'][i] = 1. - (yield_subtable['mass_in_remnants'][i] + sum(list(yield_subtable[self.elements][i])))
+			
+			# Add subtable to output table
+			self.table[metallicity] = yield_subtable
 
 
 	def francois(self):
@@ -1386,7 +1403,7 @@ class AGB_feedback(object):
 			self.table[z] = restructure_subtable
 			
 			
-	def Ventura(self):
+	def Ventura_net(self):
 		"""
 		Ventura 2013 net yields from Paolo himself
 		"""
