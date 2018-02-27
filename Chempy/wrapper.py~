@@ -138,6 +138,9 @@ def Chempy(a):
 		element_fractions = []
 		for item in elements_to_trace:
 			element_fractions.append(float(np.copy(cube.cube[item][max(i-1,0)]/cube.cube['gas'][max(i-1,0)])))## gas element fractions from one time step before	
+			if element_fractions[-1]<0:
+				#print('-ve Error')
+				raise Exception('-ve Error')
 		metallicity = float(cube.cube['Z'][i])
 		#print(metallicity)		
 				
@@ -451,7 +454,7 @@ def mcmc_multi(changing_parameter, error_list, elements):
 	print('Chain created')
 	sampler = emcee.EnsembleSampler(a.nwalkers,ndim,posterior_function_many_stars,threads=nthreads, args = [error_list,elements])
 	pos,prob,state,blobs = sampler.run_mcmc(chain,a.mburn)
-	print('5')
+	
 	mean_prob = mean_prob_beginning = np.zeros((a.m))
 	posterior_list = []
 	posterior_std_list = []

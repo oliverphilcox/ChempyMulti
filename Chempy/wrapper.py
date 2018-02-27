@@ -138,6 +138,9 @@ def Chempy(a):
 		element_fractions = []
 		for item in elements_to_trace:
 			element_fractions.append(float(np.copy(cube.cube[item][max(i-1,0)]/cube.cube['gas'][max(i-1,0)])))## gas element fractions from one time step before	
+			if element_fractions[-1]<0:
+				print('-ve Error')
+				#raise Exception('-ve Error')
 		metallicity = float(cube.cube['Z'][i])
 		#print(metallicity)		
 				

@@ -588,7 +588,7 @@ def test_dataset(width):
 		os.makedirs(directory)
 
 	a = ModelParameters()
-	size = a.test_size # Number of points
+	size = 300#a.test_size # Number of points
 	sigma = []
 	for i,param_name in enumerate(a.to_optimize):
 		sigma.append(a.priors.get(param_name)[1])
