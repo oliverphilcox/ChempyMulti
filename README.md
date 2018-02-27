@@ -1,5 +1,5 @@
 # ChempyScoring - Evolution Modelling + Yield Table Scoring
-Flexible one-zone open-box chemical evolution modeling. Abundance fitting and stellar feedback calculation. Parameter optimization for simulations and yield table scoring. This is the code described in Philcox & Rybizki (2017, submitted)
+Flexible one-zone open-box chemical evolution modeling. Abundance fitting and stellar feedback calculation. Parameter optimization for simulations and yield table scoring. This is the code described in Philcox, Rybizki & Gutke (submitted to ApJ, [arXiv](https://arxiv.org/abs/1712.05686))
 
 ## Installation
 
@@ -31,9 +31,8 @@ If you want this to be permanent, you can add the last line to your `.bashrc`.
 - Morgan Fouesneau (MPIA)
 
 ## Links
-- Philcox & Rybizki 2017 (will be on arXiv shortly)
-- <a href="http://arxiv.org/abs/1702.08729"><img src="http://img.shields.io/badge/arXiv-1702.08729-orange.svg?style=flat" alt="arxiv:1702.08729" /></a>
-- <a href="http://ascl.net/1702.011"><img src="https://img.shields.io/badge/ascl-1702.011-blue.svg?colorB=262255" alt="ascl:1702.011" /></a>
+- Philcox, Rybizki & Gutcke (submitted to ApJ, [arXiv](https://arxiv.org/abs/1712.05686))
+- Rybizki, Just & Rix ([arXiv](http://arxiv.org/abs/1702.08729), [ASCL](http://ascl.net/1702.011)
 - An early version of Chempy is presented in chapter 4 of Jan's [phd thesis](http://nbn-resolving.de/urn:nbn:de:bsz:16-heidok-199349).
 
 ## Getting started
@@ -46,7 +45,7 @@ git clone https://github.com/oliverphilcox/ChempyScoring.git
 Then you can ```jupyter notebook``` from within the tutorial folder (it will run if you have installed *ChempyScoring*). 
 If you did not install ChempyScoring you can still run the tutorial but need to point to the files in the Chempy folder. Basically you have to ```cd ../ChempyScoring/``` and then replace each ```from Chempy import ...``` with ```from . import ...```.
 
-You can also have a look at the *preliminary* Chempy [documentaion](http://www.mpia.de/homes/rybizki/html/index.html) which gives an overview over the Chempy classes and functions, although this does not yet provide support for the Scoring or Neural Network implementations.
+You can also have a look at the *preliminary* Chempy [documentation](http://www.mpia.de/homes/rybizki/html/index.html) which gives an overview over the Chempy classes and functions, although this does not yet provide support for the Scoring or Neural Network implementations.
 
 ## Attribution
-Please cite the initial Chempy [paper](https://arxiv.org/abs/1702.08729) and scoring table updates (Philcox & Rybizki 2017, submitted) when using the code in your research (so far only arxiv link, will be updated).
+Please cite the initial Chempy [paper](https://arxiv.org/abs/1702.08729) and scoring table [code](https://arxiv.org/abs/1712.05686) when using the code in your research (so far only arXiv link, will be updated).
