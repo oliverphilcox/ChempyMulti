@@ -1115,6 +1115,8 @@ def cem_real2_int(a,b):
 		param.append(a.high_mass_slope)
 	if 'log10_N_0' in a.to_optimize:
 		param.append(a.log10_N_0)
+	if 'log10_sn1a_time_delay' in a.to_optimize:
+		param.append(a.log10_sn1a_time_delay)
 	if 'log10_starformation_efficiency' in a.to_optimize:
 		param.append(a.log10_starformation_efficiency)
 	if 'log10_sfr_scale' in a.to_optimize:
