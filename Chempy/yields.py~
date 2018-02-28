@@ -1403,7 +1403,7 @@ class AGB_feedback(object):
 			self.table[z] = restructure_subtable
 			
 			
-	def Ventura(self):
+	def Ventura_net(self):
 		"""
 		Ventura 2013 net yields from Paolo himself
 		"""

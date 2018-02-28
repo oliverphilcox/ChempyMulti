@@ -16,5 +16,5 @@ a2=extract_parameters_and_priors(params,a)
 cube,abun=Chempy(a2)
 
 import pickle
-pickle.dump(abun,open("C04_9elements_abundances.pkl","wb"))
-pickle.dump(cube,open("C04_9elements_cube.pkl","wb"))
+pickle.dump(abun,open("C04_9elements_abundances2.pkl","wb"))
+pickle.dump(cube,open("C04_9elements_cube2.pkl","wb"))

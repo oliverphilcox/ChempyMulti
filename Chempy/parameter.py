@@ -23,8 +23,8 @@ class ModelParameters(object):
 	initial_neural_names = ['C','Fe','He','Mg','N','Ne','O','Si']
 	
 	## Choice of yield sets
-	yield_table_name_sn2_list = ['chieffi04','Nugrid','Nomoto2013','Portinari_net', 'chieffi04_net', 'Nomoto2013_net','NuGrid_net','West17_net','TNG_net']#'Frischknecht16_net'
-	yield_table_name_sn2_index = 4
+	yield_table_name_sn2_list = ['chieffi04','Nugrid','Nomoto2013','Portinari_net', 'chieffi04_net', 'Nomoto2013_net','NuGrid_net','West17_net','TNG_net','CL18_net']#'Frischknecht16_net'
+	yield_table_name_sn2_index = 9
 	yield_table_name_sn2 = yield_table_name_sn2_list[yield_table_name_sn2_index]
 
 	yield_table_name_hn_list = ['Nomoto2013']

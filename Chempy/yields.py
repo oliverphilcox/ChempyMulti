@@ -1323,7 +1323,69 @@ class SN2_feedback(object):
 			restructure_subtable = np.core.records.fromarrays(list_of_arrays,names=all_keys)
 		
 			self.table[z] = restructure_subtable
-			    
+
+	def CL18_net(self):
+		"""These are net yields from Chieffi + Limongi 2018 (unpublished), downloaded from http://orfeo.iaps.inaf.it/"""
+	
+		datpath=localpath+'/input/yields/CL18/'
+	
+		self.metallicities=[0.0134,0.00134,0.000134,0.0000134] # metallicities of [Fe/H]=[0,-1,-2,-3]
+		rotations=[0,150,300] # initial rotational velocity in km/s
+		self.masses=np.array([13,15,20,25,30,40,60,80,120])
+		weight_matrix=np.array([[0.7,0.3,0.],[0.6,0.4,0.],[0.48,0.48,0.04],[0.05,0.7,0.25]])
+	
+		self.elements=['H','He','Li','Be','B','C','N','O','F','Ne','Na','Mg','Al','Si','P','S','Cl','Ar','K','Ca','Sc','Ti','V','Cr','Mn','Fe','Co','Ni','Cu','Zn','Ga','Ge','As','Se','Br','Kr','Rb','Sr','Y','Zr','Nb','Mo','Xe','Cs','Ba','La','Ce','Pr','Nd','Hg','Tl','Pb','Bi']
+		LEN=len(self.elements)
+		yield_table={}
+	
+		# Import full table with correct rows and data-types
+		dt = np.dtype('U8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8')
+	
+		# Load once in full to find length
+		z = np.genfromtxt(datpath+'tab_yieldsnet_ele_exp.dec',skip_header=1,dtype=dt)
+		full_len=len(z)+1
+	
+		# Import full table with correct rows and data-types
+		dt = np.dtype('U8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8')
+		for m,met in enumerate(self.metallicities):
+			z,zTot=[],[]
+			for rotation_index in range(3):
+				header=(3*m+rotation_index)*(LEN+1)+1
+				z.append(np.genfromtxt(datpath+'tab_yieldsnet_ele_exp.dec',skip_header=header,skip_footer=full_len-header-LEN,dtype=dt))
+				zTot.append(np.genfromtxt(datpath+'tab_yieldstot_ele_exp.dec',skip_header=header,skip_footer=full_len-header-LEN,dtype=dt))
+	
+			additional_keys = ['Mass', 'mass_in_remnants','unprocessed_mass_in_winds'] # List of keys for table
+			names = additional_keys + self.elements
+	
+			# Initialise table and arrays   
+			base = np.zeros(len(self.masses))
+			list_of_arrays = []
+			for i in range(len(names)):
+				list_of_arrays.append(base)
+			yield_subtable = np.core.records.fromarrays(list_of_arrays,names=names)
+			mass_in_remnants = np.zeros(len(self.masses))
+			total_mass_fraction = np.zeros(len(self.masses))
+			element_mass = np.zeros(len(self.masses))
+			yield_subtable['Mass']=self.masses
+			tot_yield=np.zeros(len(self.masses))
+	
+			for e,el in enumerate(self.elements):
+				for m_index in range(len(self.masses)):
+					for rotation_index in range(3):
+						yield_subtable[el][m_index]+=z[rotation_index][e][m_index+4]*weight_matrix[m,rotation_index]/self.masses[m_index]
+					tot_yield[m_index]+=yield_subtable[el][m_index]
+	
+			# Compute total remnant mass
+			for m_index,mass in enumerate(self.masses):
+				for rotation_index in range(3):
+					yield_subtable['mass_in_remnants'][m_index]+=(1.-np.sum([zTot[rotation_index][i][m_index+4] for i in range(len(self.elements))])/mass)*weight_matrix[m,rotation_index]
+	
+			# Compute unprocessed mass
+			yield_subtable['unprocessed_mass_in_winds']=1.-yield_subtable['mass_in_remnants']-tot_yield
+	
+			yield_table[met]=yield_subtable
+		self.table=yield_table
+
 #######################
 class AGB_feedback(object):
 	def __init__(self):   
