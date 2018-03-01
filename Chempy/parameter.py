@@ -40,7 +40,7 @@ class ModelParameters(object):
 	yield_table_name_1a = yield_table_name_1a_list[yield_table_name_1a_index]
 
 	## Neural network parameters
-	UseNeural = False#True#False#True # This defines whether to use trained network in place of Chempy
+	UseNeural = True#True#False#True # This defines whether to use trained network in place of Chempy
 	
 	training_size = 10 #10 # no. values per parameter in training set
 	training_widths = [0.6,0.6,0.6,0.2,0.2] # 2 sigma widths
@@ -52,8 +52,8 @@ class ModelParameters(object):
 
 	## Free parameters - if some parameter is in to optimise there needs to be a prior and constraints defined
 	
-	SSP_parameters =  [-2.3,-2.75]#[1.0,-2.29]#[5.0,,1.0,-2.29 ,-2.75,	-0.8 ,0.2, 0.7, 0.3, 0.0]
-	SSP_parameters_to_optimize = ['high_mass_slope','log10_N_0']#['log10_beta','high_mass_slope'] #['beta_param', 'log10_beta','high_mass_slope', 'log10_N_0' 'log10_sn1a_time_delay','log10_sfr_factor_for_cosmic_accretion','log10_gas_reservoir_mass_factor','log10_a_parameter','log10_gas_power']
+	SSP_parameters =  [1.0,-2.3,-2.75]#[1.0,-2.29]#[5.0,,1.0,-2.29 ,-2.75,	-0.8 ,0.2, 0.7, 0.3, 0.0]
+	SSP_parameters_to_optimize = ['log10_beta','high_mass_slope','log10_N_0']#['log10_beta','high_mass_slope'] #['beta_param', 'log10_beta','high_mass_slope', 'log10_N_0' 'log10_sn1a_time_delay','log10_sfr_factor_for_cosmic_accretion','log10_gas_reservoir_mass_factor','log10_a_parameter','log10_gas_power']
 	assert len(SSP_parameters) == len(SSP_parameters_to_optimize)
 	ISM_parameters =  [-0.3,0.55,	0.5]#, 0.3,0.2, 0.7, 0.3, 0.0]
 	ISM_parameters_to_optimize = ['log10_starformation_efficiency', 'log10_sfr_scale', 'outflow_feedback_fraction']#,'log10_gas_reservoir_mass_factor','log10_sfr_factor_for_cosmic_accretion','log10_a_parameter','log10_gas_power']
