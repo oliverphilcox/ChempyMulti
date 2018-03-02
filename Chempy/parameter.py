@@ -40,7 +40,7 @@ class ModelParameters(object):
 	yield_table_name_1a = yield_table_name_1a_list[yield_table_name_1a_index]
 
 	## Neural network parameters
-	UseNeural = False#True#False#True # This defines whether to use trained network in place of Chempy
+	UseNeural = False#True # This defines whether to use trained network in place of Chempy
 	
 	training_size = 10 #10 # no. values per parameter in training set
 	training_widths = [0.6,0.6,0.6,0.2,0.2] # 2 sigma widths
