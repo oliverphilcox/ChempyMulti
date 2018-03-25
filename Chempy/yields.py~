@@ -1332,7 +1332,7 @@ class SN2_feedback(object):
 		self.metallicities=[0.0134,0.00134,0.000134,0.0000134] # metallicities of [Fe/H]=[0,-1,-2,-3]
 		rotations=[0,150,300] # initial rotational velocity in km/s
 		self.masses=np.array([13,15,20,25,30,40,60,80,120])
-		weight_matrix=np.array([1.,0.,0.],[1.,0.,0.],[1.,0.,0.],[1.,0.,0.])#np.array([[0.7,0.3,0.],[0.6,0.4,0.],[0.48,0.48,0.04],[0.05,0.7,0.25]])
+		weight_matrix=np.array([[1.,0.,0.],[1.,0.,0.],[1.,0.,0.],[1.,0.,0.]])#np.array([[0.7,0.3,0.],[0.6,0.4,0.],[0.48,0.48,0.04],[0.05,0.7,0.25]])
 	
 		self.elements=['H','He','Li','Be','B','C','N','O','F','Ne','Na','Mg','Al','Si','P','S','Cl','Ar','K','Ca','Sc','Ti','V','Cr','Mn','Fe','Co','Ni','Cu','Zn','Ga','Ge','As','Se','Br','Kr','Rb','Sr','Y','Zr','Nb','Mo','Xe','Cs','Ba','La','Ce','Pr','Nd','Hg','Tl','Pb','Bi']
 		LEN=len(self.elements)

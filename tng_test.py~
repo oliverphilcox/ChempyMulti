@@ -1,0 +1,28 @@
+# First load in TNG dataset
+import numpy as np
+positions=np.load('/data/ohep2/MPIAData/SimData/100MSun/posteriorPDF.npy')
+
+draws=positions[:100,:]
+
+cubes=[]
+abuns=[]
+for i,params in enumerate(draws):
+    if i%10==0:
+        print(i)
+    from Chempy.parameter import ModelParameters
+    a=ModelParameters()
+    from Chempy.cem_function import extract_parameters_and_priors
+    from Chempy.wrapper import Chempy
+    a2=extract_parameters_and_priors(params,a)
+    _,abun=Chempy(a2)
+    abuns.append(abun)
+
+meds=np.median(positions,axis=0)
+from Chempy.parameter import ModelParameters
+a=ModelParameters()
+from Chempy.cem_function import extract_parameters_and_priors
+from Chempy.wrapper import Chempy
+a2=extract_parameters_and_priors(meds,a)
+cubeM,abunM=Chempy(a2)
+
+np.savez('TNG100FreeFreeData.npz',median=abunM,abundances=abuns)
