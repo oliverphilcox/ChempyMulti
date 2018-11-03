@@ -1,5 +1,5 @@
 # ChempyScoring - Evolution Modelling + Yield Table Scoring
-Flexible one-zone open-box chemical evolution modeling. Abundance fitting and stellar feedback calculation. Parameter optimization for simulations and yield table scoring. This is the code described in Philcox, Rybizki & Gutke (submitted to ApJ, [arXiv](https://arxiv.org/abs/1712.05686))
+Flexible one-zone open-box chemical evolution modeling. Abundance fitting and stellar feedback calculation. Parameter optimization for simulations and yield table scoring. This is the code described in Philcox, Rybizki & Gutke (ApJ, [arXiv](https://arxiv.org/abs/1712.05686))
 
 ## Installation
 
@@ -31,7 +31,7 @@ If you want this to be permanent, you can add the last line to your `.bashrc`.
 - Morgan Fouesneau (MPIA)
 
 ## Links
-- Philcox, Rybizki & Gutcke (submitted to ApJ, [arXiv](https://arxiv.org/abs/1712.05686))
+- Philcox, Rybizki & Gutcke (ApJ, [arXiv](https://arxiv.org/abs/1712.05686))
 - Rybizki, Just & Rix ([arXiv](http://arxiv.org/abs/1702.08729), [ASCL](http://ascl.net/1702.011))
 - An early version of Chempy is presented in chapter 4 of Jan's [phd thesis](http://nbn-resolving.de/urn:nbn:de:bsz:16-heidok-199349).
 
