@@ -23,7 +23,7 @@ If you want this to be permanent, you can add the last line to your `.bashrc`.
 
 ## Authors
 - Jan Rybizki (MPIA, rybizki@mpia.de) - *Original Chempy*
-- Oliver Philcox (IoA, ohep2@cam.ac.uk) - *Yield table scoring*
+- Oliver Philcox (Harvard, ohep2@alumni.cam.ac.uk) - *Yield table scoring*
 
 ## Collaborators
 - Hans-Walter Rix (MPIA)
@@ -32,7 +32,7 @@ If you want this to be permanent, you can add the last line to your `.bashrc`.
 
 ## Links
 - Philcox, Rybizki & Gutcke (submitted to ApJ, [arXiv](https://arxiv.org/abs/1712.05686))
-- Rybizki, Just & Rix ([arXiv](http://arxiv.org/abs/1702.08729), [ASCL](http://ascl.net/1702.011)
+- Rybizki, Just & Rix ([arXiv](http://arxiv.org/abs/1702.08729), [ASCL](http://ascl.net/1702.011))
 - An early version of Chempy is presented in chapter 4 of Jan's [phd thesis](http://nbn-resolving.de/urn:nbn:de:bsz:16-heidok-199349).
 
 ## Getting started
