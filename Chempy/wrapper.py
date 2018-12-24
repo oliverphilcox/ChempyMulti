@@ -173,6 +173,70 @@ def Chempy(a):
 	
 	return cube, abundances
 
+def Chempy_all_times(a):
+	'''
+	Chemical evolution run with the default parameters using the net yields.
+
+	INPUT: 
+	
+	   a = ModelParameters() from parameter.py
+
+	OUTPUT:
+	
+	   cube = The ISM evolution class
+	
+	   abundances = The abundances of the ISM
+	'''
+	from .infall import PRIMORDIAL_INFALL
+	from .time_integration import ABUNDANCE_MATRIX
+	from .making_abundances import mass_fraction_to_abundances
+	from numpy.lib.recfunctions import append_fields	
+	basic_solar, basic_sfr, basic_infall = initialise_stuff(a)
+	elements_to_trace = a.elements_to_trace
+	basic_primordial = PRIMORDIAL_INFALL(list(elements_to_trace),np.copy(basic_solar.table))
+	basic_primordial.primordial()
+	cube = ABUNDANCE_MATRIX(np.copy(basic_sfr.t),np.copy(basic_sfr.sfr),np.copy(basic_infall.infall),list(elements_to_trace),list(basic_primordial.symbols),list(basic_primordial.fractions),float(a.gas_at_start),list(basic_primordial.symbols),list(basic_primordial.fractions),float(a.gas_reservoir_mass_factor),float(a.outflow_feedback_fraction),bool(a.check_processes),float(a.starformation_efficiency),float(a.gas_power), float(a.sfr_factor_for_cosmic_accretion), list(basic_primordial.symbols), list(basic_primordial.fractions))
+	basic_ssp = SSP_wrap(a)
+	for i in range(len(basic_sfr.t)-1):
+		j = len(basic_sfr.t)-i
+		element_fractions = []
+		for item in elements_to_trace:
+			element_fractions.append(float(np.copy(cube.cube[item][max(i-1,0)]/cube.cube['gas'][max(i-1,0)])))## gas element fractions from one time step before	
+			if element_fractions[-1]<0:
+				print('-ve Error')
+				#raise Exception('-ve Error')
+		metallicity = float(cube.cube['Z'][i])
+		#print(metallicity)		
+				
+		time_steps = np.copy(basic_sfr.t[:j])
+		basic_ssp.calculate_feedback(float(metallicity), list(elements_to_trace), list(element_fractions), np.copy(time_steps))	
+		cube.advance_one_step(i+1,np.copy(basic_ssp.table),np.copy(basic_ssp.sn2_table),np.copy(basic_ssp.agb_table),np.copy(basic_ssp.sn1a_table),np.copy(basic_ssp.bh_table))
+		if cube.cube['gas'][i] < 0:
+			print(i, basic_sfr.t[i])
+			print('gas became negative. returning -inf')
+			return -np.inf, [0]
+		if cube.gas_reservoir['gas'][i] < 0:
+			print('gas_reservoir became negative. returning -inf')
+			return -np.inf, [0]
+
+	abundances,elements,numbers = mass_fraction_to_abundances(np.copy(cube.cube),np.copy(basic_solar.table))
+	weights = cube.cube['sfr']
+	abundances = append_fields(abundances,'weights',weights)
+	abundances = append_fields(abundances,'time', cube.cube['time'])
+	abundances = np.array(abundances)
+	
+	for element in elements:		
+		if element != 'Fe':
+			try:
+				abundances[element] -= abundances['Fe']
+			except RuntimeWarning: # Remove error from first Fe abundance = -inf
+				pass
+	#TEST output
+	#print('Chempy output')
+	#print(abundances[:][-1])
+	
+	return cube, abundances
+
 
 
 def Chempy_gross(a):
