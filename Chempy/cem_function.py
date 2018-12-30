@@ -347,6 +347,9 @@ def cem_real2_all_times(a):
     elements_to_trace = list(a.elements_to_trace)
     
     cube, abundances = Chempy_all_times(a)
+    if type(cube)==float:
+        # Something became negative - discard this run.
+        return np.inf
     cube1 = cube.cube
     gas_reservoir = cube.gas_reservoir
         
@@ -369,6 +372,44 @@ def cem_real2_all_times(a):
     elements_to_trace.append('SNratio')
     """
     return(abundance_list, elements_to_trace, time_steps)
+
+
+def cem_real2_single_time(a,this_time):
+    """ real chempy function for returning predictions at a single timestep."""
+    age=a.end-this_time
+    
+    a = shorten_sfr(a,age) # use 13 max possible time here
+    if a==np.inf:
+        return np.inf
+    
+    basic_solar = solar_abundances()
+    getattr(basic_solar,a.solar_abundance_name)() # need for normalizations
+    
+    elements_to_trace = list(a.elements_to_trace)
+    
+    cube, abundances = Chempy_all_times(a)
+    if type(cube)==float:
+        # Something became negative - discard this run.
+        return np.inf
+    cube1 = cube.cube
+    gas_reservoir = cube.gas_reservoir
+        
+    abundance_list = np.zeros(len(elements_to_trace))
+        
+    # predicted values are written out and returned together with corona metallicity and SN-ratio
+    #abundance_list = []
+    for i,item in enumerate(elements_to_trace):
+        abundance_list[i]=abundances[item][-1]
+
+    """
+    
+    abundance_list[-2]=gas_reservoir['Z'][1:]
+    elements_to_trace.append('Zcorona')
+
+    abundance_list[-1]=np.divide(cube1['sn2'][1:],cube1['sn1a'][1:])
+    elements_to_trace.append('SNratio')
+    """
+    return(abundance_list, elements_to_trace)
 
 def cem_real2(a):
     '''
@@ -541,12 +582,38 @@ def multi_timestep_chempy(args):
     if output==np.inf:
         return np.inf
     else:
-        abundance_list, elements_to_trace, timesteps = cem_real2_all_times(a)
+        abundance_list, elements_to_trace, timesteps = output
     
         # Restore default values
         a.end, a.time_steps, a.total_mass = backup
     
         return abundance_list, elements_to_trace, timesteps
+    
+def single_timestep_chempy(args):
+    """
+    Calls Chempy and returns posterior values for a single pre-determined timestep, given in args.
+    """
+    all_parameter,a=args
+    changing_parameter=all_parameter[:5] # physics parameters
+    birth_time = all_parameter[5] # time of star birth
+    
+    # Update the parameters + priors:
+    a = extract_parameters_and_priors(changing_parameter,a)
+    
+    # Save the output time etc. which is changed by the actual calculation but restored to default afterwards
+    backup = a.end, a.time_steps, a.total_mass
+    
+    # Call Chempy and return all abundances and the list of element names
+    output=cem_real2_single_time(a,birth_time)
+    if output==np.inf:
+        return np.inf
+    else:
+        abundance_list, elements_to_trace = output
+    
+        # Restore default values
+        a.end, a.time_steps, a.total_mass = backup
+    
+        return abundance_list, elements_to_trace
 
 def posterior_function_predictions(changing_parameter,a):
     '''

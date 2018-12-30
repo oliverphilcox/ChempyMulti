@@ -4,3 +4,4 @@
 *.npy
 *.csv
 .ipynb*
+*.npz
