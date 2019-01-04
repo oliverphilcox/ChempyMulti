@@ -13,18 +13,18 @@ class ModelParameters(object):
 
 	## Chempy start and end times in Gyr	
 	start = 0 # birth of disc, always set to 0
-	end = 13.79761666410924	
+	end = 13.5	
 	
-	#elements_to_trace = ['Al', 'Ar', 'C', 'Ca', 'Cl', 'Co', 'Cr', 'Cu', 'F', 'Fe', 'Ga', 'Ge', 'H', 'He', 'K', 'Mg', 'Mn', 'N', 'Na', 'Ne', 'Ni', 'O', 'P', 'S', 'Sc', 'Si', 'Ti', 'V', 'Zn']
-	elements_to_trace = ['C', 'Fe', 'H', 'He', 'Mg', 'N', 'Ne', 'O', 'Si']
+	elements_to_trace = ['Al', 'Ar', 'C', 'Ca', 'Cl', 'Co', 'Cr', 'Cu', 'F', 'Fe', 'Ga', 'Ge', 'H', 'He', 'K', 'Mg', 'Mn', 'N', 'Na', 'Ne', 'Ni', 'O', 'P', 'S', 'Sc', 'Si', 'Ti', 'V', 'Zn']
+	#elements_to_trace = ['C', 'Fe', 'H', 'He', 'Mg', 'N', 'Ne', 'O', 'Si']
 	
 	## List of all names initially output by neural network
-	#initial_neural_names = ['Al', 'Ar', 'C', 'Ca', 'Cl', 'Co', 'Cr', 'Cu', 'F', 'Fe', 'Ga', 'Ge', 'He', 'K', 'Mg', 'Mn', 'N', 'Na', 'Ne', 'Ni', 'O', 'P', 'S', 'Sc', 'Si', 'Ti', 'V', 'Zn']
-	initial_neural_names = ['C','Fe','He','Mg','N','Ne','O','Si']
+	initial_neural_names = ['Al', 'Ar', 'C', 'Ca', 'Cl', 'Co', 'Cr', 'Cu', 'F', 'Fe', 'Ga', 'Ge', 'He', 'K', 'Mg', 'Mn', 'N', 'Na', 'Ne', 'Ni', 'O', 'P', 'S', 'Sc', 'Si', 'Ti', 'V', 'Zn']
+	#initial_neural_names = ['C','Fe','He','Mg','N','Ne','O','Si']
 	
 	## Choice of yield sets
 	yield_table_name_sn2_list = ['chieffi04','Nugrid','Nomoto2013','Portinari_net', 'chieffi04_net', 'Nomoto2013_net','NuGrid_net','West17_net','TNG_net','CL18_net']#'Frischknecht16_net'
-	yield_table_name_sn2_index = 8
+	yield_table_name_sn2_index = 9
 	yield_table_name_sn2 = yield_table_name_sn2_list[yield_table_name_sn2_index]
 
 	yield_table_name_hn_list = ['Nomoto2013']
@@ -32,11 +32,11 @@ class ModelParameters(object):
 	yield_table_name_hn = yield_table_name_hn_list[yield_table_name_hn_index]
 
 	yield_table_name_agb_list = ['Karakas','Nugrid','Karakas_net_yield','Ventura_net','Karakas16_net','TNG_net'] # Karakas2016 needs much more calculational resources (order of magnitude) using 2010 net yields from Karakas are faster and only N is significantly underproduced
-	yield_table_name_agb_index = 5
+	yield_table_name_agb_index = 2
 	yield_table_name_agb = yield_table_name_agb_list[yield_table_name_agb_index]
 
 	yield_table_name_1a_list = ['Iwamoto','Thielemann','Seitenzahl', 'TNG']
-	yield_table_name_1a_index = 3
+	yield_table_name_1a_index = 2
 	yield_table_name_1a = yield_table_name_1a_list[yield_table_name_1a_index]
 
 	## Neural network parameters
@@ -235,7 +235,7 @@ class ModelParameters(object):
 		infall_scale = 3.3
 
 	mmin = 0.1
-	mmax = 100.
+	mmax = 40.#100
 	mass_steps = 5000 #2000 # 200000
 
 	imf_type_name_list = ['normed_3slope','Chabrier_1','Chabrier_2','salpeter','BrokenPowerLaw']
@@ -285,7 +285,7 @@ class ModelParameters(object):
 	sn2_to_hn = 1.
 
 	sn2mmin = 8.
-	sn2mmax = 100.
+	sn2mmax = 40.#100.
 
 	bhmmin = float(sn2mmax) ## maximum of hypernova
 	bhmmax = float(mmax) ## maximum of the IMF
