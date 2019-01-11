@@ -33,7 +33,7 @@ If you want this to be permanent, you can add the last line to your `.bashrc`.
 - Morgan Fouesneau (MPIA)
 
 ## Links
-- Philcox & Rybiki (in prep) - Multi-Star Inference
+- Philcox & Rybizki (in prep) - Multi-Star Inference
 - Philcox, Rybizki & Gutcke (ApJ, [arXiv](https://arxiv.org/abs/1712.05686), [Zenodo](https://zenodo.org/record/1247336)) - Yield Table Scoring 
 - Rybizki, Just & Rix (A&A, [arXiv](http://arxiv.org/abs/1702.08729), [ASCL](http://ascl.net/1702.011)) - The *Chempy* model
 - An early version of *Chempy* is presented in chapter 4 of Jan's [phd thesis](http://nbn-resolving.de/urn:nbn:de:bsz:16-heidok-199349).
