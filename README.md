@@ -1,18 +1,20 @@
-# ChempyScoring - Evolution Modelling + Yield Table Scoring
-Flexible one-zone open-box chemical evolution modeling. Abundance fitting and stellar feedback calculation. Parameter optimization for simulations and yield table scoring. This is the code described in Philcox, Rybizki & Gutke (ApJ, [arXiv](https://arxiv.org/abs/1712.05686))
+# ChempyMulti - Multi-Star Bayesian Inference with Chempy
+This is an updated version of the [*Chempy*](http://github.com/jan-rybizki/Chempy) software, including yield table scoring as described in Philcox, Rybizki & Gutke (ApJ, [arXiv](https://arxiv.org/abs/1712.05686), and multi-star Bayesian inference.
+
+*Chempy* is a flexible one-zone open-box chemical evolution model, incorporating abundance fitting and stellar feedback calculations. We provide routines for parameter optimization for simulations and observational data and yield table scoring. 
 
 ## Installation
 
 ```
-pip install git+https://github.com/oliverphilcox/ChempyScoring.git
+pip install git+https://github.com/oliverphilcox/ChempyMulti.git
 ```
-Chempy should run with the latest python 2 and python 3 version.
+*Chempy* should run with the latest python 2 and python 3 version.
 Its dependencies are: [Numpy](http://numpy.scipy.org/), [SciPy](http://www.scipy.org/), [matplotlib](http://matplotlib.sourceforge.net/), [multiprocessing](https://docs.python.org/2/library/multiprocessing.html#module-multiprocessing), [emcee](http://dan.iel.fm/emcee/current/) (for the MCMC), [corner](http://corner.readthedocs.io/en/latest/) (for the MCMC plots), [PyTorch](http://pytorch.org/) (for Neural Networks), [scikit-monaco](https://pypi.python.org/pypi/scikit-monaco) (for Monte Carlo integration), and [tqdm](https://pypi.python.org/pypi/tqdm) (for timing multiprocessing). They are all pip installable and you can also get part of it with [Anaconda](https://www.continuum.io/downloads).
 
 ### Installation without admin rights:
 You can install *ChempyScoring* into a folder where you have write access:
 ```
-pip install --install-option='--prefix=~/extra_package/' git+https://github.com/oliverphilcox/ChempyScoring.git
+pip install --install-option='--prefix=~/extra_package/' git+https://github.com/oliverphilcox/ChempyMulti.git
 ```
 Then you have to add the `site-packages/` folder which will be one of the newly created subfolders in `extra_package/` into the ```PYTHONPATH``` variable, e.g.:
 ```
@@ -23,7 +25,7 @@ If you want this to be permanent, you can add the last line to your `.bashrc`.
 
 ## Authors
 - Jan Rybizki (MPIA, rybizki@mpia.de) - *Original Chempy*
-- Oliver Philcox (Harvard, ohep2@alumni.cam.ac.uk) - *Yield table scoring*
+- Oliver Philcox (Harvard, ohep2@alumni.cam.ac.uk) - *Yield table scoring + Multi-Star Inference*
 
 ## Collaborators
 - Hans-Walter Rix (MPIA)
@@ -31,21 +33,27 @@ If you want this to be permanent, you can add the last line to your `.bashrc`.
 - Morgan Fouesneau (MPIA)
 
 ## Links
-- Philcox, Rybizki & Gutcke (ApJ, [arXiv](https://arxiv.org/abs/1712.05686))
-- Rybizki, Just & Rix ([arXiv](http://arxiv.org/abs/1702.08729), [ASCL](http://ascl.net/1702.011))
+- Philcox & Rybiki (in prep) - Multi-Star Inference
+- Philcox, Rybizki & Gutcke (ApJ, [arXiv](https://arxiv.org/abs/1712.05686), [Zenodo](https://zenodo.org/record/1247336)) - Yield Table Scoring 
+- Rybizki, Just & Rix ([arXiv](http://arxiv.org/abs/1702.08729), [ASCL](http://ascl.net/1702.011)) - The *Chempy* model
 - An early version of Chempy is presented in chapter 4 of Jan's [phd thesis](http://nbn-resolving.de/urn:nbn:de:bsz:16-heidok-199349).
 
-## Getting started
-The jupyter [tutorial](https://github.com/oliverphilcox/ChempyScoring/blob/master/Scoring%20%26%20Parameter%20Choice%20Tutorial.ipynb) shows the usage of the software for computing yield table scores and best posterior parameters. The original Chempy [tutorial](https://github.com/oliverphilcox/ChempyScoring/old_tutorials) illustrate the basic usage of Chempy and basic concepts of galactic chemical evolution modeling. Both can be inspected in the github repository or you can run them interactively on your local machine. 
+## Tutorials
+The ```Jupyter/``` directory contains routines for multi-star parameter inference, using the [PyMC3](https://docs.pymc.io/) software. A full tutorial will follow shortly.
 
+The jupyter [tutorial](https://github.com/oliverphilcox/ChempyMulti/blob/master/Scoring%20%26%20Parameter%20Choice%20Tutorial.ipynb) shows the usage of the software for computing yield table scores and best posterior parameters. 
+
+The original Chempy [tutorial](https://github.com/oliverphilcox/ChempyScoring/old_tutorials) illustrate the basic usage of Chempy and basic concepts of galactic chemical evolution modeling. Both can be inspected in the github repository or you can run them interactively on your local machine. 
+
+## Getting Started
 To run them interactively first clone the repository with
 ```
 git clone https://github.com/oliverphilcox/ChempyScoring.git
 ```
-Then you can ```jupyter notebook``` from within the tutorial folder (it will run if you have installed *ChempyScoring*). 
+Then you can ```jupyter notebook``` from within the tutorial folder (it will run if you have installed *ChempyMulti*). 
 If you did not install ChempyScoring you can still run the tutorial but need to point to the files in the Chempy folder. Basically you have to ```cd ../ChempyScoring/``` and then replace each ```from Chempy import ...``` with ```from . import ...```.
 
-You can also have a look at the *preliminary* Chempy [documentation](http://www.mpia.de/homes/rybizki/html/index.html) which gives an overview over the Chempy classes and functions, although this does not yet provide support for the Scoring or Neural Network implementations.
+You can also have a look at the *preliminary* Chempy [documentation](http://www.mpia.de/homes/rybizki/html/index.html) which gives an overview over the Chempy classes and functions, although this does not yet provide support for the Scoring, Neural Network or Multi-Star implementations.
 
 ## Attribution
-Please cite the initial Chempy [paper](https://arxiv.org/abs/1702.08729) and scoring table [code](https://arxiv.org/abs/1712.05686) when using the code in your research (so far only arXiv link, will be updated).
+Please cite the initial Chempy [paper](https://arxiv.org/abs/1702.08729), the scoring table and neural network [paper](https://arxiv.org/abs/1712.05686) and the multi-star paper (in prep) when using the code in your research.
