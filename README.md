@@ -35,8 +35,8 @@ If you want this to be permanent, you can add the last line to your `.bashrc`.
 ## Links
 - Philcox & Rybiki (in prep) - Multi-Star Inference
 - Philcox, Rybizki & Gutcke (ApJ, [arXiv](https://arxiv.org/abs/1712.05686), [Zenodo](https://zenodo.org/record/1247336)) - Yield Table Scoring 
-- Rybizki, Just & Rix ([arXiv](http://arxiv.org/abs/1702.08729), [ASCL](http://ascl.net/1702.011)) - The *Chempy* model
-- An early version of Chempy is presented in chapter 4 of Jan's [phd thesis](http://nbn-resolving.de/urn:nbn:de:bsz:16-heidok-199349).
+- Rybizki, Just & Rix (A&A, [arXiv](http://arxiv.org/abs/1702.08729), [ASCL](http://ascl.net/1702.011)) - The *Chempy* model
+- An early version of *Chempy* is presented in chapter 4 of Jan's [phd thesis](http://nbn-resolving.de/urn:nbn:de:bsz:16-heidok-199349).
 
 ## Tutorials
 The ```Jupyter/``` directory contains routines for multi-star parameter inference, using the [PyMC3](https://docs.pymc.io/) software. A full tutorial will follow shortly.
@@ -46,7 +46,7 @@ The jupyter [tutorial](https://github.com/oliverphilcox/ChempyMulti/blob/master/
 The original Chempy [tutorial](https://github.com/oliverphilcox/ChempyScoring/old_tutorials) illustrate the basic usage of Chempy and basic concepts of galactic chemical evolution modeling. Both can be inspected in the github repository or you can run them interactively on your local machine. 
 
 ## Getting Started
-To run them interactively first clone the repository with
+To run tutorials interactively first clone the repository with
 ```
 git clone https://github.com/oliverphilcox/ChempyScoring.git
 ```
