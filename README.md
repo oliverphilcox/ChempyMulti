@@ -1,5 +1,5 @@
 # ChempyMulti - Multi-Star Bayesian Inference with Chempy
-This is an updated version of the [*Chempy*](http://github.com/jan-rybizki/Chempy) software, including yield table scoring as described in Philcox, Rybizki & Gutke (ApJ, [arXiv](https://arxiv.org/abs/1712.05686), and multi-star Bayesian inference.
+This is an updated version of the [*Chempy*](http://github.com/jan-rybizki/Chempy) software, including yield table scoring as described in Philcox, Rybizki & Gutke (ApJ, [arXiv](https://arxiv.org/abs/1712.05686)), and multi-star Bayesian inference.
 
 *Chempy* is a flexible one-zone open-box chemical evolution model, incorporating abundance fitting and stellar feedback calculations. We provide routines for parameter optimization for simulations and observational data and yield table scoring. 
 
