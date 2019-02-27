@@ -39,13 +39,20 @@ def lifetime(m,Z):
 	
 	   returns the lifetime of the star in Gyrs
 	"""
+	# Update - trying Portinari lifetime function
+	lM = np.log10(m)
+	lZ = np.log10(Z)
+	params = np.array([4.0153615 , -3.91089893,  0.99947209, -0.03601771, -0.31139679,0.09109059, -0.03218365, -0.01323112])
+	tmp = (params[0]+lM*params[1]+np.power(lM,2.)*params[2]+lZ*params[3]+lM*lZ*params[4]+lM*lM*lZ*params[5]+lZ*lZ*params[6]+lZ*lZ*lM*params[7])+6
+	return np.power(10,tmp)
+	"""
 	lm = np.log10(m)
 	a0 =  3.79 + 0.24*Z
 	a1 = -3.10 - 0.35*Z
 	a2 =  0.74 + 0.11*Z
 	tmp = a0 + a1*lm + a2*lm*lm
 	return np.divide(np.power(10,tmp),1000)
-
+	"""
 
 class IMF(object):
 	'''
