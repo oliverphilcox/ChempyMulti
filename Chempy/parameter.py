@@ -52,8 +52,8 @@ class ModelParameters(object):
 
 	## Free parameters - if some parameter is in to optimise there needs to be a prior and constraints defined
 	
-	SSP_parameters =  [-2.3,-2.75]#[1.0,-2.29]#[5.0,,1.0,-2.29 ,-2.75,	-0.8 ,0.2, 0.7, 0.3, 0.0]
-	SSP_parameters_to_optimize = ['high_mass_slope','log10_N_0']#['log10_beta','high_mass_slope'] #['beta_param', 'log10_beta','high_mass_slope', 'log10_N_0' 'log10_sn1a_time_delay','log10_sfr_factor_for_cosmic_accretion','log10_gas_reservoir_mass_factor','log10_a_parameter','log10_gas_power']
+	SSP_parameters =  [-2.3,-2.89,0.]#[1.0,-2.29]#[5.0,,1.0,-2.29 ,-2.75,	-0.8 ,0.2, 0.7, 0.3, 0.0]
+	SSP_parameters_to_optimize = ['high_mass_slope','log10_N_0','log10_sfr_factor_for_cosmic_accretion']#['log10_beta','high_mass_slope'] #['beta_param', 'log10_beta','high_mass_slope', 'log10_N_0' 'log10_sn1a_time_delay','log10_sfr_factor_for_cosmic_accretion','log10_gas_reservoir_mass_factor','log10_a_parameter','log10_gas_power']
 	assert len(SSP_parameters) == len(SSP_parameters_to_optimize)
 	ISM_parameters =  [-0.3,0.55,	0.5]#, 0.3,0.2, 0.7, 0.3, 0.0]
 	ISM_parameters_to_optimize = ['log10_starformation_efficiency', 'log10_sfr_scale', 'outflow_feedback_fraction']#,'log10_gas_reservoir_mass_factor','log10_sfr_factor_for_cosmic_accretion','log10_a_parameter','log10_gas_power']
@@ -133,7 +133,7 @@ class ModelParameters(object):
 
 	
 	# Which zero point of abundances shall be used. Asplund 2005 is corrected to VESTA abundances
-	solar_abundance_name_list = ['Lodders09','Asplund09','Asplund05_pure_solar','Asplund05_apogee_correction']
+	solar_abundance_name_list = ['Lodders09','Asplund09','Asplund05_pure_solar','Asplund05_apogee_correction','AG89']
 	solar_abundance_name_index = 1
 	solar_abundance_name = solar_abundance_name_list[solar_abundance_name_index]
 
@@ -167,7 +167,7 @@ class ModelParameters(object):
 	mburn = 1
 	save_state_every = 1
 	m = 1000 # For 7 free parameters 300 iterations are usually enough. The mcmc routine is stopping after 300 if the posterior mean is converged for more than 200 iterations.
-	error_marginalization = True # Marginalizing over the model error or using the best model error value
+	error_marginalization = False # Marginalizing over the model error or using the best model error value
 	flat_model_error_prior = [0.,1.,51] # Flat prior for the error marginalization [begin, end, number of evaluations inbetween]
 	beta_param = 1.
 	# This is the rescalable beta parameter controlling model error (default is 10)
@@ -272,7 +272,7 @@ class ModelParameters(object):
 		imf_slope_3 = -2.29
 		imf_parameter = (imf_slope_1,imf_slope_2,imf_slope_3,imf_break_1,imf_break_2)
 	name_infall_list = ['primordial','solar','simple','alpha']
-	name_infall_index = 1
+	name_infall_index = 0
 	name_infall = name_infall_list[name_infall_index]
 
 	interpolation_list = ['linear','logarithmic']
@@ -291,8 +291,8 @@ class ModelParameters(object):
 	bhmmax = float(mmax) ## maximum of the IMF
 	percentage_of_bh_mass = 0.25 # the rest 75% will be given back to the ISM with the abundances from the step before
 
-	agbmmin = 0.5
-	agbmmax = 8
+	agbmmin = 1.
+	agbmmax = 8.
 
 	sagbmmin = float(agbmmax)
 	sagbmmax = float(sn2mmin)
@@ -302,13 +302,13 @@ class ModelParameters(object):
 	time_delay_index = 1
 	time_delay_functional_form = time_delay_functional_form_list[time_delay_index]
 	if time_delay_functional_form == 'maoz':
-		N_0 = 0.0013#np.power(10,-2.75)
+		N_0 = 0.0012882#np.power(10,-2.75)
 		sn1a_time_delay = 0.04#np.power(10,-0.8)
 		sn1a_exponent = 1.12
 		dummy = 0.0
 		sn1a_parameter = [N_0,sn1a_time_delay,sn1a_exponent,dummy]
 	if time_delay_functional_form == 'normal':
-		number_of_pn_exlopding = 0.003
+		number_of_pn_exploding = 0.003
 		sn1a_time_delay = 1.
 		sn1a_timescale = 3.2
 		sn1a_gauss_beginning = 0.25
@@ -327,7 +327,7 @@ class ModelParameters(object):
 	sfr_factor_for_cosmic_accretion = 1.
 	cosmic_accretion_elements = ['H','He']
 	cosmic_accretion_element_fractions = [0.76,0.24]
-	outflow_feedback_fraction = 0.5
+	outflow_feedback_fraction = 0.5#0.5
 	## various output modes
 	check_processes = False
 	only_net_yields_in_process_tables = True

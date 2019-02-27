@@ -539,7 +539,7 @@ class SSP(object):
 		
 		   dummy = not in use anymore
 		'''
-		end_of_time = 15 #Gyrs Over this time-span the SN1a explosions will be distributed, for mass normalisation reasons
+		end_of_time = 13.8 #Gyrs Over this time-span the SN1a explosions will be distributed, for mass normalisation reasons
 		additional_keys = ['kinetic_energy','number_of_events','mass_in_remnants']
 		names = additional_keys + self.elements # not sure if all elements should be taken (might be easier to add the 3 tables in order to get total yield)
 		base = np.zeros(len(self.t))
