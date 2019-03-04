@@ -1,0 +1,20 @@
+[input]
+neural_model: /mnt/store1/oliverphilcox/ChempyMultiData/TNG_Abun2/stacked_8_element_net.npz
+mock_data_file: /mnt/store1/oliverphilcox/ChempyMultiData/TNG_Abun2/Chempy_Mock_Data_0.30.npz
+outfile: /mnt/store1/oliverphilcox/ChempyMultiData/TNG_Abun2/chains/Chempy_ADVI_0.30.npz
+
+[inference]
+all_n: [1,2,5,10,20,50,100]
+#[1,2,5,10,20,50,100,200,500,1000]
+elem_err: True 
+# whether to use element errors
+max_stars: 100 
+# maximum number of stars to use (using all n_stars combinations of this)
+        
+[sampler]
+chains: 16
+cores: 16
+tune: 2500
+fit_steps: 100000
+n_samples: 16000
+repeats: 5

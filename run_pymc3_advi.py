@@ -28,9 +28,9 @@ max_stars = Config.getint('inference','max_stars')
 
 chains = Config.getint('sampler','chains')
 cores = Config.getint('sampler','cores')
-tune = Config.getint('sampler','tune')
-n_init = Config.getint('sampler','n_init')
 n_samples = Config.getint('sampler','n_samples')
+fit_steps = Config.getint('sampler','fit_steps')
+repeats = Config.getint('sampler','repeats')
 
 ######################
 
@@ -76,7 +76,31 @@ std_log_SFR_crit = (log_SFR_crit-input_mean[3])/input_std[3]
 min_time,max_time = [1.,13.8]
 std_min_time,std_max_time=[(time-input_mean[-1])/input_std[-1] for time in [min_time,max_time]]
 
-def n_star_inference(n_stars,iteration,elem_err=False,n_init=20000,n_samples=1000,max_stars=100):    
+class HistConvergence(pm.callbacks.Callback):
+    """Convergence stopping check for histogram"""
+
+    def __init__(self, every=1000, tolerance=1e-4,max_counts=3):
+        #self.approx = approx
+        self.every = every
+        self.max_counts = max_counts
+        self.tolerance = tolerance
+        self.ELBO=1e10
+        self.count=0
+
+    def __call__(self, approx, hist, i):
+        if i % self.every or i<self.every:
+            return
+        old_ELBO=self.ELBO
+        this_hist = hist[-self.every:]
+        self.ELBO=np.mean(this_hist[np.isfinite(this_hist)]) # ignore any NaN/infs 
+        if (old_ELBO-self.ELBO)/np.abs(self.ELBO)<self.tolerance:
+            self.count+=1
+        if np.sum(np.isfinite(this_hist))==0:
+            self.count+=1
+        if self.count == self.max_counts:
+            raise StopIteration('Convergence in ELBO at %.1e%% level acheived at step %d' %(100.*self.tolerance,i))
+            
+def n_star_inference(n_stars,iteration,elem_err=False,fit_steps=100000,n_samples=16000,max_stars=100,repeats=5):    
     ## Define which stars to use
     these_stars = np.arange(max_stars)[iteration*n_stars:(iteration+1)*n_stars]
     
@@ -177,8 +201,12 @@ def n_star_inference(n_stars,iteration,elem_err=False,n_init=20000,n_samples=100
     # Now sample
     init_time = ttime.time()
     with simple_model:
-        samples=pm.sample(draws=n_samples,chains=chains,cores=cores,tune=tune,
-                          nuts_kwargs={'target_accept':0.9},init='advi+adapt_diag',n_init=n_init)
+        group_fr = pm.Group([Lambda,element_error],vfam='fr')
+        group_mf = pm.Group([Locals],vfam='mf')
+        approx = pm.Approximation([group_fr,group_mf])
+        inference = pm.KLqp(approx)
+        advi_approx = inference.fit(fit_steps,callbacks=[HistConvergence(max_counts=repeats)],obj_n_mc=1)
+        partial_samples=advi_approx.sample(n_samples,include_transformed=True)
     end_time = ttime.time()-init_time
 
     def construct_output(samples):
@@ -214,7 +242,7 @@ for nn in all_n:
         try:
             mini_chain.append(n_star_inference(nn,iteration,elem_err=elem_err,n_init=n_init,
                                                n_samples=n_samples,max_stars=max_stars))
-        except ValueError or FloatingPointError:
+        except ValueError:
             mini_chain.append(n_star_inference(nn,iteration,elem_err=elem_err,n_init=n_init,
                                                    n_samples=n_samples,max_stars=max_stars))
     chain_params.append(mini_chain)
