@@ -9,14 +9,14 @@ from Chempy.cem_function import single_timestep_chempy
 
 # First create test parameter set
 N_samples = int(5e4) # number of elements in test set
-widths = np.asarray([0.6, 0.6, 0.6, 0.2, 0.2]) # prior widths used to generate training data
+widths = np.asarray([0.6, 0.6, 0.6, 0.2, 0.2, 0.6]) # prior widths used to generate training data
 
 from scipy.stats import norm,uniform
 all_params=np.zeros([N_samples,len(a.p0)+1])
 for i in range(len(all_params)):
     while all_params[i,3]<0.29402: # to avoid SFR errors
-        all_params[i,:5]=norm.rvs(loc=a.p0,scale=widths)
-    all_params[i,5]=uniform.rvs(loc=2.0,scale=11.8)
+        all_params[i,:-1]=norm.rvs(loc=a.p0,scale=widths)
+    all_params[i,-1]=uniform.rvs(loc=1.0,scale=12.8)
 print("Created %d-element parameter set."%N_samples)
 
 def runner(index):
@@ -46,7 +46,7 @@ if __name__=='__main__':
     
     # Now run multiprocessing
     cpus=mp.cpu_count()
-    p=mp.Pool(min(16,cpus))
+    p=mp.Pool(min(30,cpus))
     output=list(tqdm.tqdm(p.imap_unordered(runner,range(N_samples)),total=N_samples))
     abuns=[o[0] for o in output]
     pars=[o[1] for o in output]
