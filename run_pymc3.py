@@ -118,8 +118,8 @@ def n_star_inference(n_stars,iteration,elem_err=False,n_init=20000,n_samples=100
     Local_prior_sigma = np.vstack([np.hstack([std_Theta_prior_width,std_times_width[i]]) for i in range(n_stars)])
     
     # Bound variables to ensure they don't exit the training parameter space
-    lowBound = tt._shared(np.asarray([-3,std_log_SFR_crit,-3,-3,std_min_time]))
-    upBound = tt._shared(np.asarray([3,3,3,3,std_max_time]))
+    lowBound = tt._shared(np.asarray([-5,std_log_SFR_crit,-5,-5,std_min_time]))
+    upBound = tt._shared(np.asarray([5,5,5,5,std_max_time]))
     
     # Create stacked mean and variances
     loc_mean=np.hstack([np.asarray(std_Theta_prior_mean).reshape(1,-1)*np.ones([n_stars,1]),std_times_mean.reshape(-1,1)])
