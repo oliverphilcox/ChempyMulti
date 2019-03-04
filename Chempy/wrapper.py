@@ -232,10 +232,10 @@ def Chempy_all_times(a):
     
     for element in elements:		
         if element != 'Fe':
-            try:
-                abundances[element] -= abundances['Fe']
-            except RuntimeWarning: # Remove error from first Fe abundance = -inf
-                pass
+            filt = np.where(np.logical_not(np.isfinite(abundances['Fe'])))
+            abundances[element][filt]=np.inf
+            filt2 = np.where(np.isfinite(abundances['Fe']))
+            abundances[element][filt2]-=abundances['Fe'][filt2]
     #TEST output
     #print('Chempy output')
     #print(abundances[:][-1])
