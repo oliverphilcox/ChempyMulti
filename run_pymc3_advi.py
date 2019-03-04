@@ -206,7 +206,7 @@ def n_star_inference(n_stars,iteration,elem_err=False,fit_steps=100000,n_samples
         approx = pm.Approximation([group_fr,group_mf])
         inference = pm.KLqp(approx)
         advi_approx = inference.fit(fit_steps,callbacks=[HistConvergence(max_counts=repeats)],obj_n_mc=1)
-        partial_samples=advi_approx.sample(n_samples,include_transformed=True)
+        samples=advi_approx.sample(n_samples,include_transformed=True)
     end_time = ttime.time()-init_time
 
     def construct_output(samples):
@@ -240,11 +240,11 @@ for nn in all_n:
     for iteration in range(max_stars//nn):
         print("Starting inference using %d stars iteration %d of %d"%(nn,iteration+1,max_stars//nn))
         try:
-            mini_chain.append(n_star_inference(nn,iteration,elem_err=elem_err,n_init=n_init,
-                                               n_samples=n_samples,max_stars=max_stars))
+            mini_chain.append(n_star_inference(nn,iteration,elem_err=elem_err,repeats=repeats,
+                                               n_samples=n_samples,fit_steps=fit_steps,max_stars=max_stars))
         except ValueError:
-            mini_chain.append(n_star_inference(nn,iteration,elem_err=elem_err,n_init=n_init,
-                                                   n_samples=n_samples,max_stars=max_stars))
+            mini_chain.append(n_star_inference(nn,iteration,elem_err=elem_err,repeats=repeats,
+                                                   n_samples=n_samples,fit_steps=fit_steps,max_stars=max_stars))
     chain_params.append(mini_chain)
 
 ## Save output
