@@ -1,7 +1,7 @@
 [input]
 neural_model: /mnt/store1/oliverphilcox/ChempyMultiData/TNG_Abun2/stacked_8_element_net.npz
-mock_data_file: /mnt/store1/oliverphilcox/ChempyMultiData/TNG_Abun2/Wrong_Yield_Mock_Data_0.05.npz
-outfile: /mnt/store1/oliverphilcox/ChempyMultiData/TNG_Abun2/chains/WrongYield_HMC_0.05.npz
+mock_data_file: /mnt/store1/oliverphilcox/ChempyMultiData/TNG_Abun2/Wrong_Yield_Mock_Data_Full.npz
+outfile: /mnt/store1/oliverphilcox/ChempyMultiData/TNG_Abun2/chains/WrongYield_HMC_Full.npz
 
 [inference]
 all_n: [1,2,5,10,20]
