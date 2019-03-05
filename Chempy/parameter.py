@@ -24,7 +24,7 @@ class ModelParameters(object):
     
     ## Choice of yield sets
     yield_table_name_sn2_list = ['chieffi04','Nugrid','Nomoto2013','Portinari_net', 'chieffi04_net', 'Nomoto2013_net','NuGrid_net','West17_net','TNG_net','CL18_net']#'Frischknecht16_net'
-    yield_table_name_sn2_index = 8#9
+    yield_table_name_sn2_index = 8#4#8#9
     yield_table_name_sn2 = yield_table_name_sn2_list[yield_table_name_sn2_index]
 
     yield_table_name_hn_list = ['Nomoto2013']
@@ -32,18 +32,18 @@ class ModelParameters(object):
     yield_table_name_hn = yield_table_name_hn_list[yield_table_name_hn_index]
 
     yield_table_name_agb_list = ['Karakas','Nugrid','Karakas_net_yield','Ventura_net','Karakas16_net','TNG_net'] # Karakas2016 needs much more calculational resources (order of magnitude) using 2010 net yields from Karakas are faster and only N is significantly underproduced
-    yield_table_name_agb_index = 5#4
+    yield_table_name_agb_index = 5#4#5#4
     yield_table_name_agb = yield_table_name_agb_list[yield_table_name_agb_index]
 
     yield_table_name_1a_list = ['Iwamoto','Thielemann','Seitenzahl', 'TNG']
-    yield_table_name_1a_index = 3#2
+    yield_table_name_1a_index = 3#2#3#2
     yield_table_name_1a = yield_table_name_1a_list[yield_table_name_1a_index]
 
     ## Neural network parameters
     UseNeural = False # This defines whether to use trained network in place of Chempy
     
     training_size = 10 #10 # no. values per parameter in training set
-    training_widths = [0.6,0.6,0.6,0.2,0.2] # 2 sigma widths
+    training_widths = [0.6,0.6,0.6,0.2,0.2,0.6] # 2 sigma widths
     neurons = 30 # Number of neurons in layer
     learning_rate = 0.007  # Default Adam neural network learning rate
     epochs = 5000 # Number of epochs used in testing
