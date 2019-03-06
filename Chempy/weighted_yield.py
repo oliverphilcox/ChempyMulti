@@ -221,7 +221,9 @@ class SSP(object):
         elif self.z > max(self.sn2_metallicities):
             metallicity_list.append(max(self.sn2_metallicities))
         elif self.z in self.sn2_metallicities:
-            metallicity_list.append(self.z)
+            # to avoid small rounding errors
+            filt = np.where(np.abs(self.z-self.sn2_metallicities)==min(np.abs(self.z-self.sn2_metallicities)))
+            metallicity_list.append(self.sn2_metallicities[filt][0])
         else:
             j=1
             while self.sn2_metallicities[j] < self.z:
@@ -238,9 +240,7 @@ class SSP(object):
                 net_tables_to_interpolate.append(np.zeros_like(self.table))
             ################################## loop which is metallicity independent		
             ##### yield table is cut down such that only yields for masses between sn2_mmin and sn2_mmax are left in
-            metallicity_key = np.round(metallicity_key,7) #remove small rounding errors
             self.sn2[metallicity_key] = self.sn2[metallicity_key][np.where(np.logical_and(self.sn2[metallicity_key]['Mass']>=self.sn2_mmin,self.sn2[metallicity_key]['Mass']<=self.sn2_mmax))]
-
             self.sn2[metallicity_key] = np.sort(self.sn2[metallicity_key], order = 'Mass')[::-1]
 
             # tmp_masses holds the masses for which yields are calculated. 'weights' gives the mass fraction of the IMF that is dying and lies in the mass range of a specific yield mass
@@ -379,6 +379,9 @@ class SSP(object):
         elif self.z > max(self.agb_metallicities):
             metallicity_list.append(max(self.agb_metallicities))
         elif self.z in self.agb_metallicities:
+            # to avoid small rounding errors
+            filt = np.where(np.abs(self.z-self.agb_metallicities)==min(np.abs(self.z-self.agb_metallicities)))
+            metallicity_list.append(self.agb_metallicities[filt][0])
             metallicity_list.append(self.z)
         else:
             j=1
@@ -396,7 +399,6 @@ class SSP(object):
                 net_tables_to_interpolate.append(np.zeros_like(self.table))
             ################################## loop which is metallicity independent
             ##### yield table is cut down such that only yields for masses between sn2_mmin and sn2_mmax are left in
-            metallicity_key=np.round(metallicity_key,7)
             self.agb[metallicity_key] = self.agb[metallicity_key][np.where(np.logical_and(self.agb[metallicity_key]['Mass']>=self.agb_mmin,self.agb[metallicity_key]['Mass']<=self.agb_mmax))]
 
             tmp_masses = self.agb[metallicity_key]['Mass']
@@ -725,6 +727,9 @@ class SSP(object):
             metallicity_list.append(max(self.sn1a_metallicities))
         elif self.z in self.sn1a_metallicities:
             metallicity_list.append(self.z)
+            # to avoid small rounding errors
+            filt = np.where(np.abs(self.z-self.sn1a_metallicities)==min(np.abs((self.z-self.sn1a_metallicities))))
+            metallicity_list.append(self.sn1a_metallicities[filt][0])
         else:
             j=1
             while self.sn1a_metallicities[j] < self.z:
@@ -734,7 +739,6 @@ class SSP(object):
         ### the loop will be run through 2 times (if metallicity not outside or exactly at one of the precalculated metallicities) and the values of the two tables will be interpolated according to the prescribed function
         tables_to_interpolate = []
         for s,metallicity_key in enumerate(metallicity_list):
-            metallicity_key = np.round(metallicity_key,7)
             tables_to_interpolate.append(np.zeros_like(self.table))
             for element_index, element_name in enumerate(list(set(self.elements).intersection(self.sn1a_elements))):
                 tables_to_interpolate[s][element_name] = self.sn1a_yields[metallicity_key][element_name]
