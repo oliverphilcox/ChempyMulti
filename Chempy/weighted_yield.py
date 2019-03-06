@@ -238,7 +238,7 @@ class SSP(object):
                 net_tables_to_interpolate.append(np.zeros_like(self.table))
             ################################## loop which is metallicity independent		
             ##### yield table is cut down such that only yields for masses between sn2_mmin and sn2_mmax are left in
-            metallicity_key = metallicity_key.round(7) #remove small rounding errors
+            metallicity_key = np.round(metallicity_key,7) #remove small rounding errors
             self.sn2[metallicity_key] = self.sn2[metallicity_key][np.where(np.logical_and(self.sn2[metallicity_key]['Mass']>=self.sn2_mmin,self.sn2[metallicity_key]['Mass']<=self.sn2_mmax))]
 
             self.sn2[metallicity_key] = np.sort(self.sn2[metallicity_key], order = 'Mass')[::-1]
@@ -396,7 +396,7 @@ class SSP(object):
                 net_tables_to_interpolate.append(np.zeros_like(self.table))
             ################################## loop which is metallicity independent
             ##### yield table is cut down such that only yields for masses between sn2_mmin and sn2_mmax are left in
-            metallicity_key=metallicity_key.round(7)
+            metallicity_key=np.round(metallicity_key,7)
             self.agb[metallicity_key] = self.agb[metallicity_key][np.where(np.logical_and(self.agb[metallicity_key]['Mass']>=self.agb_mmin,self.agb[metallicity_key]['Mass']<=self.agb_mmax))]
 
             tmp_masses = self.agb[metallicity_key]['Mass']
@@ -734,7 +734,7 @@ class SSP(object):
         ### the loop will be run through 2 times (if metallicity not outside or exactly at one of the precalculated metallicities) and the values of the two tables will be interpolated according to the prescribed function
         tables_to_interpolate = []
         for s,metallicity_key in enumerate(metallicity_list):
-            metallicity_key = metallicity_key.round(7)
+            metallicity_key = np.round(metallicity_key,7)
             tables_to_interpolate.append(np.zeros_like(self.table))
             for element_index, element_name in enumerate(list(set(self.elements).intersection(self.sn1a_elements))):
                 tables_to_interpolate[s][element_name] = self.sn1a_yields[metallicity_key][element_name]
