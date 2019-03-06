@@ -103,7 +103,13 @@ def shorten_sfr(a,age=None):
     else:
         age_of_star=age
     assert (age_of_star <= 13.0), "Age of the star must be below 13Gyr"
-    basic_sfr = SFR(a.start,a.end,a.time_steps)
+    
+    
+    new_timesteps = int((a.time_steps-1)*a.end/(a.end-age_of_star)+1)
+    new_end = (a.end-age_of_star)*(new_timesteps-1)/(a.time_steps-1)
+    
+    basic_sfr = SFR(a.start,new_end,new_timesteps)
+    
     if a.basic_sfr_name == 'gamma_function':
         getattr(basic_sfr, a.basic_sfr_name)(S0 = a.S_0 * a.mass_factor,a_parameter = a.a_parameter, loc = a.sfr_beginning, scale = a.sfr_scale)
     elif a.basic_sfr_name == 'model_A':
@@ -114,10 +120,10 @@ def shorten_sfr(a,age=None):
         basic_sfr.doubly_peaked(S0 = a.mass_factor*a.S_0, peak_ratio = a.peak_ratio, decay = a.sfr_decay, t0 = a.sfr_t0, peak1t0 = a.peak1t0, peak1sigma = a.peak1sigma)
     basic_sfr.sfr = a.total_mass * np.divide(basic_sfr.sfr,sum(basic_sfr.sfr))
     mass_normalisation = a.total_mass
-    mean_sfr = sum(basic_sfr.sfr) / a.end
+    mean_sfr = sum(basic_sfr.sfr) / new_end
     
     # at which time in the simulation is the star born
-    star_time = basic_sfr.t[-1] - age_of_star
+    star_time = a.end-age_of_star#basic_sfr.t[-1] - age_of_star
     cut = [np.where(np.abs(basic_sfr.t - star_time) == np.min(np.abs(basic_sfr.t - star_time)))]
     if len(cut[0][0]) != 1:
         cut = cut[0][0][0]
@@ -127,7 +133,7 @@ def shorten_sfr(a,age=None):
     a.end = time_model
     a.time_steps = int(cut[0][0]) + 1
     a.total_mass = sum(basic_sfr.sfr[0:a.time_steps])
-
+    
     # check whether the sfr is enough at end to produce reasonable number of stars (which is necessary in order to have a probability to observe a star at all)
     sfr_at_end = float(basic_sfr.sfr[cut] / basic_sfr.dt)
     fraction_of_mean_sfr = sfr_at_end / mean_sfr
@@ -377,7 +383,6 @@ def cem_real2_all_times(a):
 def cem_real2_single_time(a,this_time):
     """ real chempy function for returning predictions at a single timestep."""
     age=a.end-this_time
-    
     a = shorten_sfr(a,age) # use 13 max possible time here
     if a==np.inf:
         return np.inf
