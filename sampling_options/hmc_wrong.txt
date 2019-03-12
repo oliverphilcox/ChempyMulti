@@ -1,5 +1,5 @@
 [input]
-neural_model: /mnt/store1/oliverphilcox/ChempyMultiData/TNG_Abun2/stacked_8_element_net.npz
+neural_model: /mnt/store1/oliverphilcox/ChempyMultiData/TNG_Abun2/stacked_8_element_net_new.npz
 mock_data_file: /mnt/store1/oliverphilcox/ChempyMultiData/TNG_Abun2/Wrong_Yield_Mock_Data_Full.npz
 outfile: /mnt/store1/oliverphilcox/ChempyMultiData/TNG_Abun2/chains/WrongYield_HMC_Full.npz
 
