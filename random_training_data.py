@@ -9,7 +9,7 @@ from Chempy.cem_function import single_timestep_chempy
 
 # First create test parameter set
 N_samples = int(5e5) # number of elements in test set
-widths = np.asarray([0.6, 0.6, 0.6, 0.2, 0.2, 0.6]) # prior widths used to generate training data
+widths = np.asarray([0.6, 0.6, 0.6, 0.2, 0.2]) # prior widths used to generate training data
 
 from scipy.stats import norm,uniform
 all_params=np.zeros([N_samples,len(a.p0)+1])
@@ -59,4 +59,4 @@ if __name__=='__main__':
     print("multiprocessing complete after %d seconds"%(end_time-init_time));
     
     # Now save output
-    np.savez("Random_Training_Data_New_%d_10.npz"%N_samples,abundances=abuns,elements=els,params=pars);
+    np.savez("Random_Training_Data_6param_%d_0.npz"%N_samples,abundances=abuns,elements=els,params=pars);
