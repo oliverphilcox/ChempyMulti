@@ -60,13 +60,13 @@ mock_data.close()
 Lambda_prior_mean = a.p0[:2]
 Theta_prior_mean = a.p0[2:]
 Lambda_prior_width = [0.3,0.3]
-Theta_prior_width = [0.3,0.1,0.1,0.3]
+Theta_prior_width = [0.3,0.1,0.1]
 
 # Now standardize
 std_Lambda_prior_mean = (Lambda_prior_mean-input_mean[:2])/input_std[:2]
 std_Lambda_prior_width = (Lambda_prior_width)/input_std[:2]
-std_Theta_prior_mean = (Theta_prior_mean-input_mean[2:6])/input_std[2:6]
-std_Theta_prior_width = (Theta_prior_width)/input_std[2:6]
+std_Theta_prior_mean = (Theta_prior_mean-input_mean[2:5])/input_std[2:5]
+std_Theta_prior_width = (Theta_prior_width)/input_std[2:5]
 
 # Define critical theta edge:
 log_SFR_crit = 0.29402
@@ -142,8 +142,8 @@ def n_star_inference(n_stars,iteration,elem_err=False,fit_steps=100000,n_samples
     Local_prior_sigma = np.vstack([np.hstack([std_Theta_prior_width,std_times_width[i]]) for i in range(n_stars)])
     
     # Bound variables to ensure they don't exit the training parameter space
-    lowBound = tt._shared(np.asarray([-5,std_log_SFR_crit,-5,-5,std_min_time]))
-    upBound = tt._shared(np.asarray([5,5,5,5,std_max_time]))
+    lowBound = tt._shared(np.asarray([-5,std_log_SFR_crit,-5,std_min_time]))
+    upBound = tt._shared(np.asarray([5,5,5,std_max_time]))
     
     # Create stacked mean and variances
     loc_mean=np.hstack([np.asarray(std_Theta_prior_mean).reshape(1,-1)*np.ones([n_stars,1]),std_times_mean.reshape(-1,1)])
@@ -173,8 +173,8 @@ def n_star_inference(n_stars,iteration,elem_err=False,fit_steps=100000,n_samples
         TimeSq = tt.reshape(Locals[:,-1]**2.,(n_stars,1))
 
         TruLa = pm.Deterministic('Lambda',Lambda*input_std[:2]+input_mean[:2])
-        TruTh = pm.Deterministic('Thetas',Locals[:,:4]*input_std[2:6]+input_mean[2:6])
-        TruTi = pm.Deterministic('Times',Locals[:,4]*input_std[-1]+input_mean[-1])
+        TruTh = pm.Deterministic('Thetas',Locals[:,:3]*input_std[2:5]+input_mean[2:5])
+        TruTi = pm.Deterministic('Times',Locals[:,-1]*input_std[-1]+input_mean[-1])
 
         ## NEURAL NET
         Lambda_all = ma.matrix_dot(ones_tensor,Lambda)
