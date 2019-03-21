@@ -59,4 +59,4 @@ if __name__=='__main__':
     print("multiprocessing complete after %d seconds"%(end_time-init_time));
     
     # Now save output
-    np.savez("Random_Training_Data_6param_%d_1.npz"%N_samples,abundances=abuns,elements=els,params=pars);
+    np.savez("Random_Training_Data_Auriga_%d_0.npz"%N_samples,abundances=abuns,elements=els,params=pars);

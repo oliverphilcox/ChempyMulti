@@ -13,7 +13,7 @@ class ModelParameters(object):
 
     ## Chempy start and end times in Gyr	
     start = 0 # birth of disc, always set to 0
-    end = 13.79761666410924	
+    end = 13.814890029076762	
     
     #elements_to_trace = ['Al', 'Ar', 'C', 'Ca', 'Cl', 'Co', 'Cr', 'Cu', 'F', 'Fe', 'Ga', 'Ge', 'H', 'He', 'K', 'Mg', 'Mn', 'N', 'Na', 'Ne', 'Ni', 'O', 'P', 'S', 'Sc', 'Si', 'Ti', 'V', 'Zn']
     elements_to_trace = ['C', 'Fe', 'H', 'He', 'Mg', 'N', 'Ne', 'O', 'Si']
@@ -24,7 +24,7 @@ class ModelParameters(object):
     
     ## Choice of yield sets
     yield_table_name_sn2_list = ['chieffi04','Nugrid','Nomoto2013','Portinari_net', 'chieffi04_net', 'Nomoto2013_net','NuGrid_net','West17_net','TNG_net','CL18_net']#'Frischknecht16_net'
-    yield_table_name_sn2_index = 8#4#8#9
+    yield_table_name_sn2_index = 3#8#4#8#9
     yield_table_name_sn2 = yield_table_name_sn2_list[yield_table_name_sn2_index]
 
     yield_table_name_hn_list = ['Nomoto2013']
@@ -32,11 +32,11 @@ class ModelParameters(object):
     yield_table_name_hn = yield_table_name_hn_list[yield_table_name_hn_index]
 
     yield_table_name_agb_list = ['Karakas','Nugrid','Karakas_net_yield','Ventura_net','Karakas16_net','TNG_net'] # Karakas2016 needs much more calculational resources (order of magnitude) using 2010 net yields from Karakas are faster and only N is significantly underproduced
-    yield_table_name_agb_index = 5#4#5#4
+    yield_table_name_agb_index = 2#5#4#5#4
     yield_table_name_agb = yield_table_name_agb_list[yield_table_name_agb_index]
 
     yield_table_name_1a_list = ['Iwamoto','Thielemann','Seitenzahl', 'TNG']
-    yield_table_name_1a_index = 3#2#3#2
+    yield_table_name_1a_index = 1#3#2#3#2
     yield_table_name_1a = yield_table_name_1a_list[yield_table_name_1a_index]
 
     ## Neural network parameters
