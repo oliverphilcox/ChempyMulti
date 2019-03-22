@@ -1,7 +1,7 @@
 [input]
-neural_model: /mnt/store1/oliverphilcox/ChempyMultiData/Final/stacked_8_element_net_6param.npz
-mock_data_file: /mnt/store1/oliverphilcox/ChempyMultiData/Final/Chempy_Mock_Data_Full.npz
-outfile: /mnt/store1/oliverphilcox/ChempyMultiData/Final/chains/Chempy_HMC_Full.npz
+neural_model: /mnt/store1/oliverphilcox/ChempyMultiData/Auriga/stacked_8_element_net.npz
+mock_data_file: /mnt/store1/oliverphilcox/ChempyMultiData/Auriga/Chempy_Mock_Data_Full.npz
+outfile: /mnt/store1/oliverphilcox/ChempyMultiData/Auriga/chains/Chempy_HMC_Full.npz
 
 [inference]
 all_n: [1,2,5,10,20,50,100]

@@ -1,7 +1,7 @@
 [input]
 neural_model: /mnt/store1/oliverphilcox/ChempyMultiData/Auriga/stacked_8_element_net.npz
-mock_data_file: /mnt/store1/oliverphilcox/ChempyMultiData/Auriga/Chempy_Mock_Data_Full.npz
-outfile: /mnt/store1/oliverphilcox/ChempyMultiData/Auriga/chains/Chempy_ADVI_Full.npz
+mock_data_file: /mnt/store1/oliverphilcox/ChempyMultiData/Auriga/Auriga_Mock_Data_Full.npz
+outfile: /mnt/store1/oliverphilcox/ChempyMultiData/Auriga/chains/Auriga_HMC_Full.npz
 
 [inference]
 all_n: [1,2,5,10,20,50,100]
@@ -15,6 +15,5 @@ max_stars: 100
 chains: 16
 cores: 16
 tune: 2500
-fit_steps: 100000
-n_samples: 16000
-repeats: 5
+n_init: 20000
+n_samples: 1000
