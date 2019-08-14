@@ -131,7 +131,16 @@ def Chempy(a):
     elements_to_trace = a.elements_to_trace
     basic_primordial = PRIMORDIAL_INFALL(list(elements_to_trace),np.copy(basic_solar.table))
     basic_primordial.primordial()
-    cube = ABUNDANCE_MATRIX(np.copy(basic_sfr.t),np.copy(basic_sfr.sfr),np.copy(basic_infall.infall),list(elements_to_trace),list(basic_primordial.symbols),list(basic_primordial.fractions),float(a.gas_at_start),list(basic_primordial.symbols),list(basic_primordial.fractions),float(a.gas_reservoir_mass_factor),float(a.outflow_feedback_fraction),bool(a.check_processes),float(a.starformation_efficiency),float(a.gas_power), float(a.sfr_factor_for_cosmic_accretion), list(basic_primordial.symbols), list(basic_primordial.fractions))
+    
+    # Needed a rescaling for the shortened sfr	
+	  gas_reservoir_mass_factor = a.gas_reservoir_mass_factor / a.shortened_sfr_rescaling
+    #sfr_factor_for_cosmic_accretion	= a.sfr_factor_for_cosmic_accretion / a.shortened_sfr_rescaling
+	  #gas_at_start = a.gas_at_start / a.shortened_sfr_rescaling
+    cube = ABUNDANCE_MATRIX(np.copy(basic_sfr.t),np.copy(basic_sfr.sfr),np.copy(basic_infall.infall),list(elements_to_trace),
+        list(basic_primordial.symbols),list(basic_primordial.fractions),float(a.gas_at_start),list(basic_primordial.symbols),list(basic_primordial.fractions),
+        float(gas_reservoir_mass_factor),float(a.outflow_feedback_fraction),bool(a.check_processes),float(a.starformation_efficiency),float(a.gas_power),
+        float(a.sfr_factor_for_cosmic_accretion), list(basic_primordial.symbols), list(basic_primordial.fractions))
+
     basic_ssp = SSP_wrap(a)
     for i in range(len(basic_sfr.t)-1):
         j = len(basic_sfr.t)-i
@@ -195,7 +204,12 @@ def Chempy_all_times(a):
     elements_to_trace = a.elements_to_trace
     basic_primordial = PRIMORDIAL_INFALL(list(elements_to_trace),np.copy(basic_solar.table))
     basic_primordial.primordial()
-    cube = ABUNDANCE_MATRIX(np.copy(basic_sfr.t),np.copy(basic_sfr.sfr),np.copy(basic_infall.infall),list(elements_to_trace),list(basic_primordial.symbols),list(basic_primordial.fractions),float(a.gas_at_start),list(basic_primordial.symbols),list(basic_primordial.fractions),float(a.gas_reservoir_mass_factor),float(a.outflow_feedback_fraction),bool(a.check_processes),float(a.starformation_efficiency),float(a.gas_power), float(a.sfr_factor_for_cosmic_accretion), list(basic_primordial.symbols), list(basic_primordial.fractions))
+    gas_reservoir_mass_factor = a.gas_reservoir_mass_factor / a.shortened_sfr_rescaling
+	  cube = ABUNDANCE_MATRIX(np.copy(basic_sfr.t),np.copy(basic_sfr.sfr),np.copy(basic_infall.infall),list(elements_to_trace),list(basic_primordial.symbols),
+        list(basic_primordial.fractions),float(a.gas_at_start),list(basic_primordial.symbols),list(basic_primordial.fractions),float(gas_reservoir_mass_factor),
+        float(a.outflow_feedback_fraction),bool(a.check_processes),float(a.starformation_efficiency),float(a.gas_power), float(a.sfr_factor_for_cosmic_accretion), 
+        list(basic_primordial.symbols), list(basic_primordial.fractions))
+
     basic_ssp = SSP_wrap(a)
     for i in range(len(basic_sfr.t)-1):
         j = len(basic_sfr.t)-i
@@ -266,7 +280,11 @@ def Chempy_gross(a):
     elements_to_trace = a.elements_to_trace
     basic_primordial = PRIMORDIAL_INFALL(list(elements_to_trace),np.copy(basic_solar.table))
     basic_primordial.primordial(0)
-    cube = ABUNDANCE_MATRIX(np.copy(basic_sfr.t),np.copy(basic_sfr.sfr),np.copy(basic_infall.infall),list(elements_to_trace),list(basic_primordial.symbols),list(basic_primordial.fractions),float(a.gas_at_start),list(basic_primordial.symbols),list(basic_primordial.fractions),float(a.gas_reservoir_mass_factor),float(a.outflow_feedback_fraction),bool(a.check_processes),float(a.starformation_efficiency),float(a.gas_power), float(a.sfr_factor_for_cosmic_accretion), list(basic_primordial.symbols), list(basic_primordial.fractions))
+    gas_reservoir_mass_factor = a.gas_reservoir_mass_factor / a.shortened_sfr_rescaling
+	  cube = ABUNDANCE_MATRIX(np.copy(basic_sfr.t),np.copy(basic_sfr.sfr),np.copy(basic_infall.infall),list(elements_to_trace),list(basic_primordial.symbols),
+        list(basic_primordial.fractions),float(a.gas_at_start),list(basic_primordial.symbols),list(basic_primordial.fractions),float(gas_reservoir_mass_factor),
+        float(a.outflow_feedback_fraction),bool(a.check_processes),float(a.starformation_efficiency),float(a.gas_power), float(a.sfr_factor_for_cosmic_accretion), 
+        list(basic_primordial.symbols), list(basic_primordial.fractions))
     basic_ssp = SSP_wrap(a)
     for i in range(len(basic_sfr.t)-1):
         j = len(basic_sfr.t)-i

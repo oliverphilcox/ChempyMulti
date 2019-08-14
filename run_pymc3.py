@@ -104,7 +104,7 @@ def n_star_inference(n_stars,iteration,elem_err=False,n_init=20000,n_samples=100
     obs_errors = full_errors[:,el_indices]
 
     # Now standardize dataset
-    norm_data=(obs_abundances-output_mean)/output_std # use only 6 elements
+    norm_data=(obs_abundances-output_mean)/output_std
     norm_sd = obs_errors/output_std
 
     data_obs = norm_data.ravel()
@@ -162,11 +162,12 @@ def n_star_inference(n_stars,iteration,elem_err=False,n_init=20000,n_samples=100
         if elem_err:
             # ERRORS
             #element_error = pm.Normal('Element-Error',mu=-2,sd=1,shape=(1,n_els))
-            element_error = pm.HalfCauchy('Element-Error',beta=0.01,shape=(1,n_els))
+            element_error = pm.HalfCauchy('Std-Element-Error',beta=0.01/output_std,shape=(1,n_els))
+            TruErr = pm.Deterministic('Element-Error',element_error*output_std)
             stacked_error = ma.matrix_dot(ones_tensor,element_error)
-            tot_error = ma.sqrt(stacked_error**2.+norm_sd**2.)
+            tot_error = ma.sqrt(stacked_error**2.+norm_sd**2.) # NB this is all standardized by output_std here
         else:
-            tot_error = norm_sd
+            tot_error = norm_sd # NB: all quantities are standardized here
 
         predictions = pm.Deterministic("Predicted-Abundances",output*output_std+output_mean)
 

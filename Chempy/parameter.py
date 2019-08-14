@@ -13,7 +13,7 @@ class ModelParameters(object):
 
     ## Chempy start and end times in Gyr	
     start = 0 # birth of disc, always set to 0
-    end = 13.814890029076762	
+    end = 13.797617 # Planck 2015 age 814890029076762	
     
     #elements_to_trace = ['Al', 'Ar', 'C', 'Ca', 'Cl', 'Co', 'Cr', 'Cu', 'F', 'Fe', 'Ga', 'Ge', 'H', 'He', 'K', 'Mg', 'Mn', 'N', 'Na', 'Ne', 'Ni', 'O', 'P', 'S', 'Sc', 'Si', 'Ti', 'V', 'Zn']
     elements_to_trace = ['C', 'Fe', 'H', 'He', 'Mg', 'N', 'Ne', 'O', 'Si']
@@ -24,7 +24,7 @@ class ModelParameters(object):
     
     ## Choice of yield sets
     yield_table_name_sn2_list = ['chieffi04','Nugrid','Nomoto2013','Portinari_net', 'chieffi04_net', 'Nomoto2013_net','NuGrid_net','West17_net','TNG_net','CL18_net']#'Frischknecht16_net'
-    yield_table_name_sn2_index = 3#8#4#8#9
+    yield_table_name_sn2_index = 8# use TNG 8#4#8#9
     yield_table_name_sn2 = yield_table_name_sn2_list[yield_table_name_sn2_index]
 
     yield_table_name_hn_list = ['Nomoto2013']
@@ -32,11 +32,11 @@ class ModelParameters(object):
     yield_table_name_hn = yield_table_name_hn_list[yield_table_name_hn_index]
 
     yield_table_name_agb_list = ['Karakas','Nugrid','Karakas_net_yield','Ventura_net','Karakas16_net','TNG_net'] # Karakas2016 needs much more calculational resources (order of magnitude) using 2010 net yields from Karakas are faster and only N is significantly underproduced
-    yield_table_name_agb_index = 2#5#4#5#4
+    yield_table_name_agb_index = 5 # use TNG #5#4#5#4
     yield_table_name_agb = yield_table_name_agb_list[yield_table_name_agb_index]
 
     yield_table_name_1a_list = ['Iwamoto','Thielemann','Seitenzahl', 'TNG']
-    yield_table_name_1a_index = 1#3#2#3#2
+    yield_table_name_1a_index = 3 # use TNG #3#2#3#2
     yield_table_name_1a = yield_table_name_1a_list[yield_table_name_1a_index]
 
     ## Neural network parameters
@@ -58,7 +58,7 @@ class ModelParameters(object):
     ISM_parameters =  [-0.3,0.55,0.5]#,0.3,0.]#, 0.3,0.2, 0.7, 0.3, 0.0]
     ISM_parameters_to_optimize = ['log10_starformation_efficiency', 'log10_sfr_scale', 'outflow_feedback_fraction']#,'log10_sfr_factor_for_cosmic_accretion']#,'log10_sfr_factor_for_cosmic_accretion','log10_a_parameter','log10_gas_power']
     assert len(ISM_parameters) == len(ISM_parameters_to_optimize)
-
+  
     p0 = np.hstack((SSP_parameters,ISM_parameters))
     to_optimize = np.array(SSP_parameters_to_optimize + ISM_parameters_to_optimize)
     ndim = len(to_optimize)
@@ -70,7 +70,7 @@ class ModelParameters(object):
     'log10_N_0' : (-5,-1), 
     'log10_sn1a_time_delay' : (-3,1.),
     'log10_starformation_efficiency' : (-3,2),
-    'log10_sfr_scale' : (0.085,1),
+    'log10_sfr_scale' : (0.294,1),#(0.085,1),
     'sfr_scale' : (0.0,None),
     'outflow_feedback_fraction' : (0.,1.),
     'log10_gas_reservoir_mass_factor': (None,None),
@@ -104,7 +104,7 @@ class ModelParameters(object):
     'beta_param' : (5.0,2.5,0),
     'log10_beta' : (1.0,0.5,0),
     'high_mass_slope' : (-2.3,0.3,0),	
-    'log10_N_0' : (-2.75,0.3,0),
+    'log10_N_0' : (-2.89,0.3,0),
     'log10_sn1a_time_delay' : (-0.8,0.3,0),
     'log10_starformation_efficiency' : (-0.3,0.3,0),
     'log10_sfr_scale' : (0.55,0.1,0),
@@ -172,7 +172,7 @@ class ModelParameters(object):
     beta_param = 1.
     # This is the rescalable beta parameter controlling model error (default is 10)
     beta_error_distribution = [True, 1, beta_param] # Instead of a flat prior for the error marginalization we use a beta distribution with a = 1 and b = 3 as default (wikipedia and scipy have the same parametrization) putting more weight to small model errors
-    zero_model_error = False # a boolean that can be used to restore the old Chempy behaviour of 0 model error, will only work if error_marginalization is set to False
+    zero_model_error = True # a boolean that can be used to restore the old Chempy behaviour of 0 model error, will only work if error_marginalization is set to False
     send_email = False
     
     verbose = 0
@@ -286,12 +286,12 @@ class ModelParameters(object):
     interpolation_index = 1 # 1
     interpolation_scheme = interpolation_list[interpolation_index] ## could be a variant to change the interpolation scheme
     stellar_lifetimes_list = ['Argast_2000','Raiteri_1996','Portinari_1998']
-    stellar_lifetimes_index = 2
+    stellar_lifetimes_index = 2 ## this is used by TNG
     stellar_lifetimes = stellar_lifetimes_list[stellar_lifetimes_index] ## which stellar lifetime approximation to use
 
-    sn2_to_hn = 1.
+    sn2_to_hn = 1. # i.e. don't use any hypernovae yields
 
-    sn2mmin = 8.
+    sn2mmin = 8. # matching TNG
     sn2mmax = 100.
 
     bhmmin = float(sn2mmax) ## maximum of hypernova
@@ -309,8 +309,8 @@ class ModelParameters(object):
     time_delay_index = 1
     time_delay_functional_form = time_delay_functional_form_list[time_delay_index]
     if time_delay_functional_form == 'maoz':
-        N_0 = 0.0012882#np.power(10,-2.75)
-        sn1a_time_delay = 0.04#np.power(10,-0.8)
+        N_0 = 0.0013 # 0.0012882#np.power(10,-2.75)
+        sn1a_time_delay = 0.04# as used in TNG  # np.power(10,-0.8)
         sn1a_exponent = 1.12
         dummy = 0.0
         sn1a_parameter = [N_0,sn1a_time_delay,sn1a_exponent,dummy]
@@ -332,8 +332,9 @@ class ModelParameters(object):
 
     gas_reservoir_mass_factor = np.power(10,.0)#3.0
     sfr_factor_for_cosmic_accretion = 1.
+    shortened_sfr_rescaling = 1.
     cosmic_accretion_elements = ['H','He']
-    cosmic_accretion_element_fractions = [0.76,0.24]
+    cosmic_accretion_element_fractions = [0.76,0.24] # matching TNG
     outflow_feedback_fraction = 0.5#0.5
     ## various output modes
     check_processes = False
@@ -345,7 +346,8 @@ class ModelParameters(object):
     
     
     # 28 elements	
-    element_names = ['He', 'C', 'N', 'O', 'F','Ne','Na', 'Mg', 'Al', 'Si', 'P','S', 'Cl', 'Ar', 'K', 'Ca', 'Sc', 'Ti', 'V', 'Cr', 'Mn', 'Fe', 'Co', 'Ni','Cu','Zn','Ga','Ge']#, 'Zn','Y', 'Ba']# Runs with sun
+    ## is this needed??
+    element_names = []#['He', 'C', 'N', 'O', 'F','Ne','Na', 'Mg', 'Al', 'Si', 'P','S', 'Cl', 'Ar', 'K', 'Ca', 'Sc', 'Ti', 'V', 'Cr', 'Mn', 'Fe', 'Co', 'Ni','Cu','Zn','Ga','Ge']#, 'Zn','Y', 'Ba']# Runs with sun
     
     
     #observational_constraints_index = ['sol_norm']#['gas_reservoir','sn_ratio','sol_norm']#,'wildcard ','cas','arcturus','stars_at_end', 'plot_processes', 'save_abundances', 'elements']

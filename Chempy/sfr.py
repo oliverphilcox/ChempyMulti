@@ -67,8 +67,10 @@ class SFR(object):
 		'''
 		from scipy.stats import gamma
 		self.sfr = gamma.pdf(self.t,a_parameter,loc,scale)
-		self.sfr[np.where(self.sfr == 0.)] = np.min(self.sfr[np.where(self.sfr != 0.)])*0.01 ## So that no 0 sfr is there because sfr-related infall prescription fails in that case
-		self.sfr = np.divide(self.sfr,sum(self.sfr)/(np.divide(1.,self.dt)*S0))
+		self.sfr[np.where(self.sfr == 0.)] = 1e-10#np.min(self.sfr[np.where(self.sfr != 0.)])*0.01 ## So that no 0 sfr is there because sfr-related infall prescription fails in that case
+		# Decreased the minimum value because the renormalisation coming with shorten_sfr function was affected
+    self.sfr = np.divide(self.sfr,sum(self.sfr)/(np.divide(1.,self.dt)*S0))
+    
 	def prescribed(self, mass_factor,name_of_file):
 		'''
 		a method to read in prescribed SFR from textfile

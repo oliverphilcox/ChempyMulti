@@ -667,7 +667,7 @@ class SSP(object):
             self.mean_mass_of_feedback = float(-self.sn1a_yields[0.02]['mass_in_remnants']) ## This mass is turned into the explosion
             #=1.37
             #if number_of_stars_in_mass_range_for_remnant != 0:
-            self.mean_mass = 2.2#mass_of_stars_in_mass_range_for_remnant/number_of_stars_in_mass_range_for_remnant
+            self.mean_mass = 2.156#mass_of_stars_in_mass_range_for_remnant/number_of_stars_in_mass_range_for_remnant
             #else:
             #	self.mean_mass = 0.
             #=3.21

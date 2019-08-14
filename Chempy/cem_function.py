@@ -67,11 +67,8 @@ def lognorm(x,mu,factor):
     BEWARE: this function is not a properly normalized probability distribution. It only provides relative values.
     
     INPUT:
-
     x = where to evaluate the function, can be an array
-
     mu = peak of the distribution
-
     factor = the factor at which the probability decreases to 1 sigma
     
     Can be used to specify the prior on the yield factors
@@ -84,22 +81,19 @@ def lognorm(x,mu,factor):
 def shorten_sfr(a,age=None):
     '''
     This function crops the SFR to the length of the age of the star and ensures that enough stars are formed at the stellar birth epoch
-
     INPUT:
-
     a = Modelparameters
-
     OUTPUT:
     
     the function will update the modelparameters, such that the simulation will end when the star is born and it will also check whether there is enough sfr left at that epoch
     '''
-    try:
-        star = np.load('%s.npy' %(a.stellar_identifier))
-    except Exception as ex:
-        from . import localpath
-        star = np.load(localpath + 'input/stars/' + a.stellar_identifier + '.npy')
     if age==None:
-        age_of_star = star['age'][0]
+        try:
+            star = np.load('%s.npy' %(a.stellar_identifier))
+        except Exception as ex:
+            from . import localpath
+            star = np.load(localpath + 'input/stars/' + a.stellar_identifier + '.npy')
+        age_of_star = star['age'][0]  
     else:
         age_of_star=age
     assert (age_of_star <= 13.0), "Age of the star must be below 13Gyr"
@@ -129,14 +123,17 @@ def shorten_sfr(a,age=None):
         cut = cut[0][0][0]
     
     # updating the end time and the model steps and rescale the total mass
-    time_model = float(basic_sfr.t[cut])
+    time_model = float(basic_sfr.t[tuple(cut)])
     a.end = time_model
     a.time_steps = int(cut[0][0]) + 1
     a.total_mass = sum(basic_sfr.sfr[0:a.time_steps])
     
     # check whether the sfr is enough at end to produce reasonable number of stars (which is necessary in order to have a probability to observe a star at all)
-    sfr_at_end = float(basic_sfr.sfr[cut] / basic_sfr.dt)
+    sfr_at_end = float(basic_sfr.sfr[tuple(cut)] / basic_sfr.dt)
     fraction_of_mean_sfr = sfr_at_end / mean_sfr
+    
+    a.shortened_sfr_rescaling = a.total_mass / mass_normalisation	
+    
     if fraction_of_mean_sfr<0.05:
         return np.inf
     else:
@@ -147,13 +144,11 @@ def cem(changing_parameter,a):
     '''
     This is the function calculating the chemical evolution for a specific parameter set (changing_parameter) and for a specific observational constraint specified in a (e.g. 'solar_norm' calculates the likelihood of solar abundances coming out of the model). It returns the posterior and a list of blobs. It can be used by an MCMC.
     This function actually encapsulates the real cem function in order to capture exceptions and in that case return -inf. This makes the MCMC runs much more stable
-
     INPUT: 
     
     changing_parameter = parameter values of the free parameters as an array
     
     a = model parameters specified in parameter.py. There are also the names of free parameters specified here
-
     OUTPUT:
     
     log posterior, array of blobs
@@ -323,11 +318,9 @@ def cem2(a):
     '''
     This is the function calculating the chemical evolution for a specific parameter set (changing_parameter) and for a specific observational constraint specified in a (e.g. 'solar_norm' calculates the likelihood of solar abundances coming out of the model). It returns the posterior and a list of blobs. It can be used by an MCMC.
     This function actually encapsulates the real cem function in order to capture exceptions and in that case return -inf. This makes the MCMC runs much more stable
-
     INPUT: 
     
     a = model parameters specified in parameter.py and alteres by posterior_function
-
     OUTPUT:
     
     predictions, name_of_prediction
@@ -373,7 +366,6 @@ def cem_real2_all_times(a):
     
     abundance_list[-2]=gas_reservoir['Z'][1:]
     elements_to_trace.append('Zcorona')
-
     abundance_list[-1]=np.divide(cube1['sn2'][1:],cube1['sn1a'][1:])
     elements_to_trace.append('SNratio')
     """
@@ -410,7 +402,6 @@ def cem_real2_single_time(a,this_time):
     
     abundance_list[-2]=gas_reservoir['Z'][1:]
     elements_to_trace.append('Zcorona')
-
     abundance_list[-1]=np.divide(cube1['sn2'][1:],cube1['sn1a'][1:])
     elements_to_trace.append('SNratio')
     """
@@ -483,13 +474,11 @@ def posterior_function(changing_parameter,a):
     '''
     The posterior function is the interface between the optimizing function and Chempy. Usually the likelihood will be calculated with respect to a so called 'stellar wildcard'.
     Wildcards can be created according to the tutorial 6. A few wildcards are already stored in the input folder. Chempy will try the current folder first. If no wildcard npy file with the name a.stellar_identifier is found it will look into the Chempy/input/stars folder.
-
     INPUT: 
     
     changing_parameter = parameter values of the free parameters as an array
     
     a = model parameters specified in parameter.py. There are also the names of free parameters specified here
-
     OUTPUT:
     
     log posterior, array of blobs
@@ -523,6 +512,8 @@ def posterior_function_real(changing_parameter,a):
 
     # The endtime is changed for the actual calculation but restored to default afterwards
     backup = a.end ,a.time_steps, a.total_mass
+    
+    a.shortened_sfr_rescaling = 1. # Restore in order to not rescale all the time?
     
     if a.stellar_identifier is 'prior':
         likelihood = 0.
@@ -671,15 +662,10 @@ def posterior_function_predictions(changing_parameter,a):
 def get_prior(changing_parameter, a):
     """
     This function calculates the prior probability
-
     INPUT:
-
     changing_parameter = the values of the parameter vector
-
     a = the model parameters including the names of the parameters (which is needed to identify them with the prescribed priors in parameters.py)
-
     OUTPUT:
-
     the log prior is returned
     """
 
@@ -726,19 +712,13 @@ def global_optimization_real(changing_parameter, result):
     '''
     This function calculates the predictions from several Chempy zones in parallel. It also calculates the likelihood for common model errors
     BEWARE: Model parameters are called as saved in parameters.py!!!
-
     INPUT:
-
     changing_parameter = the global SSP parameters (parameters that all stars share)
-
     result = the complete parameter set is handed over as an array of shape(len(stars),len(all parameters)). From those the local ISM parameters are taken
     
     OUTPUT:
-
     -posterior = negative log posterior for all stellar zones
-
     error_list = the optimal standard deviation of the model error
-
     elements = the corresponding element symbols
     '''
     import multiprocessing as mp
@@ -918,19 +898,14 @@ def posterior_function_local(changing_parameter, stellar_identifier, global_para
     '''
     The posterior function is the interface between the optimizing function and Chempy. Usually the likelihood will be calculated with respect to a so called 'stellar wildcard'.
     Wildcards can be created according to the tutorial 6 from the github page. A few wildcards are already stored in the input folder. Chempy will try the current folder first. If no wildcard npy file with the name a.stellar_identifier is found it will look into the Chempy/input/stars folder.
-
     INPUT: 
     
     changing_parameter = parameter values of the free parameters as an array
     
     a = model parameters specified in parameter.py. There are also the names of free parameters specified here
-
     global_parameters = the SSP Parameters which are fixed for this optimization but need to be handed over to Chempy anyway
-
     errors = the model error for each element
-
     elements = the corresponding names of the elements
-
     OUTPUT:
     
     log posterior, array of blobs
@@ -1025,15 +1000,12 @@ def posterior_function_many_stars(changing_parameter,error_list,elements):
     Wildcards can be created according to the tutorial 6. A few wildcards are already stored in the input folder. Chempy will try the current folder first. If no wildcard npy file with the name a.stellar_identifier is found it will look into the Chempy/input/stars folder.
     The posterior function for many stars evaluates many Chempy instances for different stars and adds up their common likelihood. The list of stars is given in parameter.py under stellar_identifier_list.
     The names in the list must be represented by wildcards in the same folder.
-
     INPUT: 
     
     changing_parameter = parameter values of the free parameters as an array
     
     error_list = the model error list for each element
-
     elements = the corresponding element symbols
-
     OUTPUT:
     
     log posterior, array of blobs

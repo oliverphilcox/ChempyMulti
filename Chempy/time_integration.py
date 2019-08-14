@@ -258,6 +258,8 @@ class ABUNDANCE_MATRIX(object):
             self.cube[item][index] += self.infall[index] * np.divide(self.gas_reservoir[item][index],self.gas_reservoir['gas'][index])
         for i,item in enumerate(self.elements):
             self.gas_reservoir[item][index] -= self.infall[index] * np.divide(self.gas_reservoir[item][index],self.gas_reservoir['gas'][index])
+        
+            
         self.gas_reservoir['gas'][index] -= self.infall[index]
 
         # sfr will be subtracted in the next step self.sfr[index]
@@ -265,6 +267,7 @@ class ABUNDANCE_MATRIX(object):
         assert self.cube['gas'][index] >= self.sfr[index], ('time index: ', index, 'gas: ', self.cube['gas'][index], 'sfr: ', self.sfr[index], 'total SFR: ', self.sfr, 'gas needed = ', gas_needed, 'corona = ', self.gas_reservoir['gas'][index], 'sfe = ', self.starformation_efficiency , 'dt = ', self.dt)
         for i,item in enumerate(self.elements):
             self.cube[item][index] -= self.sfr[index] * np.divide(self.cube[item][index],self.cube['gas'][index])
+        
         self.cube['gas'][index] -= self.sfr[index]
         self.cube['stars'][index] += self.sfr[index]
         

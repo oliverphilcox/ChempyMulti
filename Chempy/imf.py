@@ -134,7 +134,7 @@ class IMF(object):
         self.dn = np.divide(self.dm,self.x)
         return(self.dm,self.dn)
     
-    def Chabrier_TNG(self,paramet=(0.852464,0.237912,0.079,0.69,-2.3)):
+    def Chabrier_TNG(self,paramet=(0.852464,0.237912,0.69,0.079,-2.3)):
         """
         Chabrier IMF used in Vogelsberger 2013
         """

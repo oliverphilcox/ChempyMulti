@@ -49,7 +49,7 @@ if __name__=='__main__':
     
     # Now run multiprocessing
     cpus=mp.cpu_count()
-    p=mp.Pool(min(30,cpus))
+    p=mp.Pool(min(16,cpus))
     output=list(tqdm.tqdm(p.imap_unordered(runner,range(N_samples)),total=N_samples))
     abuns=[o[0] for o in output]
     pars=[o[1] for o in output]
@@ -59,4 +59,4 @@ if __name__=='__main__':
     print("multiprocessing complete after %d seconds"%(end_time-init_time));
     
     # Now save output
-    np.savez("Random_Training_Data_Auriga_%d_0.npz"%N_samples,abundances=abuns,elements=els,params=pars);
+    np.savez("/mnt/store1/oliverphilcox/ChempyMultiData/TNG/Random_Training_Data_TNG_%d_1.npz"%N_samples,abundances=abuns,elements=els,params=pars);
