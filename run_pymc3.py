@@ -23,8 +23,9 @@ mock_data_file = Config.get('input','mock_data_file')
 outfile = Config.get('input','outfile')
 
 all_n = json.loads(Config['inference']['all_n'])
+max_stars = max(all_n)
 elem_err = Config.getboolean('inference','elem_err')
-max_stars = Config.getint('inference','max_stars')
+max_iteration = Config.getint('inference','max_iteration')
 
 chains = Config.getint('sampler','chains')
 cores = Config.getint('sampler','cores')
@@ -211,7 +212,9 @@ chain_params=[]
 for nn in all_n:
     mini_chain=[]
     for iteration in range(max_stars//nn):
-        print("Starting inference using %d stars iteration %d of %d"%(nn,iteration+1,max_stars//nn))
+        if iteration>=max_iteration:
+            break
+        print("Starting inference using %d stars iteration %d of %d"%(nn,iteration+1,min(max_iteration,max_stars//nn)))
         try:
             mini_chain.append(n_star_inference(nn,iteration,elem_err=elem_err,n_init=n_init,
                                                n_samples=n_samples,max_stars=max_stars))
