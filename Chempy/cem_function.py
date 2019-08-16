@@ -6,7 +6,10 @@ import time
 from .data_to_test import likelihood_function, wildcard_likelihood_function, elements_plot, arcturus, sol_norm, plot_processes, save_abundances,  cosmic_abundance_standard, ratio_function, star_function, gas_reservoir_metallicity
 import multiprocessing as mp
 from .wrapper import initialise_stuff, Chempy, Chempy_all_times
-from scipy.misc import logsumexp
+try:
+    from scipy.misc import logsumexp
+except ImportError
+    from scipy.special import logsumexp ## for scipy version control
 import numpy.ma as ma
 from .data_to_test import likelihood_evaluation, read_out_wildcard, likelihood_evaluation_int
 
