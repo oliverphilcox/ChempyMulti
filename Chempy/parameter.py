@@ -331,7 +331,7 @@ class ModelParameters(object):
     gas_at_start = 0. #*dt yields the Msun/pc^2 value
 
     gas_reservoir_mass_factor = np.power(10,.0)#3.0
-    sfr_factor_for_cosmic_accretion = 1.
+    sfr_factor_for_cosmic_accretion = 0.000001
     shortened_sfr_rescaling = 1.
     cosmic_accretion_elements = ['H','He']
     cosmic_accretion_element_fractions = [0.76,0.24] # matching TNG

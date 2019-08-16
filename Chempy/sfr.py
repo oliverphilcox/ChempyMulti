@@ -69,7 +69,7 @@ class SFR(object):
               self.sfr[np.where(self.sfr == 0.)] = 1e-10 # So that no 0 sfr is there because sfr-related infall prescription fails in that case
               # Decreased the minimum value because the renormalisation coming with shorten_sfr function was affected
               self.sfr = np.divide(self.sfr,sum(self.sfr)/(np.divide(1.,self.dt)*S0))
-              def prescribed(self, mass_factor,name_of_file):
+        def prescribed(self, mass_factor,name_of_file):
                '''
                a method to read in prescribed SFR from textfile
                x time is given in log years. our time is in linear Gyrs

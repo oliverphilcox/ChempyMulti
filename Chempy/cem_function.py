@@ -102,16 +102,35 @@ def shorten_sfr(a,age=None):
     new_timesteps = int((a.time_steps-1)*a.end/(a.end-age_of_star)+1)
     new_end = (a.end-age_of_star)*(new_timesteps-1)/(a.time_steps-1)
     
+    ## Compute SFR with the new end-point and timesteps
     basic_sfr = SFR(a.start,new_end,new_timesteps)
+    ## Also compute old SFR without discretization of final time
+    # This is to ensure we form the correct amount of mass in the simulation
+    old_sfr = SFR(a.start,a.end,a.time_steps)
+    
+    
     
     if a.basic_sfr_name == 'gamma_function':
         getattr(basic_sfr, a.basic_sfr_name)(S0 = a.S_0 * a.mass_factor,a_parameter = a.a_parameter, loc = a.sfr_beginning, scale = a.sfr_scale)
+        getattr(old_sfr, a.basic_sfr_name)(S0 = a.S_0 * a.mass_factor,a_parameter = a.a_parameter, loc = a.sfr_beginning, scale = a.sfr_scale)
     elif a.basic_sfr_name == 'model_A':
         basic_sfr.model_A(a.mass_factor*a.S_0,a.t_0,a.t_1)
+        old_sfr.model_A(a.mass_factor*a.S_0,a.t_0,a.t_1)
     elif a.basic_sfr_name == 'prescribed':
         basic_sfr.prescribed(a.mass_factor, a.name_of_file)
+        old_sfr.prescribed(a.mass_factor, a.name_of_file)
     elif a.basic_sfr_name == 'doubly_peaked':
         basic_sfr.doubly_peaked(S0 = a.mass_factor*a.S_0, peak_ratio = a.peak_ratio, decay = a.sfr_decay, t0 = a.sfr_t0, peak1t0 = a.peak1t0, peak1sigma = a.peak1sigma)
+        old_sfr.prescribed(a.mass_factor, a.name_of_file)
+    
+    # compute a small correction from changing the simulation end time
+    from scipy.stats import gamma
+    basic_gamma = np.sum(gamma.pdf(basic_sfr.t,a.a_parameter,a.sfr_beginning,a.sfr_scale))*basic_sfr.dt
+    old_gamma = np.sum(gamma.pdf(old_sfr.t,a.a_parameter,a.sfr_beginning,a.sfr_scale))*old_sfr.dt
+    correction = basic_gamma/old_gamma
+    a.total_mass*=correction
+    
+    ## NB: normalization doesn't matter here since it will be renormalized later 
     basic_sfr.sfr = a.total_mass * np.divide(basic_sfr.sfr,sum(basic_sfr.sfr))
     mass_normalisation = a.total_mass
     mean_sfr = sum(basic_sfr.sfr) / new_end
@@ -138,6 +157,7 @@ def shorten_sfr(a,age=None):
         return np.inf
     else:
         return a
+    
     #assert fraction_of_mean_sfr > 0.05, ('The total SFR of the last age bin is below 5% of the mean SFR', 'stellar identifier = ', a.stellar_identifier, 'star time = ', star_time, 'model time = ', time_model ) 
     
 def cem(changing_parameter,a):

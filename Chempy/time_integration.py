@@ -104,7 +104,7 @@ class ABUNDANCE_MATRIX(object):
         # Setting up the table for the gas and feedback composition
         self.cube['time'] = time
         self.cube['sfr'] = sfr
-        if gas_at_start >= 0.00000001:
+        if gas_at_start >= 0.00000000001:
             self.cube['gas'][0] = self.gas_at_start
             for i,item in enumerate(self.gas_at_start_symbols):
                 self.cube[item][0] = self.gas_at_start_fractions[i]*self.cube['gas'][0]	
