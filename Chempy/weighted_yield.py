@@ -390,7 +390,6 @@ class SSP(object):
             # to avoid small rounding errors
             filt = np.where(np.abs(self.z-self.agb_metallicities)==min(np.abs(self.z-self.agb_metallicities)))
             metallicity_list.append(self.agb_metallicities[filt][0])
-            metallicity_list.append(self.z)
         else:
             j=1
             while self.agb_metallicities[j] < self.z:
@@ -741,7 +740,6 @@ class SSP(object):
         elif self.z > max(self.sn1a_metallicities):
             metallicity_list.append(max(self.sn1a_metallicities))
         elif self.z in self.sn1a_metallicities:
-            metallicity_list.append(self.z)
             # to avoid small rounding errors
             filt = np.where(np.abs(self.z-self.sn1a_metallicities)==min(np.abs((self.z-self.sn1a_metallicities))))
             metallicity_list.append(self.sn1a_metallicities[filt][0])
