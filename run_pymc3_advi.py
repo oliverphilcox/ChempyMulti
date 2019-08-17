@@ -23,8 +23,9 @@ mock_data_file = Config.get('input','mock_data_file')
 outfile = Config.get('input','outfile')
 
 all_n = json.loads(Config['inference']['all_n'])
+max_stars = max(all_n)
 elem_err = Config.getboolean('inference','elem_err')
-max_stars = Config.getint('inference','max_stars')
+max_iteration = Config.getint('inference','max_iteration')
 
 chains = Config.getint('sampler','chains')
 cores = Config.getint('sampler','cores')
@@ -189,7 +190,7 @@ def n_star_inference(n_stars,iteration,elem_err=False,fit_steps=100000,n_samples
             element_error = pm.HalfCauchy('Std-Element-Error',beta=0.01/output_std,shape=(1,n_els))
             TruErr = pm.Deterministic('Element-Error',element_error*output_std)
             stacked_error = ma.matrix_dot(ones_tensor,element_error)
-            tot_error = ma.sqrt(stacked_error**2.+norm_sd**2.)
+            tot_error = ma.sqrt(stacked_error**2.+norm_sd**2.) # NB this is all standardized by output_std here
         else:
             tot_error = norm_sd
 
