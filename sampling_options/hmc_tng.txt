@@ -1,16 +1,16 @@
 [input]
-neural_model: /mnt/store1/oliverphilcox/ChempyMultiData/TNG/stacked_8_element_net_v3.npz
-mock_data_file: /mnt/store1/oliverphilcox/ChempyMultiData/TNG/TNG_Mock_Data_Full.npz
-outfile: /mnt/store1/oliverphilcox/ChempyMultiData/TNG/chains/TNG_HMC_Full_v3_n1000.npz
+neural_model: /mnt/store1/oliverphilcox/ChempyMultiData/TNG/stacked_8_element_net_v4.npz
+mock_data_file: /mnt/store1/oliverphilcox/ChempyMultiData/TNG/TNG_Mock_Data_Full_v4.npz
+outfile: /mnt/store1/oliverphilcox/ChempyMultiData/TNG/chains/TNG_HMC_Full_v4_n200.npz
 
 [inference]
-all_n: [1,2,5,10,20,50,100,200,500,1000]
+all_n: [1,2,5,10,20,50,100,200]
 #,200,500,1000]
 #,20,50,100]
 #[1,2,5,10,20,50,100,200,500,1000]
 elem_err: True 
 # whether to use element errors
-max_iteration: 1000
+max_iteration: 200
 # maximum number of stars to use (using all n_stars combinations of this)
         
 [sampler]

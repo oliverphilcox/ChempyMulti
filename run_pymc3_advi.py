@@ -1,6 +1,7 @@
 ## Run the PyMC3 inference for a given input dataset and parameters
 
 import numpy as np
+import pickle
 import pymc3 as pm
 import pymc3.math as ma
 import theano.tensor as tt
@@ -264,6 +265,7 @@ all_predictions = [[cc[-1] for cc in c] for c in chain_params]
 
 mean_timescale = [np.mean(all_timescale[i],axis=0) for i in range(len(all_timescale))]
 
-np.savez(outfile,n_stars=all_n,Lambdas=all_Lambda,Thetas=all_Thetas,Times=all_Times,
-            runtimes=all_timescale,Errors=all_Err,mean_runtimes=mean_timescale)
+all_data = {'n_stars':all_n,'Lambdas':all_Lambda,'Thetas':all_Thetas,'Times':all_Times,'runtimes':all_timescale,'Errors':all_Err,'mean_runtimes':mean_timescale}
+pickle.dump(all_data,open(outfile,"wb"))
+
 print("Inference complete: output saved to %s"%outfile)
