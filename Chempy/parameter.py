@@ -24,7 +24,7 @@ class ModelParameters(object):
     
     ## Choice of yield sets
     yield_table_name_sn2_list = ['chieffi04','Nugrid','Nomoto2013','Portinari_net', 'chieffi04_net', 'Nomoto2013_net','NuGrid_net','West17_net','TNG_net','CL18_net']#'Frischknecht16_net'
-    yield_table_name_sn2_index = 5#8# use TNG 8#4#8#9
+    yield_table_name_sn2_index = 8#5#8# use TNG 8#4#8#9
     yield_table_name_sn2 = yield_table_name_sn2_list[yield_table_name_sn2_index]
 
     yield_table_name_hn_list = ['Nomoto2013']
@@ -32,11 +32,11 @@ class ModelParameters(object):
     yield_table_name_hn = yield_table_name_hn_list[yield_table_name_hn_index]
 
     yield_table_name_agb_list = ['Karakas','Nugrid','Karakas_net_yield','Ventura_net','Karakas16_net','TNG_net'] # Karakas2016 needs much more calculational resources (order of magnitude) using 2010 net yields from Karakas are faster and only N is significantly underproduced
-    yield_table_name_agb_index = 4#5 # use TNG #5#4#5#4
+    yield_table_name_agb_index = 5#4#5 # use TNG #5#4#5#4
     yield_table_name_agb = yield_table_name_agb_list[yield_table_name_agb_index]
 
     yield_table_name_1a_list = ['Iwamoto','Thielemann','Seitenzahl', 'TNG']
-    yield_table_name_1a_index = 1#3 # use TNG #3#2#3#2
+    yield_table_name_1a_index = 3#1#3 # use TNG #3#2#3#2
     yield_table_name_1a = yield_table_name_1a_list[yield_table_name_1a_index]
 
     ## Neural network parameters
@@ -52,7 +52,7 @@ class ModelParameters(object):
 
     ## Free parameters - if some parameter is in to optimise there needs to be a prior and constraints defined
     
-    SSP_parameters =  [-2.3,-2.89]#[1.0,-2.29]#[5.0,,1.0,-2.29 ,-2.75,	-0.8 ,0.2, 0.7, 0.3, 0.0]
+    SSP_parameters =  [-2.3,-2.75]#1.0,-2.29]#[5.0,,1.0,-2.29 ,-2.75,	-0.8 ,0.2, 0.7, 0.3, 0.0]
     SSP_parameters_to_optimize = ['high_mass_slope','log10_N_0']#['log10_beta','high_mass_slope'] #['beta_param', 'log10_beta','high_mass_slope', 'log10_N_0' 'log10_sn1a_time_delay','log10_sfr_factor_for_cosmic_accretion','log10_gas_reservoir_mass_factor','log10_a_parameter','log10_gas_power']
     assert len(SSP_parameters) == len(SSP_parameters_to_optimize)
     ISM_parameters =  [-0.3,0.55,0.5]#,0.3,0.]#, 0.3,0.2, 0.7, 0.3, 0.0]

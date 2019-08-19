@@ -86,7 +86,7 @@ def initialise_stuff(a):
 
     basic_solar = solar_abundances()
     getattr(basic_solar, a.solar_abundance_name)()
-
+    
     basic_sfr = SFR(a.start,a.end,a.time_steps)
     if a.basic_sfr_name == 'gamma_function':
         getattr(basic_sfr, a.basic_sfr_name)(S0 = a.S_0 * a.mass_factor,a_parameter = a.a_parameter, loc = a.sfr_beginning, scale = a.sfr_scale)
@@ -96,8 +96,10 @@ def initialise_stuff(a):
         basic_sfr.prescribed(a.mass_factor, a.name_of_file)
     elif a.basic_sfr_name == 'doubly_peaked':
         basic_sfr.doubly_peaked(S0 = a.mass_factor*a.S_0, peak_ratio = a.peak_ratio, decay = a.sfr_decay, t0 = a.sfr_t0, peak1t0 = a.peak1t0, peak1sigma = a.peak1sigma)
-    basic_sfr.sfr = a.total_mass * np.divide(basic_sfr.sfr,sum(basic_sfr.sfr))
-
+        
+    basic_sfr.sfr = np.divide(basic_sfr.sfr,sum(basic_sfr.sfr))
+    
+    
     basic_infall = INFALL(np.copy(basic_sfr.t),np.copy(basic_sfr.sfr))
     if a.basic_infall_name == 'exponential':
         getattr(basic_infall, a.basic_infall_name)((a.infall_amplitude,a.tau_infall,a.infall_time_offset,a.c_infall,a.norm_infall))
