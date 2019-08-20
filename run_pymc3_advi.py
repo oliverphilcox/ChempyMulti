@@ -34,6 +34,16 @@ n_samples = Config.getint('sampler','n_samples')
 fit_steps = Config.getint('sampler','fit_steps')
 repeats = Config.getint('sampler','repeats')
 
+advi_type = Config.get('sampler','type')
+if advi_type=='MF':
+    print("\nUsing Mean-Field ADVI\n")
+elif advi_type=='FR':
+    print("\nUsing Full-Rank ADVI\n")
+elif advi_type=='Group':
+    print("\nUsing Group ADVI\n")
+else:
+    raise Exception("\nMust specify 'MF', 'FR' or 'Group' for 'advi_type' parameter\n")
+
 ######################
 
 os.chdir('/home/oliverphilcox/ChempyMulti/')
@@ -204,11 +214,25 @@ def n_star_inference(n_stars,iteration,elem_err=False,fit_steps=100000,n_samples
     # Now sample
     init_time = ttime.time()
     with simple_model:
-        group_fr = pm.Group([Lambda,element_error],vfam='fr')
-        group_mf = pm.Group([Locals],vfam='mf')
-        approx = pm.Approximation([group_fr,group_mf])
+        
+        if advi_type=='Group':
+            if elem_err:
+                group_fr = pm.Group([Lambda,element_error],vfam='fr')
+            else:
+                group_fr = pm.Group([Lambda],vfam='fr')
+            group_mf = pm.Group(None,vfam='mf') # all other parameters
+            approx = pm.Approximation([group_fr,group_mf])
+        
+        elif advi_type=='MF':
+            group = pm.Group(None,vfam='mf')
+            approx = pm.Approximation([group])
+            
+        elif advi_type=='FR':
+            group = pm.Group(None,vfam='fr')
+            approx = pm.Approximation([group])
+            
         inference = pm.KLqp(approx)
-        advi_approx = inference.fit(fit_steps,callbacks=[HistConvergence(max_counts=repeats)],obj_n_mc=1)
+        advi_approx = inference.fit(fit_steps,callbacks=[HistConvergence(max_counts=repeats)])#,obj_n_mc=1)
         samples=advi_approx.sample(n_samples,include_transformed=True)
     end_time = ttime.time()-init_time
 
