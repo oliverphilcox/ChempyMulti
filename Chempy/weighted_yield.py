@@ -142,7 +142,7 @@ class SSP(object):
         self.net_yields = only_net_yields_in_process_tables
         lifetime_functions = {'Argast_2000': lifetime_Argast, 'Raiteri_1996': lifetime_Raiteri,'Portinari_1998': lifetime_Portinari}
         
-        ######### Calculating and normalising the delay time function of SN1a
+        ######### Calculating the lifetime function of stars
         if self.stellar_lifetimes in lifetime_functions:
             self.inverse_imf = np.interp(self.t,lifetime_functions[self.stellar_lifetimes](self.x[::-1],self.z),self.x[::-1])
         else:
@@ -196,7 +196,6 @@ class SSP(object):
             list_of_arrays.append(base)
         self.sn2_table = np.core.records.fromarrays(list_of_arrays,names=names)
         
-
         self.sn2_elements = sn2_elements
         self.sn2 = sn2_yields
         self.sn2_mmin = sn2_mmin
@@ -207,10 +206,12 @@ class SSP(object):
         for i,item in enumerate(self.inverse_imf[:-1]):
             lower_cut = max(self.inverse_imf[i+1],self.sn2_mmin)
             upper_cut = min(self.inverse_imf[i],self.sn2_mmax)
-            self.table['sn2'][i+1] += imf_mass_fraction_non_nativ(self.dn,self.x,lower_cut,upper_cut)
-            self.sn2_table['number_of_events'][i+1] += imf_mass_fraction_non_nativ(self.dn,self.x,lower_cut,upper_cut)
+            tmp = imf_mass_fraction_non_nativ(self.dn,self.x,lower_cut,upper_cut)
+            self.table['sn2'][i+1] += tmp
+            self.sn2_table['number_of_events'][i+1] += tmp
             if upper_cut<lower_cut and self.inverse_imf[i+1]<self.sn2_mmin:
                 break
+                
         ### interpolation of 2 yield sets with different metallicities
         self.sn2_metallicities = np.sort(self.sn2_metallicities)
         metallicity_list = []
@@ -368,17 +369,21 @@ class SSP(object):
             if item > agb_mmax:
                 continue	
             elif count_variable == 0:
-                self.table['pn'][i] += imf_mass_fraction_non_nativ(self.dn,self.x,self.inverse_imf[i],self.agb_mmax)
-                self.agb_table['number_of_events'][i] += imf_mass_fraction_non_nativ(self.dn,self.x,self.inverse_imf[i],self.agb_mmax)
+                tmp = imf_mass_fraction_non_nativ(self.dn,self.x,self.inverse_imf[i],self.agb_mmax)
+                self.table['pn'][i] += tmp
+                self.agb_table['number_of_events'][i] += tmp
                 count_variable += 1
             else:
                 # The last time step is cut off with this method but it was important to add in order to be able to vary agb_mmin and if agb_mmin is below 1Msun effect is negligible
                 if item < self.agb_mmin:
-                    #self.table['pn'][i] += imf_mass_fraction_non_nativ(self.dn,self.x,self.agb_mmin,self.inverse_imf[i-1])
-                    #self.agb_table['number_of_events'][i] += imf_mass_fraction_non_nativ(self.dn,self.x,self.agb_mmin,self.inverse_imf[i-1])
+                    tmp = imf_mass_fraction_non_nativ(self.dn,self.x,self.agb_mmin,self.inverse_imf[i-1])
+                    self.table['pn'][i] += tmp
+                    self.agb_table['number_of_events'][i] += tmp
                     break
-                self.table['pn'][i] += imf_mass_fraction_non_nativ(self.dn,self.x,self.inverse_imf[i],self.inverse_imf[i-1])
-                self.agb_table['number_of_events'][i] += imf_mass_fraction_non_nativ(self.dn,self.x,self.inverse_imf[i],self.inverse_imf[i-1])
+                tmp = imf_mass_fraction_non_nativ(self.dn,self.x,self.inverse_imf[i],self.inverse_imf[i-1])
+                self.table['pn'][i] += tmp
+                self.agb_table['number_of_events'][i] += tmp
+        
         metallicity_list = []
         if len(self.agb_metallicities) == 1:
             metallicity_list.append(self.agb_metallicities[0])
@@ -451,8 +456,6 @@ class SSP(object):
                 last_item = item
                 gaps.append(item)
 
-
-
                 mass_weight = []
                 # now this is the loop where the imf.dm is summed up i.e. the weight is calculated
                 for t in range(len(gaps)-1):
@@ -470,8 +473,7 @@ class SSP(object):
                 mass_index = np.array(mass_index)
                 mass_weight_list.append(mass_weight)
                 mass_index_list.append(mass_index)
-
-            
+                
             # here the list structure is brought onto arrays to make vector multiplication possible for feedback calculations			
             max_different_masses_per_time_step = max(len_of_mass_weights)
             mass_index_array = np.zeros((len(self.inverse_imf),max_different_masses_per_time_step),dtype=int)
@@ -646,6 +648,7 @@ class SSP(object):
                 if full_time[i]>=tau_8:
                     feedback_number[i] = np.power(np.divide(full_time[i],tau_8),-1*s_exponent) * np.divide(s_exponent-1,tau_8)# * N_0 * number_of_stars_in_mass_range_for_remnant
             feedback_number = np.divide(feedback_number,sum(feedback_number)) * N_0# * number_of_stars_in_mass_range_for_remnant
+            
             #N_0 now is the number of SN1a per 1Msun
             if stochastic_IMF:
                 number_of_potential_sn1a_explosions = int(round(ssp_mass))#int(round(number_of_stars_in_mass_range_for_remnant * ssp_mass) )

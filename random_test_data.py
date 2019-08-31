@@ -59,4 +59,4 @@ if __name__=='__main__':
     print("multiprocessing complete after %d seconds"%(end_time-init_time));
     
     # Now save output
-    np.savez("/mnt/store1/oliverphilcox/ChempyMultiData/TNG/Random_Test_Data_TNG_%d_0_v3.npz"%N_samples,abundances=abuns,elements=els,params=pars);
+    np.savez("/home/oliverphilcox/ChempyMulti/TNG_Test_Data.npz",abundances=abuns,elements=els,params=pars);

@@ -230,6 +230,8 @@ def Chempy_all_times(a):
         time_steps = np.copy(basic_sfr.t[:j])
         basic_ssp.calculate_feedback(float(metallicity), list(elements_to_trace), list(element_fractions), np.copy(time_steps)) 
         cube.advance_one_step(i+1,np.copy(basic_ssp.table),np.copy(basic_ssp.sn2_table),np.copy(basic_ssp.agb_table),np.copy(basic_ssp.sn1a_table),np.copy(basic_ssp.bh_table))
+        
+        
         for item in elements_to_trace:
             if cube.cube[item][i]<0:
                 print(i,item)

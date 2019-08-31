@@ -30,7 +30,7 @@ class ABUNDANCE_MATRIX(object):
         
         gas_at_start = how much gas at start do we have (default = 0)
         
-        gas_at_start_symbols = list of elements at beginnin
+        gas_at_start_symbols = list of elements at beginning
         
         gas_at_start_fractions = the corresponding fractions
         
@@ -259,7 +259,6 @@ class ABUNDANCE_MATRIX(object):
         for i,item in enumerate(self.elements):
             self.gas_reservoir[item][index] -= self.infall[index] * np.divide(self.gas_reservoir[item][index],self.gas_reservoir['gas'][index])
         
-            
         self.gas_reservoir['gas'][index] -= self.infall[index]
 
         # sfr will be subtracted in the next step self.sfr[index]

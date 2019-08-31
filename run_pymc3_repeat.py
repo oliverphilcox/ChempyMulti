@@ -1,7 +1,6 @@
 ## Run the PyMC3 inference for a given input dataset and parameters
 
 import numpy as np
-import pickle
 import pymc3 as pm
 import pymc3.math as ma
 import theano.tensor as tt
@@ -24,25 +23,15 @@ mock_data_file = Config.get('input','mock_data_file')
 outfile = Config.get('input','outfile')
 
 all_n = json.loads(Config['inference']['all_n'])
-max_stars = max(all_n)
+max_stars = 500#max(all_n)
 elem_err = Config.getboolean('inference','elem_err')
 max_iteration = Config.getint('inference','max_iteration')
 
 chains = Config.getint('sampler','chains')
 cores = Config.getint('sampler','cores')
+tune = Config.getint('sampler','tune')
+n_init = Config.getint('sampler','n_init')
 n_samples = Config.getint('sampler','n_samples')
-fit_steps = Config.getint('sampler','fit_steps')
-repeats = Config.getint('sampler','repeats')
-
-advi_type = Config.get('sampler','type')
-if advi_type=='MF':
-    print("\nUsing Mean-Field ADVI\n")
-elif advi_type=='FR':
-    print("\nUsing Full-Rank ADVI\n")
-elif advi_type=='Group':
-    print("\nUsing Group ADVI\n")
-else:
-    raise Exception("\nMust specify 'MF', 'FR' or 'Group' for 'advi_type' parameter\n")
 
 ######################
 
@@ -88,31 +77,7 @@ std_log_SFR_crit = (log_SFR_crit-input_mean[3])/input_std[3]
 min_time,max_time = [1.,13.8]
 std_min_time,std_max_time=[(time-input_mean[-1])/input_std[-1] for time in [min_time,max_time]]
 
-class HistConvergence(pm.callbacks.Callback):
-    """Convergence stopping check for histogram"""
-
-    def __init__(self, every=1000, tolerance=1e-4,max_counts=3):
-        #self.approx = approx
-        self.every = every
-        self.max_counts = max_counts
-        self.tolerance = tolerance
-        self.ELBO=1e10
-        self.count=0
-
-    def __call__(self, approx, hist, i):
-        if i % self.every or i<self.every:
-            return
-        old_ELBO=self.ELBO
-        this_hist = hist[-self.every:]
-        self.ELBO=np.mean(this_hist[np.isfinite(this_hist)]) # ignore any NaN/infs 
-        if (old_ELBO-self.ELBO)/np.abs(self.ELBO)<self.tolerance:
-            self.count+=1
-        if np.sum(np.isfinite(this_hist))==0:
-            self.count+=1
-        if self.count == self.max_counts:
-            raise StopIteration('Convergence in ELBO at %.1e%% level acheived at step %d' %(100.*self.tolerance,i))
-            
-def n_star_inference(n_stars,iteration,elem_err=False,fit_steps=100000,n_samples=16000,max_stars=100,repeats=5):    
+def n_star_inference(n_stars,iteration,elem_err=False,n_init=20000,n_samples=1000,max_stars=100):    
     ## Define which stars to use
     these_stars = np.arange(max_stars)[iteration*n_stars:(iteration+1)*n_stars]
     
@@ -140,7 +105,7 @@ def n_star_inference(n_stars,iteration,elem_err=False,fit_steps=100000,n_samples
     obs_errors = full_errors[:,el_indices]
 
     # Now standardize dataset
-    norm_data=(obs_abundances-output_mean)/output_std # use only 6 elements
+    norm_data=(obs_abundances-output_mean)/output_std
     norm_sd = obs_errors/output_std
 
     data_obs = norm_data.ravel()
@@ -203,7 +168,7 @@ def n_star_inference(n_stars,iteration,elem_err=False,fit_steps=100000,n_samples
             stacked_error = ma.matrix_dot(ones_tensor,element_error)
             tot_error = ma.sqrt(stacked_error**2.+norm_sd**2.) # NB this is all standardized by output_std here
         else:
-            tot_error = norm_sd
+            tot_error = norm_sd # NB: all quantities are standardized here
 
         predictions = pm.Deterministic("Predicted-Abundances",output*output_std+output_mean)
 
@@ -214,26 +179,8 @@ def n_star_inference(n_stars,iteration,elem_err=False,fit_steps=100000,n_samples
     # Now sample
     init_time = ttime.time()
     with simple_model:
-        
-        if advi_type=='Group':
-            if elem_err:
-                group_fr = pm.Group([Lambda,element_error],vfam='fr')
-            else:
-                group_fr = pm.Group([Lambda],vfam='fr')
-            group_mf = pm.Group(None,vfam='mf') # all other parameters
-            approx = pm.Approximation([group_fr,group_mf])
-        
-        elif advi_type=='MF':
-            group = pm.Group(None,vfam='mf')
-            approx = pm.Approximation([group])
-            
-        elif advi_type=='FR':
-            group = pm.Group(None,vfam='fr')
-            approx = pm.Approximation([group])
-            
-        inference = pm.KLqp(approx)
-        advi_approx = inference.fit(fit_steps,callbacks=[HistConvergence(max_counts=repeats)])#,obj_n_mc=1)
-        samples=advi_approx.sample(n_samples,include_transformed=True)
+        samples=pm.sample(draws=n_samples,chains=chains,cores=cores,tune=tune,
+                          nuts_kwargs={'target_accept':0.9},init='advi+adapt_diag',n_init=n_init)
     end_time = ttime.time()-init_time
 
     def construct_output(samples):
@@ -264,14 +211,16 @@ def n_star_inference(n_stars,iteration,elem_err=False,fit_steps=100000,n_samples
 chain_params=[]
 for nn in all_n:
     mini_chain=[]
-    for iteration in range(max_stars//nn):
-        print("Starting inference using %d stars iteration %d of %d"%(nn,iteration+1,max_stars//nn))
+    for iteration in range(5):
+        #if iteration>=max_iteration:
+        #    break
+        print("Starting inference using %d stars iteration %d of %d"%(nn,iteration+1,5))#min(max_iteration,max_stars//nn)))
         try:
-            mini_chain.append(n_star_inference(nn,iteration,elem_err=elem_err,repeats=repeats,
-                                               n_samples=n_samples,fit_steps=fit_steps,max_stars=max_stars))
-        except ValueError:
-            mini_chain.append(n_star_inference(nn,iteration,elem_err=elem_err,repeats=repeats,
-                                                   n_samples=n_samples,fit_steps=fit_steps,max_stars=max_stars))
+            mini_chain.append(n_star_inference(nn,iteration,elem_err=elem_err,n_init=n_init,
+                                               n_samples=n_samples,max_stars=max_stars))
+        except ValueError or FloatingPointError:
+            mini_chain.append(n_star_inference(nn,iteration,elem_err=elem_err,n_init=n_init,
+                                                   n_samples=n_samples,max_stars=max_stars))
     chain_params.append(mini_chain)
 
 ## Save output
@@ -289,7 +238,6 @@ all_predictions = [[cc[-1] for cc in c] for c in chain_params]
 
 mean_timescale = [np.mean(all_timescale[i],axis=0) for i in range(len(all_timescale))]
 
-all_data = {'n_stars':all_n,'Lambdas':all_Lambda,'Thetas':all_Thetas,'Times':all_Times,'runtimes':all_timescale,'Errors':all_Err,'mean_runtimes':mean_timescale}
-pickle.dump(all_data,open(outfile,"wb"))
-
+np.savez(outfile,n_stars=all_n,Lambdas=all_Lambda,Thetas=all_Thetas,Times=all_Times,
+            runtimes=all_timescale,Errors=all_Err,mean_runtimes=mean_timescale)
 print("Inference complete: output saved to %s"%outfile)
