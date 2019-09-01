@@ -1,9 +1,17 @@
 numpy
 matplotlib
-emcee
 corner
 multiprocessing
 scipy
-pytorch
-scikit-monaco
 tqdm
+
+[for inference using Chempy and yield table scoring]
+emcee
+
+[for yield table scoring]
+scikit-monaco
+pytorch
+
+[for multi-star inference]
+pymc3
+scikit-learn
