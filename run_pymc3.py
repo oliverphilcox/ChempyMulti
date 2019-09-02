@@ -227,7 +227,7 @@ for nn in all_n:
 print("Saving output")
 all_n = all_n[:len(chain_params)]
 all_Lambda = [[cc[0] for cc in c] for c in chain_params]
-all_Thetas = [[cc[1][:,0,:] for cc in c] for c in chain_params]
+all_Thetas = [[cc[1][:,:,:] for cc in c] for c in chain_params]
 all_Times = [[cc[2] for cc in c] for c in chain_params]
 all_timescale = [[cc[3] for cc in c] for c in chain_params]
 if elem_err:

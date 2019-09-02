@@ -1,0 +1,18 @@
+[input]
+neural_model: /home/oliverphilcox/ChempyMulti/tutorial_data/TNG_Network_Weights.npz
+mock_data_file: /home/oliverphilcox/ChempyMulti/tutorial_data/Tutorial_Mock_Data.npz
+outfile: /home/oliverphilcox/ChempyMulti/tutorial_data/Inference_Output.npz
+
+[inference]
+all_n: [1,2,5,10]
+elem_err: True 
+# whether to use element errors
+max_iteration: 10 
+# maximum number of stars to use (using all n_stars combinations of this)
+        
+[sampler]
+chains: 16
+cores: 16
+tune: 2000
+n_init: 10000
+n_samples: 1000
