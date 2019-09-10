@@ -1,11 +1,11 @@
 # ChempyMulti - Multi-Star Bayesian Inference with Chempy
-This is an updated version of the [*Chempy*](http://github.com/jan-rybizki/Chempy) software, including yield table scoring as described in Philcox, Rybizki & Gutke (2018, *ApJ*, [arXiv](https://arxiv.org/abs/1712.05686)), and multi-star Bayesian inference as described in Philcox & Rybizki (2019, submitted to *ApJ*). This replaces the [*ChempyScoring*](https://github.com/oliverphilcox/ChempyScoring) package.
+This is an updated version of the [*Chempy*](http://github.com/jan-rybizki/Chempy) software, including yield table scoring as described in Philcox, Rybizki & Gutke (2018, *ApJ*, [arXiv](https://arxiv.org/abs/1712.05686)), and multi-star Bayesian inference as described in Philcox & Rybizki (2019, submitted to *ApJ*, [arXiv](https://arxiv.org/abs/1909.00812)). This replaces the [*ChempyScoring*](https://github.com/oliverphilcox/ChempyScoring) package.
 
 *Chempy* is a flexible one-zone open-box chemical evolution model, incorporating abundance fitting and stellar feedback calculations. We provide routines for parameter optimization for simulations and observational data and yield table scoring. 
 
 ## Tutorials
 We provide the following tutorials on basic *Chempy* usage as well as yield table scoring and multi-parameter inference:
-- [Inferring Galactic Parameters using Chemical Abundances from Multiple Stars](https://github.com/oliverphilcox/ChempyMulti/blob/master/Multi-Star%20Inference%20with%20Chempy%20-%20Tutorial.ipynb). This includes description of the new *Chempy* routines to compute the ISM abundances at any given simulation time, as well as a detailed guide to running Hamiltonian Monte Carlo inference using *Chempy*, neural networks and PyMC3 for mock or observational data. Analysis is based on the Philcox & Rybizki (2019, submitted to *ApJ*) paper. 
+- [Inferring Galactic Parameters using Chemical Abundances from Multiple Stars](https://github.com/oliverphilcox/ChempyMulti/blob/master/Multi-Star%20Inference%20with%20Chempy%20-%20Tutorial.ipynb). This includes description of the new *Chempy* routines to compute the ISM abundances at any given simulation time, as well as a detailed guide to running Hamiltonian Monte Carlo inference using *Chempy*, neural networks and PyMC3 for mock or observational data. Analysis is based on the Philcox & Rybizki (2019, submitted to *ApJ*, [arXiv](https://arxiv.org/abs/1909.00812)) paper. 
 - [Scoring Yield Tables and Choosing Parameters for Hydrodynamical Simulations using Proto-solar Abundances](https://github.com/oliverphilcox/ChempyMulti/blob/master/Scoring%20%26%20Parameter%20Choice%20Tutorial.ipynb). This describes how to score yield tables based on the MCMC methods of Philcox, Rybizki & Gutke (2018, *ApJ*, [arXiv](https://arxiv.org/abs/1712.05686)), including discussion of the neural network implementation and adding new yield tables to *Chempy*.
 - [General *Chempy* Tutorials](https://github.com/jan-rybizki/Chempy/tree/master/tutorials). These describe the basic functionality of *Chempy* including running the simulation, performing inference using MCMC and producing SSP enrichment tables for hydrodynamical simulations. This is based on the Rybizki et al. (2017, *A&A*, [arXiv](https://arxiv.org/abs/1702.08729)) paper.
 
@@ -42,7 +42,7 @@ If you want this to be permanent, you can add the last line to your `.bashrc`.
 - Nathan Sandford (UC Berkeley)
 
 ## Links
-- Philcox & Rybizki (2019, submitted to *ApJ*) - Multi-Star Inference
+- Philcox & Rybizki (2019, submitted to *ApJ*, [arXiv](https://arxiv.org/abs/1909.00812)) - Multi-Star Inference
 - Philcox, Rybizki & Gutcke (2018, ApJ, [arXiv](https://arxiv.org/abs/1712.05686), [Zenodo](https://zenodo.org/record/1247336)) - Yield Table Scoring 
 - Rybizki, Just & Rix (A&A, [arXiv](http://arxiv.org/abs/1702.08729), [ASCL](http://ascl.net/1702.011)) - The *Chempy* model
 - An early version of *Chempy* is presented in chapter 4 of Jan's [phd thesis](http://nbn-resolving.de/urn:nbn:de:bsz:16-heidok-199349).
@@ -58,5 +58,5 @@ If you did not install ChempyScoring you can still run the tutorial but need to 
 You can also have a look at the *preliminary* Chempy [documentation](http://www.mpia.de/homes/rybizki/html/index.html) which gives an overview over the Chempy classes and functions, although this does not yet provide support for the Scoring, Neural Network or Multi-Star implementations.
 
 ## Attribution
-Please cite the initial Chempy [paper](https://arxiv.org/abs/1702.08729), the scoring table and neural network [paper](https://arxiv.org/abs/1712.05686) and the multi-star paper (submitted) when using the code in your research.
+Please cite the initial Chempy [paper](https://arxiv.org/abs/1702.08729), the scoring table and neural network [paper](https://arxiv.org/abs/1712.05686) and the multi-star [paper](https://arxiv.org/abs/1909.00812) when using the code in your research.
  
