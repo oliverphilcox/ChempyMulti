@@ -1,44 +1,44 @@
 import numpy as np
-from scipy.interpolate import InterpolatedUnivariateSpline 
+from scipy.interpolate import InterpolatedUnivariateSpline
 import os,os.path
 import re
 from numpy.lib.recfunctions import append_fields
 from . import localpath
 
 class SN1a_feedback(object):
-    def __init__(self):    
+    def __init__(self):
         """
         this is the object that holds the feedback table for SN1a
-        
+
         .masses gives a list of masses
-        
+
         .metallicities gives a list of possible yield metallicities
-        
+
         .elements gives the elements considered in the yield table
-        
+
         .table gives a dictionary where the yield table for a specific metallicity can be queried
-        
+
         .table[0.02] gives a yield table.
-        
+
             Keys of this object are ['Mass','mass_in_remnants','elements']
-        
+
                 Mass is in units of Msun
-        
+
                 'mass_in_remnants' in units of Msun but with a '-'
-        
-                'elements' yield in Msun normalised to Mass. i.e. integral over all elements is unity 
+
+                'elements' yield in Msun normalised to Mass. i.e. integral over all elements is unity
         """
-    
-    
+
+
     def TNG(self):
         """ IllustrisTNG yield tables from Pillepich et al. 2017.
         These are the 1997 Nomoto W7 models, and sum all isotopes (not just stable)"""
-        
+
         import h5py as h5
         filename = localpath+'input/yields/TNG/SNIa.hdf5'
         # Read H5 file
         f = h5.File(filename, "r")
-        
+
         indexing = {}
         indexing['H'] = 'Hydrogen'
         indexing['He'] = 'Helium'
@@ -82,34 +82,34 @@ class SN1a_feedback(object):
         indexing['Zr'] = 'Zirconium'
         indexing['Nb'] = 'Niobium'
         indexing['Mo'] = 'Molybdenum'
-        
-        
+
+
         self.elements = list(indexing.keys())
-        
+
         self.table = {}
-        
+
         self.metallicities = list([0.02]) # arbitrary since only one value
         self.masses = list([np.sum(f['Yield'].value)]) # sum of all yields
-        
+
         names = ['Mass','mass_in_remnants']+self.elements
-        
+
         yield_subtable = {}
-        
+
         base = np.zeros(len(self.masses))
         list_of_arrays = []
         for i in range(len(names)):
             list_of_arrays.append(base)
-            
+
         yield_subtable = np.core.records.fromarrays(list_of_arrays,names=names)
-        
+
         yield_subtable['Mass'] = self.masses
         yield_subtable['mass_in_remnants'] = np.asarray([-1*m for m in self.masses])
-        
+
         for el_index,el in enumerate(self.elements):
             yield_subtable[el] = np.divide(f['Yield'][el_index],self.masses)
-        
-        self.table[self.metallicities[0]] = yield_subtable	
-    
+
+        self.table[self.metallicities[0]] = yield_subtable
+
     def Seitenzahl(self):
         """
         Seitenzahl 2013 from Ivo txt
@@ -135,7 +135,7 @@ class SN1a_feedback(object):
     def Thielemann(self):
         """
         Thilemann 2003 yields as compiled in Travaglio 2004
-        """	
+        """
         y = np.genfromtxt(localpath + 'input/yields/Thielemann2003/0.02.txt', names = True, dtype = None)
 
         metallicity_list = [0.02]
@@ -233,7 +233,7 @@ class SN1a_feedback(object):
 
 
         indexing = {}
-        
+
         indexing['C'] = carbon_list
         indexing['N'] = nitrogen_list
         indexing['O'] = oxygen_list
@@ -259,9 +259,9 @@ class SN1a_feedback(object):
         indexing['Ni'] = nickel_list
         indexing['Cu'] = copper_list
         indexing['Zn'] = zinc_list
-        
-        self.elements = list(indexing.keys())        
-        
+
+        self.elements = list(indexing.keys())
+
 
         #################################
         yield_tables_final_structure = {}
@@ -280,7 +280,7 @@ class SN1a_feedback(object):
                 list_of_arrays.append(base)
             yield_tables_final_structure_subtable = np.core.records.fromarrays(list_of_arrays,names=names)
             yield_tables_final_structure_subtable['Mass'] = self.masses[0]
-            
+
             total_mass = []
             for i,item in enumerate(self.elements):
                 for j,jtem in enumerate(indexing[item]):
@@ -301,52 +301,61 @@ class SN2_feedback(object):
                 Different tables can be loaded by the methods.
         """
 
+    def linear_fit(self):
+        """ Load a linear fit to the SN2 yields of TNG"""
+        dat = np.load(localpath+'input/tng_fit_sn2.npz',allow_pickle=True) # load in data-file
+
+        self.metallicities = dat.f.metallicities
+        self.mnasses = dat.f.masses
+        self.table = dat.f.table.item()
+        self.elements = dat.f.elements
+
     def Portinari_net(self):
         '''
-        Loading the yield table from Portinari1998. 
+        Loading the yield table from Portinari1998.
         These are presented as net yields in fractions of initial stellar mass.
         '''
-        
+
         # Define metallicities in table
-        self.metallicities = [0.0004,0.004,0.008,0.02,0.05] 
-        
+        self.metallicities = [0.0004,0.004,0.008,0.02,0.05]
+
         # Load one table
         x = np.genfromtxt(localpath + 'input/yields/Portinari_1998/0.02.txt',names=True)
-        
+
         # Define masses and elements in yield tables
         self.masses = list(x['Mass']) # In solar masses
         self.elements = list(x.dtype.names[3:])
-        
+
         self.table = {} # Output dictionary for yield tables
-        
+
         for metallicity in self.metallicities:
-            additional_keys = ['Mass', 'mass_in_remnants','unprocessed_mass_in_winds'] 
+            additional_keys = ['Mass', 'mass_in_remnants','unprocessed_mass_in_winds']
             names = additional_keys + self.elements # These are fields in dictionary
-            
+
             # Create empty record array of correct size
             base = np.zeros(len(self.masses))
             list_of_arrays = []
             for i in range(len(names)):
                 list_of_arrays.append(base)
             yield_subtable = np.core.records.fromarrays(list_of_arrays,names=names)
-            
+
             # Add mass field to subtable (in solar masses)
             yield_subtable['Mass'] = np.array(self.masses)
-            
+
             # Read in yield tbale
             x = np.genfromtxt(localpath + 'input/yields/Portinari_1998/%s.txt' %(metallicity),names=True)
-            
+
             # Read in element yields
             for item in self.elements:
                 yield_subtable[item] = np.divide(x[item],x['Mass']) # Yields must be in mass fraction
-            
+
             # Add fractional mass in remnants
             yield_subtable['mass_in_remnants'] = np.divide(x['Mass'] - x['ejected_mass'], x['Mass'])
-            
+
             # Add unprocessed mass as 1-remnants (with correction if summed net yields are not exactly zero)
             for i,item in enumerate(self.masses):
                 yield_subtable['unprocessed_mass_in_winds'][i] = 1. - (yield_subtable['mass_in_remnants'][i] + sum(list(yield_subtable[self.elements][i])))
-            
+
             # Add subtable to output table
             self.table[metallicity] = yield_subtable
 
@@ -366,7 +375,7 @@ class SN2_feedback(object):
             y[item] = np.divide(y[item],y['Mass'])
         yield_tables = {}
         for i,item in enumerate(self.metallicities):
-            yield_tables[item] = y 
+            yield_tables[item] = y
         self.table = yield_tables
 
     def chieffi04(self):
@@ -400,7 +409,7 @@ class SN2_feedback(object):
             _download_chieffi04()
 
         tdtype =   [('metallicity',float),('date_after_explosion',float),('species','|S5'),('13',float),('15',float),('20',float),('25',float),('30',float),('35',float)]
-        
+
 
 
         y = np.genfromtxt('%s/yields.dat' %(DATADIR), dtype = tdtype, names = None)
@@ -410,7 +419,7 @@ class SN2_feedback(object):
         tables = []
         for i, item in enumerate(self.metallicities):
             tables.append(y[(i*number_of_species):((i+1)*number_of_species)])
-        
+
         #############################################
         for i in range(len(tables)):
             tables[i] = tables[i][np.where(tables[i]['date_after_explosion']==0)]
@@ -441,7 +450,7 @@ class SN2_feedback(object):
             for i in range(len(names)):
                 list_of_arrays.append(base)
             yield_tables_final_structure_subtable = np.core.records.fromarrays(list_of_arrays,names=names)
-            
+
             yield_tables_final_structure_subtable['Mass'] = np.array(self.masses)
             for j,jtem in enumerate(self.masses):
                 yield_tables_final_structure_subtable['mass_in_remnants'][j] = yields_for_one_metallicity[str(jtem)][1] / float(jtem) # ,yield_tables_final_structure_subtable['Mass'][i])
@@ -458,7 +467,7 @@ class SN2_feedback(object):
                     tmp.append(yield_tables_final_structure_subtable[jtem][i])
                 tmp = sum(tmp)
                 yield_tables_final_structure_subtable['unprocessed_mass_in_winds'][i] = 1 - tmp
-            
+
             yield_tables_final_structure[self.metallicities[metallicity_index]] = yield_tables_final_structure_subtable#[::-1]
         self.table = yield_tables_final_structure
 
@@ -494,7 +503,7 @@ class SN2_feedback(object):
             _download_chieffi04()
 
         tdtype =   [('metallicity',float),('date_after_explosion',float),('species','|S5'),('13',float),('15',float),('20',float),('25',float),('30',float),('35',float)]
-        
+
 
 
         y = np.genfromtxt('%s/yields.dat' %(DATADIR), dtype = tdtype, names = None)
@@ -504,7 +513,7 @@ class SN2_feedback(object):
         tables = []
         for i, item in enumerate(self.metallicities):
             tables.append(y[(i*number_of_species):((i+1)*number_of_species)])
-        
+
         #############################################
         for i in range(len(tables)):
             tables[i] = tables[i][np.where(tables[i]['date_after_explosion']==0)]
@@ -545,16 +554,16 @@ class SN2_feedback(object):
 
         tdtype =   [('empty',int),('element1','|S3'),('165',float),('200',float),('300',float),('500',float),('1500',float),('2000',float),('2500',float)]
         tdtype2 =   [('empty',int),('element1','|S3'),('165',float),('200',float),('300',float),('500',float),('1500',float),('2000',float),('2500',float),('3200',float),('6000',float)]
-        
+
         expdtype =   [('empty',int),('element1','|S3'),('15_delay',float),('15_rapid',float),('20_delay',float),('20_rapid',float),('25_delay',float),('25_rapid',float)]
         expdtype2 =   [('empty',int),('element1','|S3'),('15_delay',float),('15_rapid',float),('20_delay',float),('20_rapid',float),('25_delay',float),('32_delay',float),('32_rapid',float),('60_delay',float)]
-        
+
         yield_tables = {}
         self.metallicities = [0.02,0.01]
 
         which_sn_model_to_use = 'delay' # 'rapid'
 
-        for i,metallicity_index in enumerate([2,1]): 
+        for i,metallicity_index in enumerate([2,1]):
             if i == 0:
                 z = np.genfromtxt(localpath + 'input/yields/NuGrid_AGB_SNII_2013/set1p%d/element_table_set1.%d_yields_winds.txt' %(metallicity_index,metallicity_index),dtype = tdtype2,names = None,skip_header = 3, delimiter = '&', autostrip = True)
                 y = np.genfromtxt(localpath + 'input/yields/NuGrid_AGB_SNII_2013/set1p%d/element_table_set1.%d_yields_exp.txt' %(metallicity_index,metallicity_index),dtype = expdtype2,names = None,skip_header = 3, delimiter = '&', autostrip = True)
@@ -569,16 +578,16 @@ class SN2_feedback(object):
                 y['15_%s' %(which_sn_model_to_use)] += z['1500']
                 y['20_%s' %(which_sn_model_to_use)] += z['2000']
                 y['25_%s' %(which_sn_model_to_use)] += z['2500']
-                
+
             # For python 3 the bytes need to be changed into strings
             element_list2 = []
             for j,item in enumerate(y['element1']):
                     element_list2.append(item.decode('utf8'))
             y = rcfuncs.append_fields(y,'element',element_list2,usemask = False)
-            
+
             yield_tables[self.metallicities[i]] = y
-        
-        self.elements = list(yield_tables[0.02]['element']) 
+
+        self.elements = list(yield_tables[0.02]['element'])
         # For python 3 the bytes need to be changed into strings
         self.masses = np.array((15,20,25,32,60))
 
@@ -632,15 +641,15 @@ class SN2_feedback(object):
                 yield_tables_final_structure_subtable[final_mass_name_tag][3] = (1-sum(yield_tables_final_structure_subtable[self.elements][3]))
                 yield_tables_final_structure_subtable[final_mass_name_tag][4] = (1-sum(yield_tables_final_structure_subtable[self.elements][4]))
 
-            else:        
+            else:
                 yield_tables_final_structure_subtable[final_mass_name_tag][0] = (1-sum(yield_tables_final_structure_subtable[self.elements][0]))
                 yield_tables_final_structure_subtable[final_mass_name_tag][1] = (1-sum(yield_tables_final_structure_subtable[self.elements][1]))
                 yield_tables_final_structure_subtable[final_mass_name_tag][2] = (1-sum(yield_tables_final_structure_subtable[self.elements][2]))
 
             yield_tables_final_structure[metallicity] = yield_tables_final_structure_subtable#[::-1]
         self.table = yield_tables_final_structure
-        
-    
+
+
     def one_parameter(self, elements, element_fractions):
         """
         This function was introduced in order to find best-fit yield sets where each element has just a single yield (no metallicity or mass dependence).
@@ -649,17 +658,17 @@ class SN2_feedback(object):
         """
         self.metallicities = [0.01]
         self.masses = np.array([10])
-        self.elements = elements 
+        self.elements = elements
 
         ### restructuring the tables such that it looks like the sn2 dictionary: basic_agb[metallicicty][element]
         yield_tables_final_structure = {}
-        
+
 
         additional_keys = ['Mass','mass_in_remnants','unprocessed_mass_in_winds']
         names = additional_keys + self.elements
         base = np.zeros(len(self.masses))
         list_of_arrays = []
-        
+
         for i in range(len(names)):
             list_of_arrays.append(base)
         yield_table = np.core.records.fromarrays(list_of_arrays,names=names)
@@ -686,7 +695,7 @@ class SN2_feedback(object):
         self.metallicities = [0.0500,0.0200,0.0080,0.0040,0.0010]
         self.masses = np.array((13,15,18,20,25,30,40))
         z = np.genfromtxt(localpath + 'input/yields/Nomoto2013/nomoto_2013_z=0.0200.dat',dtype=dt,names = True)
-        
+
         yield_tables_dict = {}
         for item in self.metallicities:
             z = np.genfromtxt(localpath + 'input/yields/Nomoto2013/nomoto_2013_z=%.4f.dat' %(item),dtype=dt,names = True)
@@ -731,7 +740,7 @@ class SN2_feedback(object):
         indexing['Li'] = lithium_list
         indexing['Be'] = berillium_list
         indexing['B'] = boron_list
-        
+
         indexing['C'] = carbon_list
         indexing['N'] = nitrogen_list
         indexing['O'] = oxygen_list
@@ -774,7 +783,7 @@ class SN2_feedback(object):
             names = additional_keys + self.elements
             base = np.zeros(len(self.masses))
             list_of_arrays = []
-            
+
             for i in range(len(names)):
                 list_of_arrays.append(base)
             yield_tables_final_structure_subtable = np.core.records.fromarrays(list_of_arrays,names=names)
@@ -804,7 +813,7 @@ class SN2_feedback(object):
                         temp1[5] = line_of_one_element[26]
                         temp1[6] = line_of_one_element[27]
                         yield_tables_final_structure_subtable[item] += np.divide(temp1,self.masses)
-                        
+
             yield_tables_final_structure_subtable['unprocessed_mass_in_winds'][0] = (1-yield_tables_final_structure_subtable['mass_in_remnants'][0]-sum(yield_tables_final_structure_subtable[self.elements][0]))#yields_for_one_metallicity[0][21]#
             yield_tables_final_structure_subtable['unprocessed_mass_in_winds'][1] = (1-yield_tables_final_structure_subtable['mass_in_remnants'][1]-sum(yield_tables_final_structure_subtable[self.elements][1]))#yields_for_one_metallicity[0][22]#
             yield_tables_final_structure_subtable['unprocessed_mass_in_winds'][2] = (1-yield_tables_final_structure_subtable['mass_in_remnants'][2]-sum(yield_tables_final_structure_subtable[self.elements][2]))#yields_for_one_metallicity[0][23]#divided by mass because 'mass in remnant' is also normalised
@@ -812,7 +821,7 @@ class SN2_feedback(object):
             yield_tables_final_structure_subtable['unprocessed_mass_in_winds'][4] = (1-yield_tables_final_structure_subtable['mass_in_remnants'][4]-sum(yield_tables_final_structure_subtable[self.elements][4]))#yields_for_one_metallicity[0][25]#
             yield_tables_final_structure_subtable['unprocessed_mass_in_winds'][5] = (1-yield_tables_final_structure_subtable['mass_in_remnants'][5]-sum(yield_tables_final_structure_subtable[self.elements][5]))#yields_for_one_metallicity[0][26]#
             yield_tables_final_structure_subtable['unprocessed_mass_in_winds'][6] = (1-yield_tables_final_structure_subtable['mass_in_remnants'][6]-sum(yield_tables_final_structure_subtable[self.elements][6]))#yields_for_one_metallicity[0][27]#
-    
+
 
             yield_tables_final_structure[metallicity] = yield_tables_final_structure_subtable#[::-1]
         self.table = yield_tables_final_structure
@@ -829,7 +838,7 @@ class SN2_feedback(object):
         self.metallicities = [0.0500,0.0200,0.0080,0.0040,0.0010]
         self.masses = np.array((13,15,18,20,25,30,40))
         z = np.genfromtxt(localpath + 'input/yields/Nomoto2013/nomoto_2013_z=0.0200.dat',dtype=dt,names = True)
-        
+
         yield_tables_dict = {}
         for item in self.metallicities:
             z = np.genfromtxt(localpath + 'input/yields/Nomoto2013/nomoto_2013_z=%.4f.dat' %(item),dtype=dt,names = True)
@@ -874,7 +883,7 @@ class SN2_feedback(object):
         indexing['Li'] = lithium_list
         indexing['Be'] = berillium_list
         indexing['B'] = boron_list
-        
+
         indexing['C'] = carbon_list
         indexing['N'] = nitrogen_list
         indexing['O'] = oxygen_list
@@ -914,9 +923,9 @@ class SN2_feedback(object):
 
     def West17_net(self):
         """ CC-SN data from the ertl.txt file from Chris West & Alexander Heger (2017, in prep)
-        
+
         Only elements up to Ge are implemented here - but original table has all up to Pb"""
-        
+
         # Index elements
         indexing = {}
         indexing['H'] =  ['H1', 'H2']
@@ -951,26 +960,26 @@ class SN2_feedback(object):
         indexing['Zn'] =  ['Zn64', 'Zn66', 'Zn67', 'Zn68', 'Zn70']
         indexing['Ga'] =  ['Ga69', 'Ga71']
         indexing['Ge'] =  ['Ge70', 'Ge72', 'Ge73', 'Ge74', 'Ge76']
-            
+
         # Load data
         data = np.genfromtxt('Chempy/input/yields/West17/ertl.txt',skip_header=102,names=True)
-        
+
         # Load model parameters
         z_solar = 0.0153032
         self.masses = np.unique(data['mass'])
         scaled_z = np.unique(data['metallicity']) # scaled to solar
         self.metallicities = scaled_z*z_solar # actual metallicities
-        
+
         self.elements = [key for key in indexing.keys()] # list of elements
-                
+
         # Output table
         self.table = {}
-        
+
         # Create initial abundances
         init_abun = {}
-        
+
         import os
-        
+
         if os.path.exists('Chempy/input/yields/West17/init_abun.npz'):
             init_file = np.load('Chempy/input/yields/West17/init_abun.npz')
             for z_in,sc_z in enumerate(scaled_z):
@@ -978,40 +987,40 @@ class SN2_feedback(object):
                 for k,key in enumerate(init_file['keys']):
                     init_abun[sc_z][key] = init_file['datfile'][z_in][k]
         else: # If not already saved
-            
+
             # Import initial abundance package
             os.chdir('Chempy/input/yields/West17')
             import gch_wh13
             os.chdir('../../../../')
-            
+
             init_dat = []
             from matplotlib.cbook import flatten
-            all_isotopes=list(flatten(list(indexing.values())))	
+            all_isotopes=list(flatten(list(indexing.values())))
             for sc_z in scaled_z:
                 init_abun[sc_z] = gch_wh13.GCHWH13(sc_z)
                 init_dat.append(init_abun[sc_z].abu)
             np.savez('Chempy/input/yields/West17/init_abun.npz',datfile=init_dat,keys=all_isotopes)
-        
+
         for z_index,z in enumerate(self.metallicities): # Define table for each metallicity
-        
+
             # Initialise subtables
             yield_subtable = {}
             yield_subtable['mass_in_remnants'] = []
             yield_subtable['Mass'] = self.masses
             for el in self.elements:
                 yield_subtable[el]=[]
-            
+
             # Find correct row in table
             for mass in self.masses:
                 for r,row in enumerate(data):
                     if row['mass'] == mass and row['metallicity']==scaled_z[z_index]:
                         row_index = r
                         break
-                
+
                 # Add remnant mass fraction
                 remnant = data['remnant'][row_index]
                 yield_subtable['mass_in_remnants'].append(remnant/mass)
-                
+
                 # Add each isotope into table
                 for element in self.elements:
                     el_net_yield = 0
@@ -1019,25 +1028,25 @@ class SN2_feedback(object):
                         isotope_net_yield = data[isotope][r]/mass-init_abun[scaled_z[z_index]][isotope]*(mass-remnant)/mass
                         el_net_yield +=isotope_net_yield # combine for total isotope yield
                     yield_subtable[element].append(el_net_yield)
-                
-            
+
+
             summed_yields = np.zeros(len(self.masses)) # Total net yield - should be approx 1
             for element in self.elements:
                 yield_subtable[element] = np.asarray(yield_subtable[element])
                 summed_yields+=yield_subtable[element]
-            
+
             # Write into yield table
             yield_subtable['mass_in_remnants'] = np.asarray(yield_subtable['mass_in_remnants'])
             yield_subtable['unprocessed_mass_in_winds'] = 1.0-yield_subtable['mass_in_remnants']-summed_yields
-                    
+
             # Restructure table
             all_keys = ['Mass','mass_in_remnants','unprocessed_mass_in_winds']+self.elements
-            
+
             list_of_arrays = [yield_subtable[key] for key in all_keys]
             restructure_subtable = np.core.records.fromarrays(list_of_arrays,names=all_keys)
-                    
+
             self.table[z] = restructure_subtable
-        
+
     def Frischknecht16_net(self):
         """ DO NOT USE!!
         pre-SN2 yields from Frischknecht et al. 2016. These are implemented for masses of 15-40Msun, for rotating stars.
@@ -1046,13 +1055,13 @@ class SN2_feedback(object):
         """
         import numpy.lib.recfunctions as rcfuncs
         import os
-        
-        # Define metallicites 
+
+        # Define metallicites
         self.metallicities = [0.0134,1e-3,1e-5] # First is solar value
-    
+
         # Define masses
         self.masses=  np.array((15,20,25,40))
-        
+
         # Define isotope indexing. For radioactive isotopes with half-lives << Chempy time_step they are assigned to their daughter element
         # NB: we only use elements up to Ge here, as in the paper
         indexing={}
@@ -1089,39 +1098,39 @@ class SN2_feedback(object):
         indexing['Ga']  = ['ga69','ga71']
         indexing['Ge']  = ['ge70','ge72','ge73','ge74','ge76']
 
-        # Define indexed elements 
+        # Define indexed elements
         self.elements = list(indexing.keys())
-        
-        
+
+
         # Define data types
         dt = np.dtype('U8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8')
-    
+
         # Initialise yield table
         yield_table = {}
-    
-        
+
+
         # Import full table with correct rows and data-types
         z = np.genfromtxt(localpath+'input/yields/Frischknecht16/yields_total.txt',skip_header=62,dtype=dt)
-        
-        
-        
+
+
+
         # Create model dictionary indexed by metallicity, giving relevant model number for each choice of mass
         # See Frischknecht info_yields.txt file for model information
         model_dict = {}
         model_dict[0.0134] = [2,8,14,27]
         model_dict[1e-3]=[4,10,16,28]
         model_dict[1e-5]=[6,12,18,29]
-        
-        # Import list of remnant masses for each model (from row 32-60, column 6 of .txt file) 
+
+        # Import list of remnant masses for each model (from row 32-60, column 6 of .txt file)
         # NB: these are in solar masses
         rem_mass_table = np.loadtxt(localpath+'input/yields/Frischknecht16/yields_total.txt',skiprows=31,usecols=6)[:29]
 
-        # Create one subtable for each metallicity 
+        # Create one subtable for each metallicity
         for metallicity in self.metallicities:
             additional_keys = ['Mass', 'mass_in_remnants','unprocessed_mass_in_winds'] # List of keys for table
             names = additional_keys + self.elements
-            
-            # Initialise table and arrays   
+
+            # Initialise table and arrays
             base = np.zeros(len(self.masses))
             list_of_arrays = []
             for i in range(len(names)):
@@ -1130,49 +1139,49 @@ class SN2_feedback(object):
             mass_in_remnants = np.zeros(len(self.masses))
             total_mass_fraction = np.zeros(len(self.masses))
             element_mass = np.zeros(len(self.masses))
-            
+
             # Add masses to table
             yield_subtable['Mass'] = self.masses
-            
-            
-            # Extract remnant masses (in solar masses) for each model:			
+
+
+            # Extract remnant masses (in solar masses) for each model:
             for mass_index,model_index in enumerate(model_dict[metallicity]):
-                mass_in_remnants[mass_index] = rem_mass_table[model_index-1] 
-        
-        # Iterate over all elements 
+                mass_in_remnants[mass_index] = rem_mass_table[model_index-1]
+
+        # Iterate over all elements
             for element in self.elements:
                 element_mass = np.zeros(len(self.masses))
                 for isotope in indexing[element]: # Iterate over isotopes of each element
-                    for mass_index,model_index in enumerate(model_dict[metallicity]): # Iterate over masses 
-                        for row in z: # Find required row in table 
+                    for mass_index,model_index in enumerate(model_dict[metallicity]): # Iterate over masses
+                        for row in z: # Find required row in table
                             if row[0] == isotope:
                                 element_mass[mass_index]+=row[model_index] # Compute cumulative mass for all isotopes
                 yield_subtable[element]=np.divide(element_mass,self.masses) # Add entry to subtable
-            
+
             all_fractions = [row[model_index] for row in z] # This lists all elements (not just up to Ge)
             total_mass_fraction[mass_index] = np.sum(all_fractions) # Compute total net mass fraction (sums to approximately 0)
-            
-            # Add fields for remnant mass (now as a mass fraction) and unprocessed mass fraction			
-            yield_subtable['mass_in_remnants']=np.divide(mass_in_remnants,self.masses)                    
+
+            # Add fields for remnant mass (now as a mass fraction) and unprocessed mass fraction
+            yield_subtable['mass_in_remnants']=np.divide(mass_in_remnants,self.masses)
             yield_subtable['unprocessed_mass_in_winds'] = 1.-(yield_subtable['mass_in_remnants']+total_mass_fraction) # This is all mass not from yields/remnants
-            
+
             # Add subtable to full table
             yield_table[metallicity]=yield_subtable
 
         # Define final yield table for output
         self.table = yield_table
-    
+
     def NuGrid_net(self,model_type='delay'):
         """ This gives the net SNII yields from the NuGrid collaboration (Ritter et al. 2017 (in prep))
         Either rapid or delay SN2 yields (Fryer et al. 2012) can be used - changeable via the model_type parameter.
-        
-        Delay models are chosen for good match with the Fe yields of Nomoto et al. (2006) and Chieffi & Limongi (2004)		
+
+        Delay models are chosen for good match with the Fe yields of Nomoto et al. (2006) and Chieffi & Limongi (2004)
         """
 
         # Create list of masses and metallicites:
         self.masses = [12.0,15.0,20.0,25.0]
-        self.metallicities = [0.02,0.01,0.006,0.001,0.0001]		
-        
+        self.metallicities = [0.02,0.01,0.006,0.001,0.0001]
+
         # First define names of yield tables and the remnant masses for each metallicity (in solar masses)
         if model_type == 'delay':
             filename=localpath+'input/yields/NuGrid/H NuGrid yields delay_total.txt'
@@ -1192,82 +1201,82 @@ class SN2_feedback(object):
             remnants[0.0001] = [1.44,1.44,1.76,5.61]
         else:
             raise ValueError('Wrong type: must be delay or rapid')
-    
-        # Define which lines in the .txt files to use. 
+
+        # Define which lines in the .txt files to use.
         # This defines cuts starting at each relevant table
         cuts={}
         for z in self.metallicities:
-            cuts[z] = [] 
+            cuts[z] = []
             for mass in self.masses:
                 txtfile=open(filename,"r")
                 for line_no,line in enumerate(txtfile):
                     if str(mass) in line and str(z) in line:
                         cuts[z].append(line_no)
-                
+
         line_end = line_no # Final line
-        
+
         # Create list of elements taken from data-file (from first relevant table)
         data = np.genfromtxt(filename,skip_header=int(cuts[0.02][0])+4,
                             skip_footer=line_end-int(cuts[0.02][0])-83,
                     dtype=['<U8','<U15','<U15','<U15'])
-                    
+
         self.elements = [str(line[0][1:]) for line in data]
-    
+
         self.table={} # Initialize final output
-        
+
         for z in self.metallicities: # Produce subtable for each metallicity
             yield_subtable={}
             yield_subtable['Mass'] = self.masses
             yield_subtable['mass_in_remnants'] = np.divide(np.asarray(remnants[z]),self.masses) # Initialize lists
             for el in self.elements:
                 yield_subtable[el] = []
-            
+
             for m_index,mass in enumerate(self.masses): # Create data array for each mass
                 unprocessed_mass = mass-remnants[z][m_index] # Mass not in remnants in Msun
                 data = np.genfromtxt(filename,skip_header=int(cuts[z][m_index])+4,
                     skip_footer=line_end-int(cuts[z][m_index])-83,dtype=['<U8','<U15','<U15','<U15']) # Read from data file
-                
+
                 # Now iterate over data-file and read in element names
-                # NB: [1:]s are necessary as each element in txt file starts with &   		
+                # NB: [1:]s are necessary as each element in txt file starts with &
                 for line in data:
                     el_name = str(line[0][1:]) # Name of element
                     el_yield = float(line[1][1:]) # Yield in Msun
-                    el_init = float(line[2][1:]) # Initial mass fraction 
+                    el_init = float(line[2][1:]) # Initial mass fraction
                     el_net = el_yield-el_init*unprocessed_mass
                     yield_subtable[el_name].append(el_net/mass) # Net mass fraction
-                                
-            # Calculate summed net yield - should be approximately 0	
+
+            # Calculate summed net yield - should be approximately 0
             summed_yields = np.zeros(len(self.masses))
             for el in self.elements:
                 yield_subtable[el] = np.asarray(yield_subtable[el])
                 summed_yields+=yield_subtable[el]
-            
-            # Compute mass not in remnants with summed net yield small correction		
+
+            # Compute mass not in remnants with summed net yield small correction
             yield_subtable['unprocessed_mass_in_winds'] = 1.0-yield_subtable['mass_in_remnants']-summed_yields
-            
+
             # Restructure dictionary into record array for output
             all_keys = ['Mass','mass_in_remnants','unprocessed_mass_in_winds']+self.elements
             list_of_arrays = [yield_subtable[key] for key in all_keys]
             restructure_subtable = np.core.records.fromarrays(list_of_arrays,names=all_keys)
-            
+
             self.table[z] = restructure_subtable # This is output table for specific z
-            
+
         # Yield table output is self.table
-        
-        
+
+
     def TNG_net(self):
         """ This loads the CC-SN yields used in the Illustris TNG simulation.
         This includes Kobayashi (2006) and Portinari (1998) tables - see Pillepich et al. 2017
-        
+
         THIS ONLY WORKS FOR IMF SLOPE IS -2.3 - DO NOT OPTIMIZE OVER THIS
-        """  
-        
+        """
+
         import h5py as h5
         filename = localpath+'input/yields/TNG/SNII.hdf5'
         # Read H5 file
         f = h5.File(filename, "r")
-        
-        # Define element indexing			
+
+        # Define element indexing
         indexing = {}
         indexing['H'] = 'Hydrogen'
         indexing['He'] = 'Helium'
@@ -1280,70 +1289,70 @@ class SN2_feedback(object):
         indexing['S'] = 'Sulphur' # Not used by TNG simulation
         indexing['Ca'] = 'Calcium' # Not used by TNG simulation
         indexing['Fe'] = 'Iron'
-        
+
         self.elements = list(indexing.keys())
-        
+
         self.table = {}
-        
+
         # Define masses / metallicities
         self.metallicities = list(f['Metallicities'].value)
         self.masses = f['Masses'].value
 
-    
+
         for z_index,z in enumerate(self.metallicities):
-            
+
             yield_subtable = {}
-            
+
             z_name = f['Yield_names'].value[z_index].decode('utf-8')
             z_data = f['Yields/'+z_name+'/Yield']
-            
+
             ejecta_mass = f['Yields/'+z_name+'/Ejected_mass'].value
-            
+
             yield_subtable['Mass'] = self.masses
             remnants = self.masses-ejecta_mass
             yield_subtable['mass_in_remnants'] = np.divide(remnants,self.masses)
             for el in list(indexing.keys()):
                 yield_subtable[el] = np.zeros(len(self.masses))
-            
+
             summed_yields = np.zeros(len(self.masses))
-                
+
             for m_index,mass in enumerate(self.masses):
                 for el_index,el in enumerate(self.elements):
                     el_yield_fraction = z_data[el_index][m_index]/mass #(mass-remnants[m_index]) # Find fraction of ejecta per element
-                    yield_subtable[el][m_index] = el_yield_fraction					
+                    yield_subtable[el][m_index] = el_yield_fraction
                     summed_yields[m_index]+=el_yield_fraction # Compute total yield
-                
+
             yield_subtable['unprocessed_mass_in_winds'] = 1.-summed_yields-yield_subtable['mass_in_remnants']
-            
+
             # Restructure table
             all_keys = ['Mass','mass_in_remnants','unprocessed_mass_in_winds']+self.elements
-        
+
             list_of_arrays = [yield_subtable[key] for key in all_keys]
             restructure_subtable = np.core.records.fromarrays(list_of_arrays,names=all_keys)
-        
+
             self.table[z] = restructure_subtable
 
     def CL18_net(self):
         """These are net yields from Chieffi + Limongi 2018 (unpublished), downloaded from http://orfeo.iaps.inaf.it/"""
-    
+
         datpath=localpath+'/input/yields/CL18/'
-    
+
         self.metallicities=[0.0134,0.00134,0.000134,0.0000134] # metallicities of [Fe/H]=[0,-1,-2,-3]
         rotations=[0,150,300] # initial rotational velocity in km/s
         self.masses=np.array([13,15,20,25,30,40,60,80,120])
         weight_matrix=np.array([[0.7,0.3,0.],[0.6,0.4,0.],[0.48,0.48,0.04],[0.05,0.7,0.25]]) # np.array([[1.,0.,0.],[1.,0.,0.],[1.,0.,0.],[1.,0.,0.]])#
-    
+
         self.elements=['H','He','Li','Be','B','C','N','O','F','Ne','Na','Mg','Al','Si','P','S','Cl','Ar','K','Ca','Sc','Ti','V','Cr','Mn','Fe','Co','Ni','Cu','Zn','Ga','Ge','As','Se','Br','Kr','Rb','Sr','Y','Zr','Nb','Mo','Xe','Cs','Ba','La','Ce','Pr','Nd','Hg','Tl','Pb','Bi']
         LEN=len(self.elements)
         yield_table={}
-    
+
         # Import full table with correct rows and data-types
         dt = np.dtype('U8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8')
-    
+
         # Load once in full to find length
         z = np.genfromtxt(datpath+'tab_yieldsnet_ele_exp.dec',skip_header=1,dtype=dt)
         full_len=len(z)+1
-    
+
         # Import full table with correct rows and data-types
         dt = np.dtype('U8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8,f8')
         for m,met in enumerate(self.metallicities):
@@ -1352,11 +1361,11 @@ class SN2_feedback(object):
                 header=(3*m+rotation_index)*(LEN+1)+1
                 z.append(np.genfromtxt(datpath+'tab_yieldsnet_ele_exp.dec',skip_header=header,skip_footer=full_len-header-LEN,dtype=dt))
                 zTot.append(np.genfromtxt(datpath+'tab_yieldstot_ele_exp.dec',skip_header=header,skip_footer=full_len-header-LEN,dtype=dt))
-    
+
             additional_keys = ['Mass', 'mass_in_remnants','unprocessed_mass_in_winds'] # List of keys for table
             names = additional_keys + self.elements
-    
-            # Initialise table and arrays   
+
+            # Initialise table and arrays
             base = np.zeros(len(self.masses))
             list_of_arrays = []
             for i in range(len(names)):
@@ -1367,38 +1376,48 @@ class SN2_feedback(object):
             element_mass = np.zeros(len(self.masses))
             yield_subtable['Mass']=self.masses
             tot_yield=np.zeros(len(self.masses))
-    
+
             for e,el in enumerate(self.elements):
                 for m_index in range(len(self.masses)):
                     for rotation_index in range(3):
                         yield_subtable[el][m_index]+=z[rotation_index][e][m_index+4]*weight_matrix[m,rotation_index]/self.masses[m_index]
                     tot_yield[m_index]+=yield_subtable[el][m_index]
-    
+
             # Compute total remnant mass
             for m_index,mass in enumerate(self.masses):
                 for rotation_index in range(3):
                     yield_subtable['mass_in_remnants'][m_index]+=(1.-np.sum([zTot[rotation_index][i][m_index+4] for i in range(len(self.elements))])/mass)*weight_matrix[m,rotation_index]
-    
+
             # Compute unprocessed mass
             yield_subtable['unprocessed_mass_in_winds']=1.-yield_subtable['mass_in_remnants']-tot_yield
-    
+
             yield_table[met]=yield_subtable
         self.table=yield_table
 
+
 #######################
 class AGB_feedback(object):
-    def __init__(self):   
+    def __init__(self):
         """
         This is the object that holds the feedback table for agb stars.
                 The different methods load different tables from the literature. They are in the input/yields/ folder.
         """
-        
+
+    def linear_fit(self):
+        """ Load a linear fit to the AGB yields of TNG"""
+        dat = np.load(localpath+'input/tng_fit_agb.npz',allow_pickle=True) # load in data-file
+
+        self.metallicities = dat.f.metallicities
+        self.mnasses = dat.f.masses
+        self.table = dat.f.table.item()
+        self.elements = dat.f.elements
+
     def TNG_net(self):
         """ This gives the yields used in the IllustrisTNG simulation (see Pillepich et al. 2017)
         These are net yields, and a combination of Karakas (2006), Doherty et al. (2014) & Fishlock et al. (2014)
-        These were provided by Annalisa herself.	
-        
-        This is indexing backwards in mass (high to low) to match with Karakas tables	
+        These were provided by Annalisa herself.
+
+        This is indexing backwards in mass (high to low) to match with Karakas tables
         """
         import h5py as h5
         filename = localpath+'input/yields/TNG/AGB.hdf5'
@@ -1419,50 +1438,50 @@ class AGB_feedback(object):
         indexing['Fe'] = 'Iron'
 
         self.elements = list(indexing.keys())
-        
+
         self.table = {}
-        
+
         self.metallicities = list(f['Metallicities'].value)
         self.masses = f['Masses'].value
-        
+
 
         for z_index,z in enumerate(self.metallicities):
 
             yield_subtable = {}
-            
+
             z_name = f['Yield_names'].value[z_index].decode('utf-8')
             z_data = f['Yields/'+z_name+'/Yield']
-            
+
             ejecta_mass = f['Yields/'+z_name+'/Ejected_mass'].value
-            
+
             yield_subtable['Mass'] = list(reversed(self.masses))
             remnants = self.masses-ejecta_mass
             yield_subtable['mass_in_remnants'] = np.divide(list(reversed(remnants)),yield_subtable['Mass'])
             for el in list(indexing.keys()):
                 yield_subtable[el] = np.zeros(len(self.masses))
-            
+
             summed_yields = np.zeros(len(self.masses))
-            
+
             for m_index,mass in enumerate(yield_subtable['Mass']):
                 for el_index,el in enumerate(self.elements):
                     el_yield = z_data[el_index][len(self.masses)-m_index-1]
                     el_yield_fraction = el_yield/mass
                     yield_subtable[el][m_index] = el_yield_fraction
                     summed_yields[m_index]+=el_yield_fraction
-            
+
             yield_subtable['unprocessed_mass_in_winds'] = 1.-summed_yields-yield_subtable['mass_in_remnants']
-            
+
             self.table[z.astype(float)] = yield_subtable
-            
+
             # Restructure table
             all_keys = ['Mass','mass_in_remnants','unprocessed_mass_in_winds']+self.elements
-            
+
             list_of_arrays = [yield_subtable[key] for key in all_keys]
             restructure_subtable = np.core.records.fromarrays(list_of_arrays,names=all_keys)
-            
+
             self.table[z] = restructure_subtable
-            
-            
+
+
     def Ventura_net(self):
         """
         Ventura 2013 net yields from Paolo himself
@@ -1483,7 +1502,7 @@ class AGB_feedback(object):
                 list_of_arrays.append(base)
             yield_tables_final_structure_subtable = np.core.records.fromarrays(list_of_arrays,names=names)
             yield_tables_final_structure_subtable['Mass'] = x['Mass']
-            yield_tables_final_structure_subtable['mass_in_remnants'] = np.divide(x['mass_in_remnants'],x['Mass'])	
+            yield_tables_final_structure_subtable['mass_in_remnants'] = np.divide(x['mass_in_remnants'],x['Mass'])
             for item in self.elements:
                 if item == 'C':
                     yield_tables_final_structure_subtable[item] = x['C12']
@@ -1532,7 +1551,7 @@ class AGB_feedback(object):
         self.metallicities = [0.0500,0.0200,0.0080,0.0040,0.0010]
         self.masses = np.array((1.,1.2,1.5,1.8,1.9,2.0,2.2,2.5,3.0,3.5,4.0,4.5,5.0,5.5,6.0))#,6.5,7.0,8.0,10.))
         z = np.genfromtxt(localpath + 'input/yields/Nomoto2013/nomoto_2013_z=0.0200.dat',dtype=dt,names = True)
-        
+
         yield_tables_dict = {}
         for item in self.metallicities:
             z = np.genfromtxt(localpath + 'input/yields/Nomoto2013/nomoto_2013_z=%.4f.dat' %(item),dtype=dt,names = True)
@@ -1577,7 +1596,7 @@ class AGB_feedback(object):
         indexing['Li'] = lithium_list
         indexing['Be'] = berillium_list
         indexing['B'] = boron_list
-        
+
         indexing['C'] = carbon_list
         indexing['N'] = nitrogen_list
         indexing['O'] = oxygen_list
@@ -1616,19 +1635,19 @@ class AGB_feedback(object):
             names = additional_keys + self.elements
             base = np.zeros(len(self.masses))
             list_of_arrays = []
-            
+
             for i in range(len(names)):
                 list_of_arrays.append(base)
             yield_tables_final_structure_subtable = np.core.records.fromarrays(list_of_arrays,names=names)
             yield_tables_final_structure_subtable['Mass'] = self.masses
-            
+
             for i,item in enumerate(self.elements):
                 yield_tables_final_structure_subtable[item] = 0
                 for j,jtem in enumerate(indexing[item]):
                         ################### here we can change the yield that we need for processing. normalising 'ejected_mass' with the initial mass to get relative masses
                         line_of_one_element = yields_for_one_metallicity[np.where(yields_for_one_metallicity['M']==jtem)][0]
                         temp1 = np.zeros(len(self.masses))
-                        for s in range(len(self.masses)): 
+                        for s in range(len(self.masses)):
                             temp1[s] = line_of_one_element[s+2]
                         yield_tables_final_structure_subtable[item] += np.divide(temp1,self.masses)
 
@@ -1647,7 +1666,7 @@ class AGB_feedback(object):
         yield_tables = {}
         self.metallicities = [0.02,0.01]
 
-        for i,metallicity_index in enumerate([2,1]): 
+        for i,metallicity_index in enumerate([2,1]):
             y = np.genfromtxt(localpath + 'input/yields/NuGrid_AGB_SNII_2013/set1p%d/element_table_set1.%d_yields_winds.txt' %(metallicity_index,metallicity_index),dtype = tdtype,names = None,skip_header = 3, delimiter = '&', autostrip = True)
 
             ## Python3 need transformation between bytes and strings
@@ -1655,11 +1674,11 @@ class AGB_feedback(object):
             for j,jtem in enumerate(y['element1']):
                     element_list2.append(jtem.decode('utf8'))
             y = rcfuncs.append_fields(y,'element',element_list2,usemask = False)
-            
+
             yield_tables[self.metallicities[i]] = y
-        
-        
-        self.elements = list(yield_tables[0.02]['element']) 
+
+
+        self.elements = list(yield_tables[0.02]['element'])
         self.masses = np.array((1.65,2.0,3.0,5.0))
 
         ######
@@ -1670,10 +1689,10 @@ class AGB_feedback(object):
             final_mass_name_tag = 'mass_in_remnants'
             additional_keys = ['Mass',final_mass_name_tag]
             names = additional_keys + self.elements
-            
+
             base = np.zeros(len(self.masses))
             list_of_arrays = []
-            
+
             for i in range(len(names)):
                 list_of_arrays.append(base)
             yield_tables_final_structure_subtable = np.core.records.fromarrays(list_of_arrays,names=names)
@@ -1694,7 +1713,7 @@ class AGB_feedback(object):
             yield_tables_final_structure_subtable[final_mass_name_tag][1] = (1-sum(yield_tables_final_structure_subtable[self.elements][1]))
             yield_tables_final_structure_subtable[final_mass_name_tag][2] = (1-sum(yield_tables_final_structure_subtable[self.elements][2]))
             yield_tables_final_structure_subtable[final_mass_name_tag][3] = (1-sum(yield_tables_final_structure_subtable[self.elements][3]))
-            
+
 
             yield_tables_final_structure[metallicity] = yield_tables_final_structure_subtable[::-1]
         self.table = yield_tables_final_structure
@@ -1737,7 +1756,7 @@ class AGB_feedback(object):
         tdtype =   [('imass',float),('metallicity',float),('fmass',float),('species1','|S4'),('A',int),('net_yield',float),('ejected_mass',float),('initial_wind',float),('average_wind',float),('initial_mass_fraction',float),('production_factor',float)]
         metallicity_list = [0.02, 0.008, 0.004 ,0.0001]
         self.metallicities = metallicity_list
-        
+
 
 
         tables = []
@@ -1751,15 +1770,15 @@ class AGB_feedback(object):
 
 
             tables.append(y)
-        
+
 
         ### easy to extend to other species just make a new list of isotopes (see karakas tables)
-        ### and then also extend the indexing variable. 
+        ### and then also extend the indexing variable.
         ### The choice for specific elements can be done later when just using specific species
         hydrogen_list = ['n','p','d']
         helium_list = ['he3','he4']
         lithium_list = ['li7','be7','b8']
-        
+
         carbon_list = ['c12','c13','n13']
         nitrogen_list = ['n14','n15','c14','o14','o15']
         oxygen_list = [ 'o16','o17','o18','f17','f18']
@@ -1782,7 +1801,7 @@ class AGB_feedback(object):
         indexing['H'] = hydrogen_list
         indexing['He'] = helium_list
         indexing['Li'] = lithium_list
-        
+
         indexing['C'] = carbon_list
         indexing['N'] = nitrogen_list
         indexing['O'] = oxygen_list
@@ -1801,7 +1820,7 @@ class AGB_feedback(object):
         indexing['Ni'] = nickel_list
 
         #indexing['S_el'] = ni_to_bi
-        
+
         self.elements = list(indexing.keys())
         #### little fix for karakas tablea5.dat: 6.0 M_sun is written two times. We chose the first one
         #tables[3]['imass'][-77:] = 6.5 # this is the fix if the second 6msun line was interpreted as 6.5 msun
@@ -1831,7 +1850,7 @@ class AGB_feedback(object):
                     element['production_factor'] += temp['production_factor']
                 yields_002[item1] = element
             yield_tables[metallicity] = yields_002
-        
+
         self.masses = np.unique(tables[0]['imass']) ## table a3 and a4 and maybe a5 are missing 6.5 Msun its probably easier to skip the 6.5 Msun entries altogether for interpolation reasons
 
         ### restructuring the tables such that it looks like the sn2 dictionary: basic_agb[metallicicty][element]
@@ -1846,7 +1865,7 @@ class AGB_feedback(object):
             else:
                 base = np.zeros(len(self.masses)-1)
             list_of_arrays = []
-            
+
             for i in range(len(names)):
                 list_of_arrays.append(base)
             yield_tables_final_structure_subtable = np.core.records.fromarrays(list_of_arrays,names=names)
@@ -1880,7 +1899,7 @@ class AGB_feedback(object):
                 dt = np.dtype([('element1', '|S4'), ('atomic_number', np.int),('log_e', np.float),('xh', np.float),('xfe', np.float),('xi', np.float),('massi', np.float)])
             ### yield
             y = np.genfromtxt('%syield_z%s.dat' %(data_path,metallicity_name), dtype=dt)
-            
+
             ## Python3 need transformation between bytes and strings
             if sys.version[0] == '3':
                 element_list2 = []
@@ -1931,7 +1950,7 @@ class AGB_feedback(object):
             sum_all = sum(list(initial_abundances[0])[3:])
             for i,item in enumerate(elements):
                 initial_abundances[item] /= sum_all
-            #### just copied out of the files. Also several masses and other overshootfactors had to be excluded. 
+            #### just copied out of the files. Also several masses and other overshootfactors had to be excluded.
             if metallicity == 0.001:
                 list_of_masses = [1.,1.25,1.5,2.0,2.25,2.5,2.75,3.,3.25,3.5,4.,4.5,5.,5.5,6.,7.]
                 list_of_remnant = [0.678,0.669,0.657,0.668,0.839,0.948,1.057,1.189,1.403,1.176,1.726,1.659,1.740,1.962,1.725,2.062]
@@ -2021,7 +2040,7 @@ class AGB_feedback(object):
         tdtype =   [('imass',float),('metallicity',float),('fmass',float),('species1','|S4'),('A',int),('net_yield',float),('ejected_mass',float),('initial_wind',float),('average_wind',float),('initial_mass_fraction',float),('production_factor',float)]
         metallicity_list = [0.02, 0.008, 0.004 ,0.0001]
         self.metallicities = metallicity_list
-        
+
 
 
         tables = []
@@ -2035,15 +2054,15 @@ class AGB_feedback(object):
 
 
             tables.append(y)
-        
+
 
         ### easy to extend to other species just make a new list of isotopes (see karakas tables)
-        ### and then also extend the indexing variable. 
+        ### and then also extend the indexing variable.
         ### The choice for specific elements can be done later when just using specific species
         hydrogen_list = ['n','p','d']
         helium_list = ['he3','he4']
         lithium_list = ['li7','be7','b8']
-        
+
         carbon_list = ['c12','c13','n13']
         nitrogen_list = ['n14','n15','c14','o14','o15']
         oxygen_list = [ 'o16','o17','o18','f17','f18']
@@ -2066,7 +2085,7 @@ class AGB_feedback(object):
         indexing['H'] = hydrogen_list
         indexing['He'] = helium_list
         indexing['Li'] = lithium_list
-        
+
         indexing['C'] = carbon_list
         indexing['N'] = nitrogen_list
         indexing['O'] = oxygen_list
@@ -2085,7 +2104,7 @@ class AGB_feedback(object):
         indexing['Ni'] = nickel_list
 
         #indexing['S_el'] = ni_to_bi
-        
+
         self.elements = list(indexing.keys())
         #### little fix for karakas tablea5.dat: 6.0 M_sun is written two times. We chose the first one
         #tables[3]['imass'][-77:] = 6.5 # this is the fix if the second 6msun line was interpreted as 6.5 msun
@@ -2116,7 +2135,7 @@ class AGB_feedback(object):
 
                 yields_002[item1] = element
             yield_tables[metallicity] = yields_002
-        
+
         self.masses = np.unique(tables[0]['imass']) ## table a3 and a4 and maybe a5 are missing 6.5 Msun its probably easier to skip the 6.5 Msun entries altogether for interpolation reasons
 
         ### restructuring the tables such that it looks like the sn2 dictionary: basic_agb[metallicicty][element]
@@ -2131,7 +2150,7 @@ class AGB_feedback(object):
             else:
                 base = np.zeros(len(self.masses)-1)
             list_of_arrays = []
-            
+
             for i in range(len(names)):
                 list_of_arrays.append(base)
             yield_tables_final_structure_subtable = np.core.records.fromarrays(list_of_arrays,names=names)
@@ -2154,17 +2173,17 @@ class AGB_feedback(object):
         """
         self.metallicities = [0.01]
         self.masses = np.array([3])
-        self.elements = elements 
+        self.elements = elements
 
         ### restructuring the tables such that it looks like the sn2 dictionary: basic_agb[metallicicty][element]
         yield_tables_final_structure = {}
-        
+
 
         additional_keys = ['Mass','mass_in_remnants','unprocessed_mass_in_winds']
         names = additional_keys + self.elements
         base = np.zeros(len(self.masses))
         list_of_arrays = []
-        
+
         for i in range(len(names)):
             list_of_arrays.append(base)
         yield_table = np.core.records.fromarrays(list_of_arrays,names=names)
@@ -2196,7 +2215,7 @@ class Hypernova_feedback(object):
         self.metallicities = [0.0500,0.0200,0.0080,0.0040,0.0010]
         self.masses = np.array((20,25,30,40))
         z = np.genfromtxt(localpath + 'input/yields/Nomoto2013/hn_z=0.0200.dat',dtype=dt,names = True)
-        
+
         yield_tables_dict = {}
         for item in self.metallicities:
             z = np.genfromtxt(localpath + 'input/yields/Nomoto2013/hn_z=%.4f.dat' %(item),dtype=dt,names = True)
@@ -2243,7 +2262,7 @@ class Hypernova_feedback(object):
         indexing['Li'] = lithium_list
         indexing['Be'] = berillium_list
         indexing['B'] = boron_list
-        
+
         indexing['C'] = carbon_list
         indexing['N'] = nitrogen_list
         indexing['O'] = oxygen_list
@@ -2287,7 +2306,7 @@ class Hypernova_feedback(object):
             names = additional_keys + self.elements
             base = np.zeros(len(self.masses))
             list_of_arrays = []
-            
+
             for i in range(len(names)):
                 list_of_arrays.append(base)
             yield_tables_final_structure_subtable = np.core.records.fromarrays(list_of_arrays,names=names)
@@ -2296,7 +2315,7 @@ class Hypernova_feedback(object):
             for i in range(len(self.masses)):
                 temp1[i] = yields_for_one_metallicity[0][i+1]
             yield_tables_final_structure_subtable['mass_in_remnants'] = np.divide(temp1,self.masses)
-            
+
             for i,item in enumerate(self.elements):
                 yield_tables_final_structure_subtable[item] = 0
                 for j,jtem in enumerate(indexing[item]):
@@ -2308,6 +2327,6 @@ class Hypernova_feedback(object):
                         yield_tables_final_structure_subtable[item] += np.divide(temp1,self.masses)
 
             for i in range(len(self.masses)):
-                yield_tables_final_structure_subtable['unprocessed_mass_in_winds'][i] = (1-yield_tables_final_structure_subtable['mass_in_remnants'][i]-sum(yield_tables_final_structure_subtable[self.elements][i]))#yields_for_one_metallicity[0][21]#			
+                yield_tables_final_structure_subtable['unprocessed_mass_in_winds'][i] = (1-yield_tables_final_structure_subtable['mass_in_remnants'][i]-sum(yield_tables_final_structure_subtable[self.elements][i]))#yields_for_one_metallicity[0][21]#
             yield_tables_final_structure[metallicity] = yield_tables_final_structure_subtable#[::-1]
         self.table = yield_tables_final_structure
