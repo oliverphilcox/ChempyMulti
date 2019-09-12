@@ -32,12 +32,13 @@ class ModelParameters(object):
     yield_table_name_hn_index = 0
     yield_table_name_hn = yield_table_name_hn_list[yield_table_name_hn_index]
 
-    yield_table_name_agb_list = ['Karakas','Nugrid','Karakas_net_yield','Ventura_net','Karakas16_net','TNG_net'] # Karakas2016 needs much more calculational resources (order of magnitude) using 2010 net yields from Karakas are faster and only N is significantly underproduced
-    yield_table_name_agb_index = 5#4#5 # use TNG #5#4#5#4
+    yield_table_name_agb_list = ['Karakas','Nugrid','Karakas_net_yield','Ventura_net','Karakas16_net',
+                                'TNG_net','linear_fit'] # Karakas2016 needs much more calculational resources (order of magnitude) using 2010 net yields from Karakas are faster and only N is significantly underproduced
+    yield_table_name_agb_index = 6#4#5 # use TNG #5#4#5#4
     yield_table_name_agb = yield_table_name_agb_list[yield_table_name_agb_index]
 
-    yield_table_name_1a_list = ['Iwamoto','Thielemann','Seitenzahl', 'TNG']
-    yield_table_name_1a_index = 3#1#3 # use TNG #3#2#3#2
+    yield_table_name_1a_list = ['Iwamoto','Thielemann','Seitenzahl', 'TNG','linear_fit']
+    yield_table_name_1a_index = 4#1#3 # use TNG #3#2#3#2
     yield_table_name_1a = yield_table_name_1a_list[yield_table_name_1a_index]
 
     ## Neural network parameters

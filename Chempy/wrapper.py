@@ -1,4 +1,4 @@
-import numpy as np 
+import numpy as np
 from .weighted_yield import SSP, lifetime_Argast, lifetime_Raiteri
 from .imf import IMF
 from .yields import SN2_feedback, AGB_feedback, SN1a_feedback, Hypernova_feedback
@@ -12,7 +12,7 @@ class SSP_wrap():
         Upon initialization the default IMF, CC-SN yields, SN Ia yields and AGB yields is loaded.
 
         INPUT:
-        
+
         a = Modelparameter class. So the default IMF etc are loaded. If we want other yield sets etc. loaded we need to specify that in paramter.py
         '''
 
@@ -53,27 +53,28 @@ class SSP_wrap():
         The feedback is calculated for the initializes SSP.
 
         INPUT:
-        
+
         z = metallicity of the SSP in mass fraction (not normed to solar!)
-        
+
         elements = which elements to follow
-        
+
         element_fractions = the birth material of the SSP in the same order as 'elements'
-        
+
         time_steps = the time-steps for which the enrichment of the SSP should be calculated (usually the time-steps until the end of the chempy simulation)
         '''
         basic_ssp = SSP(False, float(z), np.copy(self.imf.x), np.copy(self.imf.dm), np.copy(self.imf.dn), np.copy(time_steps), list(elements), str(self.a.stellar_lifetimes), str(self.a.interpolation_scheme), bool(self.a.only_net_yields_in_process_tables))
-        basic_ssp.sn2_feedback(list(self.sn2.elements), dict(self.sn2.table), np.copy(self.sn2.metallicities), float(self.a.sn2mmin), float(self.a.sn2mmax),list(element_fractions))
-        basic_ssp.agb_feedback(list(self.agb.elements), dict(self.agb.table), list(self.agb.metallicities), float(self.a.agbmmin), float(self.a.agbmmax),np.hstack(element_fractions))
+        #basic_ssp.sn2_feedback(list(self.sn2.elements), dict(self.sn2.table), np.copy(self.sn2.metallicities), float(self.a.sn2mmin), float(self.a.sn2mmax),list(element_fractions))
+        #basic_ssp.agb_feedback(list(self.agb.elements), dict(self.agb.table), list(self.agb.metallicities), float(self.a.agbmmin), float(self.a.agbmmax),np.hstack(element_fractions))
         basic_ssp.sn1a_feedback(list(self.sn1a.elements), list(self.sn1a.metallicities), dict(self.sn1a.table), str(self.a.time_delay_functional_form), float(self.a.sn1ammin), float(self.a.sn1ammax), self.a.sn1a_parameter, float(self.a.total_mass), bool(self.a.stochastic_IMF))
-        basic_ssp.bh_feedback(float(self.a.bhmmin),float(self.a.bhmmax),list(elements), np.hstack(element_fractions) , float(self.a.percentage_of_bh_mass))
-        
+        #basic_ssp.bh_feedback(float(self.a.bhmmin),float(self.a.bhmmax),list(elements), np.hstack(element_fractions) , float(self.a.percentage_of_bh_mass))
+
         # exposing these tables to the outside wrapper
         self.table = basic_ssp.table
-        self.sn2_table = basic_ssp.sn2_table
-        self.agb_table = basic_ssp.agb_table
-        self.sn1a_table = basic_ssp.sn1a_table
-        self.bh_table = basic_ssp.bh_table
+        print("ONLY WITH 1a FEEDBACK - update table names")
+        self.sn2_table = basic_ssp.sn1a_table
+        self.agb_table = basic_ssp.sn1a_table#agb_table
+        self.sn1a_table = basic_ssp.sn1a_table#sn1a_table
+        self.bh_table = basic_ssp.sn1a_table#bh_table
         self.inverse_imf = basic_ssp.inverse_imf
 
 def initialise_stuff(a):
@@ -81,12 +82,12 @@ def initialise_stuff(a):
     Convenience function initialising the solar abundance, SFR and infall with the default values provided in parameter.py as a
     '''
     from .solar_abundance import solar_abundances
-    from .sfr import SFR 
+    from .sfr import SFR
     from .infall import INFALL
 
     basic_solar = solar_abundances()
     getattr(basic_solar, a.solar_abundance_name)()
-    
+
     basic_sfr = SFR(a.start,a.end,a.time_steps)
     if a.basic_sfr_name == 'gamma_function':
         getattr(basic_sfr, a.basic_sfr_name)(S0 = a.S_0 * a.mass_factor,a_parameter = a.a_parameter, loc = a.sfr_beginning, scale = a.sfr_scale)
@@ -96,10 +97,10 @@ def initialise_stuff(a):
         basic_sfr.prescribed(a.mass_factor, a.name_of_file)
     elif a.basic_sfr_name == 'doubly_peaked':
         basic_sfr.doubly_peaked(S0 = a.mass_factor*a.S_0, peak_ratio = a.peak_ratio, decay = a.sfr_decay, t0 = a.sfr_t0, peak1t0 = a.peak1t0, peak1sigma = a.peak1sigma)
-        
+
     basic_sfr.sfr = np.divide(basic_sfr.sfr,sum(basic_sfr.sfr))
-    
-    
+
+
     basic_infall = INFALL(np.copy(basic_sfr.t),np.copy(basic_sfr.sfr))
     if a.basic_infall_name == 'exponential':
         getattr(basic_infall, a.basic_infall_name)((a.infall_amplitude,a.tau_infall,a.infall_time_offset,a.c_infall,a.norm_infall))
@@ -115,30 +116,30 @@ def Chempy(a):
     '''
     Chemical evolution run with the default parameters using the net yields.
 
-    INPUT: 
-    
+    INPUT:
+
     a = ModelParameters() from parameter.py
 
     OUTPUT:
-    
+
     cube = The ISM evolution class
-    
+
     abundances = The abundances of the ISM
     '''
     from .infall import PRIMORDIAL_INFALL
     from .time_integration import ABUNDANCE_MATRIX
     from .making_abundances import mass_fraction_to_abundances
-    from numpy.lib.recfunctions import append_fields    
+    from numpy.lib.recfunctions import append_fields
     basic_solar, basic_sfr, basic_infall = initialise_stuff(a)
     elements_to_trace = a.elements_to_trace
     basic_primordial = PRIMORDIAL_INFALL(list(elements_to_trace),np.copy(basic_solar.table))
     basic_primordial.primordial()
-    
-    # Needed a rescaling for the shortened sfr  
+
+    # Needed a rescaling for the shortened sfr
     gas_reservoir_mass_factor = a.gas_reservoir_mass_factor / a.shortened_sfr_rescaling
     #sfr_factor_for_cosmic_accretion    = a.sfr_factor_for_cosmic_accretion / a.shortened_sfr_rescaling
     gas_at_start = a.gas_at_start / a.shortened_sfr_rescaling
-    
+
     cube = ABUNDANCE_MATRIX(np.copy(basic_sfr.t),np.copy(basic_sfr.sfr),np.copy(basic_infall.infall),list(elements_to_trace),
         list(basic_primordial.symbols),list(basic_primordial.fractions),float(gas_at_start),list(basic_primordial.symbols),list(basic_primordial.fractions),
         float(gas_reservoir_mass_factor),float(a.outflow_feedback_fraction),bool(a.check_processes),float(a.starformation_efficiency),float(a.gas_power),
@@ -149,15 +150,15 @@ def Chempy(a):
         j = len(basic_sfr.t)-i
         element_fractions = []
         for item in elements_to_trace:
-            element_fractions.append(float(np.copy(cube.cube[item][max(i-1,0)]/cube.cube['gas'][max(i-1,0)])))## gas element fractions from one time step before    
+            element_fractions.append(float(np.copy(cube.cube[item][i]/cube.cube['gas'][i])))## gas element fractions from one time step before
             if element_fractions[-1]<0:
                 print('-ve Error')
                 #raise Exception('-ve Error')
         metallicity = float(cube.cube['Z'][i])
-        #print(metallicity)     
-                
+        #print(metallicity)
+
         time_steps = np.copy(basic_sfr.t[:j])
-        basic_ssp.calculate_feedback(float(metallicity), list(elements_to_trace), list(element_fractions), np.copy(time_steps)) 
+        basic_ssp.calculate_feedback(float(metallicity), list(elements_to_trace), list(element_fractions), np.copy(time_steps))
         cube.advance_one_step(i+1,np.copy(basic_ssp.table),np.copy(basic_ssp.sn2_table),np.copy(basic_ssp.agb_table),np.copy(basic_ssp.sn1a_table),np.copy(basic_ssp.bh_table))
         if cube.cube['gas'][i] < 0:
             print(i, basic_sfr.t[i])
@@ -172,8 +173,8 @@ def Chempy(a):
     abundances = append_fields(abundances,'weights',weights)
     abundances = append_fields(abundances,'time', cube.cube['time'])
     abundances = np.array(abundances)
-    
-    for element in elements:       
+
+    for element in elements:
         if element != 'Fe':
             try:
                 abundances[element] -= abundances['Fe']
@@ -182,57 +183,61 @@ def Chempy(a):
     #TEST output
     #print('Chempy output')
     #print(abundances[:][-1])
-    
+
     return cube, abundances
 
 def Chempy_all_times(a):
     '''
     Chemical evolution run with the default parameters using the net yields.
 
-    INPUT: 
-    
+    INPUT:
+
     a = ModelParameters() from parameter.py
 
     OUTPUT:
-    
+
     cube = The ISM evolution class
-    
+
     abundances = The abundances of the ISM
     '''
     from .infall import PRIMORDIAL_INFALL
     from .time_integration import ABUNDANCE_MATRIX
     from .making_abundances import mass_fraction_to_abundances
-    from numpy.lib.recfunctions import append_fields    
+    from numpy.lib.recfunctions import append_fields
     basic_solar, basic_sfr, basic_infall = initialise_stuff(a)
     elements_to_trace = a.elements_to_trace
     basic_primordial = PRIMORDIAL_INFALL(list(elements_to_trace),np.copy(basic_solar.table))
     basic_primordial.primordial()
     gas_reservoir_mass_factor = a.gas_reservoir_mass_factor / a.shortened_sfr_rescaling
     gas_at_start = a.gas_at_start / a.shortened_sfr_rescaling # unlikely to be needed unless a.gas_at_start is non-zero
-        
+
     cube = ABUNDANCE_MATRIX(np.copy(basic_sfr.t),np.copy(basic_sfr.sfr),np.copy(basic_infall.infall),list(elements_to_trace),list(basic_primordial.symbols),
         list(basic_primordial.fractions),float(gas_at_start),list(basic_primordial.symbols),list(basic_primordial.fractions),float(gas_reservoir_mass_factor),
         float(a.outflow_feedback_fraction),bool(a.check_processes),float(a.starformation_efficiency),float(a.gas_power),
         float(a.sfr_factor_for_cosmic_accretion),list(basic_primordial.symbols), list(basic_primordial.fractions))
 
     basic_ssp = SSP_wrap(a)
-    
+
     for i in range(len(basic_sfr.t)-1):
         j = len(basic_sfr.t)-i
         element_fractions = []
         for item in elements_to_trace:
-            element_fractions.append(float(np.copy(cube.cube[item][max(i-1,0)]/cube.cube['gas'][max(i-1,0)])))## gas element fractions from one time step before    
+            element_fractions.append(float(np.copy(cube.cube[item][i]/cube.cube['gas'][i])))## gas element fractions from one time step before
             if element_fractions[-1]<0:
                 print('-ve Error')
                 #raise Exception('-ve Error')
         metallicity = float(cube.cube['Z'][i])
-        #print(metallicity)     
-                
+        #print(metallicity)
+
         time_steps = np.copy(basic_sfr.t[:j])
-        basic_ssp.calculate_feedback(float(metallicity), list(elements_to_trace), list(element_fractions), np.copy(time_steps)) 
+        basic_ssp.calculate_feedback(float(metallicity), list(elements_to_trace), list(element_fractions), np.copy(time_steps))
+
+        print("agb table for first two time steps")
+        for el in a.elements_to_trace:
+            print(el,basic_ssp.table[el][:2])
+
         cube.advance_one_step(i+1,np.copy(basic_ssp.table),np.copy(basic_ssp.sn2_table),np.copy(basic_ssp.agb_table),np.copy(basic_ssp.sn1a_table),np.copy(basic_ssp.bh_table))
-        
-        
+
         for item in elements_to_trace:
             if cube.cube[item][i]<0:
                 print(i,item)
@@ -251,8 +256,8 @@ def Chempy_all_times(a):
     abundances = append_fields(abundances,'weights',weights)
     abundances = append_fields(abundances,'time', cube.cube['time'])
     abundances = np.array(abundances)
-    
-    for element in elements:       
+
+    for element in elements:
         if element != 'Fe':
             filt = np.where(np.logical_not(np.isfinite(abundances['Fe'])))
             abundances[element][filt]=np.inf
@@ -261,7 +266,7 @@ def Chempy_all_times(a):
     #TEST output
     #print('Chempy output')
     #print(abundances[:][-1])
-    
+
     return cube, abundances
 
 
@@ -270,20 +275,20 @@ def Chempy_gross(a):
     '''
     Chemical evolution run with the default parameters but now using solar scaled material (testing the worse case when total yields provided).
 
-    INPUT: 
-    
+    INPUT:
+
     a = ModelParameters() from parameter.py
 
     OUTPUT:
-    
+
     cube = The ISM evolution class
-    
+
     abundances = The abundances of the ISM
     '''
     from infall import PRIMORDIAL_INFALL
     from time_integration import ABUNDANCE_MATRIX
     from making_abundances import mass_fraction_to_abundances
-    from numpy.lib.recfunctions import append_fields    
+    from numpy.lib.recfunctions import append_fields
     basic_solar, basic_sfr, basic_infall = initialise_stuff(a)
     elements_to_trace = a.elements_to_trace
     basic_primordial = PRIMORDIAL_INFALL(list(elements_to_trace),np.copy(basic_solar.table))
@@ -292,7 +297,7 @@ def Chempy_gross(a):
     gas_at_start = a.gas_at_start / a.shortened_sfr_rescaling
     cube = ABUNDANCE_MATRIX(np.copy(basic_sfr.t),np.copy(basic_sfr.sfr),np.copy(basic_infall.infall),list(elements_to_trace),list(basic_primordial.symbols),
         list(basic_primordial.fractions),float(gas_at_start),list(basic_primordial.symbols),list(basic_primordial.fractions),float(gas_reservoir_mass_factor),
-        float(a.outflow_feedback_fraction),bool(a.check_processes),float(a.starformation_efficiency),float(a.gas_power), float(a.sfr_factor_for_cosmic_accretion), 
+        float(a.outflow_feedback_fraction),bool(a.check_processes),float(a.starformation_efficiency),float(a.gas_power), float(a.sfr_factor_for_cosmic_accretion),
         list(basic_primordial.symbols), list(basic_primordial.fractions))
     basic_ssp = SSP_wrap(a)
     for i in range(len(basic_sfr.t)-1):
@@ -302,7 +307,7 @@ def Chempy_gross(a):
         solar_scaled_material.solar(np.log10(metallicity/basic_solar.z))
         element_fractions = list(solar_scaled_material.fractions)
         for item in elements_to_trace:
-            element_fractions.append(float(np.copy(cube.cube[item][max(i-1,0)]/cube.cube['gas'][max(i-1,0)])))## gas element fractions from one time step before    
+            element_fractions.append(float(np.copy(cube.cube[item][i]/cube.cube['gas'][i])))## gas element fractions from one time step before
         time_steps = np.copy(basic_sfr.t[:j])
         basic_ssp.calculate_feedback(float(metallicity), list(elements_to_trace), list(element_fractions), np.copy(time_steps))
         cube.advance_one_step(i+1,np.copy(basic_ssp.table),np.copy(basic_ssp.sn2_table),np.copy(basic_ssp.agb_table),np.copy(basic_ssp.sn1a_table))
@@ -318,7 +323,7 @@ def multi_star_optimization():
     '''
     This function will optimize the parameters of all stars in a hierachical manner (similar to gibbs sampling)
 
-    INPUT: 
+    INPUT:
 
     a = will be loaded from parameter.py (prepare all variables there)
 
@@ -331,18 +336,18 @@ def multi_star_optimization():
     from .optimization import minimizer_initial, minimizer_global, minimizer_local
     from .cem_function import global_optimization_error_returned
     from .parameter import ModelParameters
-    
+
     # For testing
     import warnings
     warnings.filterwarnings("ignore")
-        
+
     a = ModelParameters()
     print(a.stellar_identifier_list)
     start_time = time.time()
 
     log_list = []
     # I: Minimization for each star seperately
-    # 1: for each star make initial conditions (each star needs other model parameters) 
+    # 1: for each star make initial conditions (each star needs other model parameters)
     parameter_list = []
     for item in a.stellar_identifier_list:
         parameter_list.append(item)
@@ -384,7 +389,7 @@ def multi_star_optimization():
         print(posteriors)
 
         global_iteration1 = time.time()
-        print('step %d global minimization took: %2.f seconds' %(counter, global_iteration1 - initial)) 
+        print('step %d global minimization took: %2.f seconds' %(counter, global_iteration1 - initial))
 
         # III: Local parameter minimization:
         # 1: Use fixed global parameters and fixed common errors make initial conditions
@@ -419,7 +424,7 @@ def multi_star_optimization():
         log_list.append(np.copy(result))
         log_list.append('step %d local minimization' %(counter))
         local_iteration1 = time.time()
-        print('step %d local minimization took: %2.f seconds' %(counter, local_iteration1 - global_iteration1)) 
+        print('step %d local minimization took: %2.f seconds' %(counter, local_iteration1 - global_iteration1))
 
     log_list.append(posteriors)
     print(log_list)
@@ -439,7 +444,7 @@ def multi_star_optimization():
 def mcmc(a):
     '''
     Convenience function to use the MCMC. A subdirectory mcmc/ will be created in the current directory and intermediate chains will be stored there.
-    
+
     The MCMC will sample the volume of best posterior for the likelihood functions that are declared in parameter.py. Default is ['sol_norm','gas_reservoir','sn_ratio'] which corresponds to 'Sun+' from the paper.
     '''
     import time
@@ -455,7 +460,7 @@ def mcmc(a):
             print('%s already existed. Content might be overwritten' %(directory))
     else:
         os.makedirs(directory)
-    
+
     a.check_processes = False
     a.number_of_models_overplotted = 1
     a.only_net_yields_in_process_tables = False
@@ -464,11 +469,11 @@ def mcmc(a):
     a.nthreads = mp.cpu_count()
     if a.nthreads == 4:
         a.nthreads = 2
-    
+
     chain = creating_chain(a,np.copy(a.p0))
     sampler = emcee.EnsembleSampler(a.nwalkers,a.ndim,posterior_probability,threads=a.nthreads, args = [a])
     pos,prob,state,blobs = sampler.run_mcmc(chain,a.mburn)
-    
+
     mean_prob = mean_prob_beginning = np.zeros((a.m))
     posterior_list = []
     posterior_std_list = []
@@ -484,7 +489,7 @@ def mcmc(a):
         np.save('%s/flatmeanposterior' %(directory), posterior_list)
         np.save('%s/flatstdposterior' %(directory), posterior_std_list)
         print(np.mean(posterior, axis = 0)[0], np.mean(posterior, axis = 0)[-1])
-        
+
         if i>202:
             print('posterior -1, -100, -200',np.mean(posterior, axis = 0)[-1], np.mean(posterior, axis = 0)[-100], np.mean(posterior, axis = 0)[-200])
             print('posterior 0, 100, 200',np.mean(posterior, axis = 0)[0], np.mean(posterior, axis = 0)[100], np.mean(posterior, axis = 0)[200])
@@ -501,9 +506,9 @@ def mcmc(a):
 def mcmc_multi(changing_parameter, error_list, elements):
     '''
     Convenience function to use the MCMC for multiple zones (and therefore multiple observations). A subdirectory mcmc/ will be created in the current directory and intermediate chains will be stored there.
-    The MCMC will sample the volume of best posterior for the likelihood functions that are declared in parameter.py. 
+    The MCMC will sample the volume of best posterior for the likelihood functions that are declared in parameter.py.
     Default is a list of Proto-sun, Arcturus and B-stars. The MCMC uses many walkers and can use multiple threads. Each walker will evaluate a series of Chempy zones and add their posterior together which then will be returned.
-    
+
     INPUT:
 
     changing_parameter = the parameter vector for initialization (will usually be found from minimization before). The initial chain will be created by jittering slightly the initial parameter guess
@@ -533,14 +538,14 @@ def mcmc_multi(changing_parameter, error_list, elements):
             print('%s already existed. Content might be overwritten' %(directory))
     else:
         os.makedirs(directory)
-    
+
     nthreads = mp.cpu_count()
     if nthreads == 4:
         nthreads = 2
     ndim = len(changing_parameter)
     a.nwalkers = max(a.nwalkers, int(ndim*2))
     chain = np.empty(shape = (a.nwalkers,ndim))
-    
+
     for i in range(a.nwalkers):
         result = -np.inf
         while result == -np.inf:
@@ -550,7 +555,7 @@ def mcmc_multi(changing_parameter, error_list, elements):
     print('Chain created')
     sampler = emcee.EnsembleSampler(a.nwalkers,ndim,posterior_function_many_stars,threads=nthreads, args = [error_list,elements])
     pos,prob,state,blobs = sampler.run_mcmc(chain,a.mburn)
-    
+
     mean_prob = mean_prob_beginning = np.zeros((a.m))
     posterior_list = []
     posterior_std_list = []
@@ -566,7 +571,7 @@ def mcmc_multi(changing_parameter, error_list, elements):
         np.save('%s/flatmeanposterior' %(directory), posterior_list)
         np.save('%s/flatstdposterior' %(directory), posterior_std_list)
         print(np.mean(posterior, axis = 0)[0], np.mean(posterior, axis = 0)[-1])
-        
+
         if i>202:
             print('posterior -1, -100, -200',np.mean(posterior, axis = 0)[-1], np.mean(posterior, axis = 0)[-100], np.mean(posterior, axis = 0)[-200])
             print('posterior 0, 100, 200',np.mean(posterior, axis = 0)[0], np.mean(posterior, axis = 0)[100], np.mean(posterior, axis = 0)[200])
@@ -600,12 +605,12 @@ def send_email(thread_count, iteration_count, posterior_beginning, posterior_end
     server.ehlo()
     server.login("pythonspeaking@gmail.com", "MPIA_Server_runs")
     text = msg.as_string()
-    server.sendmail(fromaddr, toaddr, text) 
-    
+    server.sendmail(fromaddr, toaddr, text)
+
 def mcmc_quick(changing_parameter,elements,preload):
     '''
     Convenience function to use the MCMC for one zone. A subdirectory mcmc/ will be created in the current directory and intermediate chains will be stored there.
-    The MCMC will sample the volume of best posterior for the likelihood functions that are declared in parameter.py. 
+    The MCMC will sample the volume of best posterior for the likelihood functions that are declared in parameter.py.
     This is a cut down version to speed up MCMC for one star only
     INPUT:
 
@@ -637,14 +642,14 @@ def mcmc_quick(changing_parameter,elements,preload):
             print('%s already existed. Content might be overwritten' %(directory))
     else:
         os.makedirs(directory)
-    
+
     nthreads = mp.cpu_count()
     if nthreads == 4:
         nthreads = 2
     ndim = len(changing_parameter)
     a.nwalkers = max(a.nwalkers, int(ndim*2))
     chain = np.empty(shape = (a.nwalkers,ndim))
-    
+
     for i in range(a.nwalkers):
         result = -np.inf
         while result == -np.inf:
@@ -655,8 +660,8 @@ def mcmc_quick(changing_parameter,elements,preload):
     pool=mp.Pool()
     sampler = emcee.EnsembleSampler(a.nwalkers,ndim,posterior_function_mcmc_quick,threads=nthreads, args = [elements,preload],pool=pool)
     pos,prob,state,blobs = sampler.run_mcmc(chain,a.mburn)
-        
-    
+
+
     mean_prob = mean_prob_beginning = np.zeros((a.m))
     posterior_list = []
     posterior_std_list = []
@@ -673,7 +678,7 @@ def mcmc_quick(changing_parameter,elements,preload):
     #   np.save('%s/flatmeanposterior' %(directory), posterior_list)
     #   np.save('%s/flatstdposterior' %(directory), posterior_std_list)
         print(np.mean(posterior, axis = 0)[0], np.mean(posterior, axis = 0)[-1])
-        
+
         #if i>202:
             #print('posterior -1, -100, -200',np.mean(posterior, axis = 0)[-1], np.mean(posterior, axis = 0)[-100], np.mean(posterior, axis = 0)[-200])
             #print('posterior 0, 100, 200',np.mean(posterior, axis = 0)[0], np.mean(posterior, axis = 0)[100], np.mean(posterior, axis = 0)[200])
@@ -691,17 +696,17 @@ def mcmc_quick(changing_parameter,elements,preload):
     posterior_std_list.append(np.std(posterior, axis = 0)[-1])
     np.save('%s/flatmeanposterior' %(directory), posterior_list)
     np.save('%s/flatstdposterior' %(directory), posterior_std_list)
-    pool.close()    
+    pool.close()
     if a.send_email:
         send_email(nthreads, i, np.mean(posterior, axis = 0)[0], np.mean(posterior, axis = 0)[-1], a, elapsed1)
 
 
-    
+
 def single_star_optimization():
     '''
     This function will optimize the parameters of a single zone quickly
 
-    INPUT: 
+    INPUT:
 
     a = will be loaded from parameter.py (prepare all variables there)
 
@@ -715,20 +720,20 @@ def single_star_optimization():
     from .cem_function import global_optimization_error_returned
     from .parameter import ModelParameters
     from .score_function import preload_params_mcmc
-    
+
     # For testing
     import warnings
     warnings.filterwarnings("ignore")
-        
+
     a = ModelParameters()
     preload = preload_params_mcmc()
-    
+
     print(a.stellar_identifier_list)
     start_time = time.time()
 
     log_list = []
     # I: Minimization for each star seperately
-    # 1: for each star make initial conditions (each star needs other model parameters) 
+    # 1: for each star make initial conditions (each star needs other model parameters)
     parameter_list = []
     for item in a.stellar_identifier_list:
         parameter_list.append(item)
@@ -738,9 +743,9 @@ def single_star_optimization():
     #p.close()
     #p.join()
     #result = np.vstack(t)
-    
+
     result  = minimizer_initial_quick(parameter_list)
-    
+
     log_list.append(np.copy(result))
     log_list.append('initial minimization')
     initial = time.time()
@@ -772,7 +777,7 @@ def single_star_optimization():
     #   print(posteriors)
 
     #   global_iteration1 = time.time()
-    #   print('step %d global minimization took: %2.f seconds' %(counter, global_iteration1 - initial))   
+    #   print('step %d global minimization took: %2.f seconds' %(counter, global_iteration1 - initial))
 
         # III: Local parameter minimization:
         # 1: Use fixed global parameters and fixed common errors make initial conditions
@@ -807,7 +812,7 @@ def single_star_optimization():
     #   log_list.append(np.copy(result))
     #   log_list.append('step %d local minimization' %(counter))
     #   local_iteration1 = time.time()
-    #   print('step %d local minimization took: %2.f seconds' %(counter, local_iteration1 - global_iteration1))   
+    #   print('step %d local minimization took: %2.f seconds' %(counter, local_iteration1 - global_iteration1))
 
     #log_list.append(posteriors)
     #print(log_list)
@@ -815,19 +820,19 @@ def single_star_optimization():
     # V: MCMC run
     ## reshape the result to have global parameters in the front and the local parameters following
     #changing_parameter = list(result[0,:len(a.SSP_parameters)])
-    
+
     elements = np.unique(a.elements_to_trace,preload.wildcard.dtype.names)
     changing_parameter = list(result)
 
     #for i in range(result.shape[0]):
     #   changing_parameter.append(list(result[i,len(a.SSP_parameters):]))
-    
+
     changing_parameter = np.hstack(changing_parameter)
-    
+
     ## jitter the parameters to initialise the chain (add a validation later, i.e. testing that the particular parameters yield a result)
-    
+
     mcmc_quick(changing_parameter, elements,preload)
-    
+
     # 1: Free all parameters and optimize common error (SSP should be the same for all stars)
     # 2: Plug everything into emcee and sample the posterior
     return log_list
@@ -835,13 +840,13 @@ def single_star_optimization():
 
 def scoring_wrapper():
     """
-    NO LONGER USED 
+    NO LONGER USED
     This function will calculate Bayes and CV scores for yield set, using the code in score_function.py.
-    
-    The neural network must be trained beforehand using training_data and create_network    
-    
+
+    The neural network must be trained beforehand using training_data and create_network
+
     Main outputs are labelled .npz files in the Scores/ file.
-    
+
     MUST set a.UseNeural = True for this and select correct dataset.
     """
     from Chempy.neural import training_data,create_network
@@ -850,13 +855,12 @@ def scoring_wrapper():
     from Chempy.score_function import CV_wrapper, Bayes_wrapper
     init_time = time.time()
     a = ModelParameters()
-    
+
     print('Step 1 (at time %.2f s): Calculate Bayes score' %(time.time()-init_time))
     Bayes_wrapper()
-    
+
     print('Step 2 (at time %.2f s): Calculate cross-validation score' %(time.time()-init_time))
     CV_wrapper()
-    
-    print('Process complete in time %.2f s' %(time.time()-init_time))   
-    return None 
-    
+
+    print('Process complete in time %.2f s' %(time.time()-init_time))
+    return None

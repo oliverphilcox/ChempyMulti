@@ -1,4 +1,4 @@
-import numpy as np 
+import numpy as np
 
 
 
@@ -7,38 +7,38 @@ def imf_mass_fraction_non_nativ(imf_dm,imf_x,mlow,mup):
     Function to determine the mass fraction of the IMF between two masses
 
     INPUT:
-    
+
         imf_dm = imf_class.dm
-    
+
         imf_x = imf_class.x
-    
+
         mlow = lower mass
-    
+
         mup = upper mass
 
-    
+
         OUTPUT:
-    
+
         the mass fraction in this mass range
     '''
     cut = np.where(np.logical_and(imf_x>=mlow,imf_x<mup))
     fraction = sum(imf_dm[cut])
-    
+
     return(fraction)
 
 def lifetime_Argast(m,Z_frac):
     """
     here we will calculate the MS lifetime of the star after Argast et al., 2000, A&A, 356, 873
-    
+
         INPUT:
 
         m = mass in Msun
-    
+
         Z_frac = fractions of metals of the stellar composition
-    
+
         Z = metallicity in Zsun
-    
-        
+
+
         OUTPUT:
 
         returns the lifetime of the star in Gyrs
@@ -57,9 +57,9 @@ def lifetime_Raiteri(m,Z):
     INPUT:
 
     m = mass in Msun
-    
+
     Z = metallicity in Zsun
-    
+
     returns the lifetime of the star in Gyrs
     """
     lm = np.log10(m)
@@ -73,11 +73,11 @@ def lifetime_Raiteri(m,Z):
 def lifetime_Portinari(m,Z):
     """
     INPUT:
-    
+
         m = mass in Msun
-        
+
         Z = metallicity fraction
-        
+
     returns lifetime of start in Gyrs
     """
     # Portinari 1998 lifetime function
@@ -88,7 +88,7 @@ def lifetime_Portinari(m,Z):
         lZ = np.log10(Z) # to avoid zero errors
     params = np.array([10.0153615 , -3.91089893,  0.99947209, -0.03601771, -0.31139679,0.09109059, -0.03218365, -0.01323112])
     tmp = (params[0]+lM*params[1]+np.power(lM,2.)*params[2]+lZ*params[3]+lM*lZ*params[4]+lM*lM*lZ*params[5]+lZ*lZ*params[6]+lZ*lZ*lM*params[7])
-    return np.divide(np.power(10,tmp),1e9)    
+    return np.divide(np.power(10,tmp),1e9)
 
 class SSP(object):
     '''
@@ -99,33 +99,33 @@ class SSP(object):
         Upon initialisation the table for the SSP evolution and enrichment over time is created. Interpolation from yield tables in mass is made linear.
 
         INPUT:
-        
+
         output = bool, should output be plotted
-        
+
         z = metallicity of the SSP in Z, not normed to solar
-        
+
         imf_x = class_imf.x
-        
+
         imf_dm = class_imf.dm
-        
+
         imf_dn = class_imf.dn
-        
+
         time_steps = time_steps usually coming from class_sfr.t
-        
+
         elements_to_trace = which elements should be traced
-        
+
         stellar_lifetimes = the name of the stellar lifetimes function that should be used ('Raiteri_1996', 'Argast_2000')
-        
+
         interpolation_scheme = which interpolation in metallicity should be used for the yield table ('linear' or 'logarithmic')
-        
+
         only_net_yields_in_process_tables = Should the total yields or only the net yields be stored in the nucleosynthetic enrichment tables, bool
 
         OUTPUT:
-        
+
         the ssp_class.table holds key values of the evolution of the SSP all normalised to a mass of unity (which is the starting mass of the SSP).
-        
-        mass_in_ms_stars + cumsum(mass_of_ms_stars_dying) = 1 calculated from stellar lifetime with IMF 
-        
+
+        mass_in_ms_stars + cumsum(mass_of_ms_stars_dying) = 1 calculated from stellar lifetime with IMF
+
         The element feedbacks are also given normalised to one. And the number of events as well
         '''
         self.z = z
@@ -141,7 +141,7 @@ class SSP(object):
         self.output = output
         self.net_yields = only_net_yields_in_process_tables
         lifetime_functions = {'Argast_2000': lifetime_Argast, 'Raiteri_1996': lifetime_Raiteri,'Portinari_1998': lifetime_Portinari}
-        
+
         ######### Calculating the lifetime function of stars
         if self.stellar_lifetimes in lifetime_functions:
             self.inverse_imf = np.interp(self.t,lifetime_functions[self.stellar_lifetimes](self.x[::-1],self.z),self.x[::-1])
@@ -159,28 +159,28 @@ class SSP(object):
         for i in range(index):
             mlow = self.inverse_imf[index-i]
             mup = self.inverse_imf[index-i-1]
-            tmp[i] = imf_mass_fraction_non_nativ(self.dm,self.x,mlow,mup) 
+            tmp[i] = imf_mass_fraction_non_nativ(self.dm,self.x,mlow,mup)
         self.table['mass_of_ms_stars_dying'][1:] = tmp[::-1]
         self.table['mass_in_ms_stars'] = 1.-np.cumsum(self.table['mass_of_ms_stars_dying'])
         #print self.inverse_imf[1]
 
-    def sn2_feedback(self, sn2_elements, sn2_yields, sn2_metallicities, sn2_mmin, sn2_mmax, fractions_in_gas):	
+    def sn2_feedback(self, sn2_elements, sn2_yields, sn2_metallicities, sn2_mmin, sn2_mmax, fractions_in_gas):
         '''
         Calculating the CC-SN feedback over time.
         The routine is sensitive to the ordering of the masses in the yield table, it must begin with the smallest increase to the biggest value.
 
         INPUT:
-        
+
         sn2_elements = which elements are provided by the yield table, list containing the symbols
-        
+
         sn2_yields = the yield table provided by Chempys SN2 yield class
-        
+
         sn2_metallicities = the metallicities of that table
-        
+
         sn2_mmin = the minimal mass of the CC-SN (default 8) in Msun
-        
+
         sn2_mmax = the maximum mass of the CC-SN (default 100) in Msun
-        
+
         fractions_in_gas = the birth material of the SSP (will be mixed into the enrichment as unprocessed material)
 
         OUTPUT:
@@ -195,7 +195,7 @@ class SSP(object):
         for i in range(len(names)):
             list_of_arrays.append(base)
         self.sn2_table = np.core.records.fromarrays(list_of_arrays,names=names)
-        
+
         self.sn2_elements = sn2_elements
         self.sn2 = sn2_yields
         self.sn2_mmin = sn2_mmin
@@ -211,7 +211,7 @@ class SSP(object):
             self.sn2_table['number_of_events'][i+1] += tmp
             if upper_cut<lower_cut and self.inverse_imf[i+1]<self.sn2_mmin:
                 break
-                
+
         ### interpolation of 2 yield sets with different metallicities
         self.sn2_metallicities = np.sort(self.sn2_metallicities)
         metallicity_list = []
@@ -239,7 +239,7 @@ class SSP(object):
             tables_to_interpolate.append(np.zeros_like(self.table))
             if self.net_yields:
                 net_tables_to_interpolate.append(np.zeros_like(self.table))
-            ################################## loop which is metallicity independent		
+            ################################## loop which is metallicity independent
             ##### yield table is cut down such that only yields for masses between sn2_mmin and sn2_mmax are left in
             try:
                 self.sn2[metallicity_key] = self.sn2[metallicity_key][np.where(np.logical_and(self.sn2[metallicity_key]['Mass']>=self.sn2_mmin,self.sn2[metallicity_key]['Mass']<=self.sn2_mmax))]
@@ -261,7 +261,7 @@ class SSP(object):
                     break
                 support = []
                 support.append(self.sn2_mmax)
-                for i in range(len(tmp_masses)-1): 
+                for i in range(len(tmp_masses)-1):
                     support.append(np.mean(tmp_masses[i:i+2]))
                 support.append(self.sn2_mmin)
                 ### support spans the mass ranges where the yields of a specific stellar mass (tmp_masses) will be applied
@@ -275,11 +275,11 @@ class SSP(object):
                         weights[i] = 0.
                         continue
                     cut = np.where(np.logical_and(self.x<upper_cut,self.x>=lower_cut))
-                    weights[i] = sum(self.dm[cut]) 
+                    weights[i] = sum(self.dm[cut])
                     # weights hold the weights with which each mass_range of the yield set needs to be multiplied
                 ###### here the feedback of the elements is calculated
                 for item in list(set(self.elements).intersection(self.sn2_elements))+['mass_in_remnants']:
-                    tables_to_interpolate[s][item][time_index+1] = sum(self.sn2[metallicity_key][item]*weights)				
+                    tables_to_interpolate[s][item][time_index+1] = sum(self.sn2[metallicity_key][item]*weights)
                     if self.net_yields:
                         net_tables_to_interpolate[s][item][time_index+1] = sum(self.sn2[metallicity_key][item]*weights)
                 ######## here the unprocessed wind feedback is calculated
@@ -317,23 +317,24 @@ class SSP(object):
                     else:
                         self.sn2_table[element_name] += tables_to_interpolate[i][element_name] * metallicity_weight[i]
         ### here the number of stars going sn2 is calculated
-        
+
+
     def agb_feedback(self,agb_elements, agb_yields, agb_metallicities, agb_mmin, agb_mmax, fractions_in_gas):
         '''
         AGB enrichment calculation adds the feedback to the total SSP table and also to the self.agb_yield table.
 
         INPUT:
-        
+
         agb_elements = which elements are provided by the yield table, list containing the symbols
-        
+
         agb_yields = the yield table provided by Chempys AGB yield class
-        
+
         agb_metallicities = the metallicities of that table
-        
+
         agb_mmin = the minimal mass of the AGB stars (default 0.5) in Msun
-        
+
         agb_mmax = the maximum mass of the AGB stars (default 8) in Msun
-        
+
         fractions_in_gas = the birth material of the SSP (will be mixed into the enrichment as unprocessed material)
 
         OUTPUT:
@@ -362,12 +363,12 @@ class SSP(object):
         self.agb_elements = agb_elements
         self.agb = agb_yields
         self.agb_metallicities = np.sort(agb_metallicities)
-        
+
         ####### counting the pn events
         count_variable = 0
         for i,item in enumerate(self.inverse_imf):
             if item > agb_mmax:
-                continue	
+                continue
             elif count_variable == 0:
                 tmp = imf_mass_fraction_non_nativ(self.dn,self.x,self.inverse_imf[i],self.agb_mmax)
                 self.table['pn'][i] += tmp
@@ -383,7 +384,7 @@ class SSP(object):
                 tmp = imf_mass_fraction_non_nativ(self.dn,self.x,self.inverse_imf[i],self.inverse_imf[i-1])
                 self.table['pn'][i] += tmp
                 self.agb_table['number_of_events'][i] += tmp
-        
+
         metallicity_list = []
         if len(self.agb_metallicities) == 1:
             metallicity_list.append(self.agb_metallicities[0])
@@ -425,7 +426,7 @@ class SSP(object):
             #print tmp_masses
             support = []
             support.append(self.agb_mmax)
-            for i in range(len(tmp_masses)-1): 
+            for i in range(len(tmp_masses)-1):
                 support.append(np.mean(tmp_masses[i:i+2]))
             support.append(self.agb_mmin)
             support = np.array(support)
@@ -447,7 +448,7 @@ class SSP(object):
                 mass_index = []
                 gaps.append(last_item)
                 #print item,support
-                while support[j] > item: 
+                while support[j] > item:
                     gaps.append(support[j])
                     mass_index.append(j-1)
                     j += 1
@@ -468,13 +469,13 @@ class SSP(object):
 
                 #print i,j,support[j],item,gaps,mass_index
 
-                len_of_mass_weights.append(len(mass_weight)) 
+                len_of_mass_weights.append(len(mass_weight))
                 mass_weight = np.array(mass_weight)
                 mass_index = np.array(mass_index)
                 mass_weight_list.append(mass_weight)
                 mass_index_list.append(mass_index)
-                
-            # here the list structure is brought onto arrays to make vector multiplication possible for feedback calculations			
+
+            # here the list structure is brought onto arrays to make vector multiplication possible for feedback calculations
             max_different_masses_per_time_step = max(len_of_mass_weights)
             mass_index_array = np.zeros((len(self.inverse_imf),max_different_masses_per_time_step),dtype=int)
             mass_weight_array = np.zeros((len(self.inverse_imf),max_different_masses_per_time_step))
@@ -482,7 +483,7 @@ class SSP(object):
             for i in range(len(self.inverse_imf)):
                 # was important to add in order to be able to vary agb_mmin
                 if self.inverse_imf[i] < self.agb_mmin:
-                    break				
+                    break
                 for t in range(max_different_masses_per_time_step):
                     if len(mass_weight_list[i])==t:
                         break
@@ -497,16 +498,16 @@ class SSP(object):
             #print tables_to_interpolate[s][['O','C']]
             if 'unprocessed_mass_in_winds' in self.agb[metallicity_key].dtype.names:
                 for element_i,element_n in enumerate(self.elements):
-                    for t in range(max_different_masses_per_time_step):	
+                    for t in range(max_different_masses_per_time_step):
                         tables_to_interpolate[s][element_n] += (self.agb[metallicity_key]['unprocessed_mass_in_winds'][mass_index_array[:,t]] * mass_weight_array[:,t]) * fractions_in_gas[element_i]
-            #print 'after adding wind' 
+            #print 'after adding wind'
             #print tables_to_interpolate[s][['O','C']]
 
 
 
         ########## end of loop which is metallicity independent
         #for i,item in enumerate(self.inverse_imf[:]):
-        #	
+        #
         #	print i, item, mass_weight_array[i],mass_index_array[i]
         ##### interpolating metallicity if there were two different used.
         metallicity_weight = []
@@ -545,38 +546,38 @@ class SSP(object):
         Calculating the SN1a feedback over time
 
         INPUT:
-        
+
         sn1a_elements = Which elements are provided by the yield table
-        
-        sn1a_metallicities = metallicities in the yield table 
-        
+
+        sn1a_metallicities = metallicities in the yield table
+
         sn1a_yields = yield table
-        
+
         time_delay_functional_form = which functional form of the delay time should be used ('normal','maoz','gamma_function'). Maoz is the default and the others are not tested. Check for functionality
-        
+
         sn1a_min = the minimum mass from which sn1a can occur (does not matter for maoz)
-        
+
         sn1a_max = the maximum mass from which SN Ia can occur (does not mater for maoz)
-        
+
         time_delay_parameter = a tuple containing the parameters for the specific functional form
-        
+
         ssp_mass = the mass of the SSP
-        
+
         stochastic_IMF = bool, do we want to use stochastci explosions
 
-        
+
         OUTPUT:
 
         the classes table will be filled up and a sn2_table will be added (so that the individual processes can be tracked)
 
         for MAOZ functional form the following parameters are in time_delay_parameter:
-        
+
         N_0 = Number of SNIa exploding per Msun over the course of 15Gyr
-        
+
         tau_8 = The delay time when the first SN Ia explode (usually 40Myr are anticipated because then 8Msun stars start to die but our Prior is more at 160Myr)
-        
+
         s_eponent = the time decay exponent
-        
+
         dummy = not in use anymore
         '''
         end_of_time = 13.8 #Gyrs Over this time-span the SN1a explosions will be distributed, for mass normalisation reasons
@@ -600,21 +601,21 @@ class SSP(object):
             #mass_factor = 0.003,a_parameter = 2, loc = 0, scale = 3
             '''
             the gamma function for a_parameter = 2 and loc = 0 produces a peak at scale so we have a two parameter sfr.
-            
+
             Later we can also release a to have a larger diversity in functional form.
             '''
             from scipy.stats import gamma
             #norm = sum(self.sfr)*number_factor
             #self.infall = np.divide(self.infall*norm,sum(self.infall))
-            
+
             full_time = np.linspace(0, end_of_time, (end_of_time/self.dt)+1)
             feedback_number = gamma.pdf(full_time,a_parameter,loc,scale)
 
             #for i in range(len(full_time)):
             #	if full_time[i]>=tau_8:
-            #		feedback_number[i] = N_0 * np.power(np.divide(full_time[i],tau_8),-1*s_exponent) * np.divide(s_exponent-1,tau_8)		
+            #		feedback_number[i] = N_0 * np.power(np.divide(full_time[i],tau_8),-1*s_exponent) * np.divide(s_exponent-1,tau_8)
             feedback_number = np.divide(feedback_number*number_factor,sum(feedback_number))
-            
+
             #number_of_stars_in_mass_range_for_remnant = imf_mass_fraction_non_nativ(self.dn,self.x,self.sn1a_min,self.sn1a_max)
             #mass_of_stars_in_mass_range_for_remnant = imf_mass_fraction_non_nativ(self.dm,self.x,self.sn1a_min,self.sn1a_max)
             # for sn1a max and min == 8 and 2 we get:
@@ -648,7 +649,9 @@ class SSP(object):
                 if full_time[i]>=tau_8:
                     feedback_number[i] = np.power(np.divide(full_time[i],tau_8),-1*s_exponent) * np.divide(s_exponent-1,tau_8)# * N_0 * number_of_stars_in_mass_range_for_remnant
             feedback_number = np.divide(feedback_number,sum(feedback_number)) * N_0# * number_of_stars_in_mass_range_for_remnant
-            
+
+            print(full_time,feedback_number)
+
             #N_0 now is the number of SN1a per 1Msun
             if stochastic_IMF:
                 number_of_potential_sn1a_explosions = int(round(ssp_mass))#int(round(number_of_stars_in_mass_range_for_remnant * ssp_mass) )
@@ -692,16 +695,16 @@ class SSP(object):
             while full_time[j]<time_delay_peak:
                 feedback_mass[j] = np.exp(-0.5*((full_time[j]-time_delay_peak)/float(gauss_beginning))**2) #1./(std*np.sqrt(2*np.pi))*
                 j += 1
-    
+
 
             number_of_stars_in_mass_range_for_remnant = imf_mass_fraction_non_nativ(self.dn,self.x,self.sn1a_min,self.sn1a_max)
             mass_of_stars_in_mass_range_for_remnant = imf_mass_fraction_non_nativ(self.dm,self.x,self.sn1a_min,self.sn1a_max)
-            
+
             self.mean_mass_of_feedback = float(-self.sn1a_yields[0.02]['mass_in_remnants']) ## This mass is turned into the explosion
             self.mean_mass = mass_of_stars_in_mass_range_for_remnant/number_of_stars_in_mass_range_for_remnant
             self.mean_remnant_mass = self.mean_mass * 0.37 # interpolation from Karakas yields
             self.mean_accretion_mass = self.mean_mass_of_feedback - self.mean_remnant_mass ## This comes from Hydrogen feedback
-            
+
             mass_fraction_detonating = self.mean_mass_of_feedback * number_of_stars_in_mass_range_for_remnant * pn_number_detonating_until_12Gyr
             number_fraction_detonating = number_of_stars_in_mass_range_for_remnant * pn_number_detonating_until_12Gyr
 
@@ -733,7 +736,7 @@ class SSP(object):
         self.table['H'] -= self.sn1a_feedback_mass * (1.-(self.mean_remnant_mass/self.mean_mass_of_feedback))
         self.table['sn1a'] = self.sn1a_feedback_number
         self.sn1a_table['number_of_events'] = self.sn1a_feedback_number
-        
+
         ######### Interpolation of yieldsets for different metallicities
         metallicity_list = []
         if len(self.sn1a_metallicities) == 1:
@@ -766,10 +769,10 @@ class SSP(object):
                     except KeyError:
                         tables_to_interpolate[s][element_name] = np.inf
                         print("SN Ia Key error")
-                        
+
             #tables_to_interpolate[s]['mass_in_remnants'] = self.sn1a_yields[metallicity_key]['mass_in_remnants']
             ########## end of loop which is metallicity independent
-        
+
         metallicity_weight = []
         if len(metallicity_list) == 1:
             metallicity_weight.append(1.)
@@ -777,7 +780,7 @@ class SSP(object):
                 self.table[element_name] += self.sn1a_feedback_mass * tables_to_interpolate[0][element_name]
                 self.sn1a_table[element_name] += self.sn1a_feedback_mass * tables_to_interpolate[0][element_name]
             #tables_to_interpolate[0]['mass_in_remnants']
-            
+
         else:
             if self.interpolation_scheme == 'linear':
                 distance = metallicity_list[1]-metallicity_list[0]
@@ -800,21 +803,21 @@ class SSP(object):
     def bh_feedback(self,bhmmin,bhmmax,element_list,fractions_in_gas,percentage_of_bh_mass):
         '''
         BH enrichment routine, just no enrichment for a specific mass range. A set percentage is fed back into the ISM
-        
+
         Inputs:
             Min/Max black hole mass (40-100 is default - see parameter file).
-            
+
             Element list to be calculated
-            
+
             Fractions of each element in the ISM gas
-            
+
             Percentage of BH progenitor fed back into the ISM (75% default)
         '''
         cut = np.where(np.logical_and(self.x>=bhmmin,self.x<bhmmax))
         weight = sum(self.dm[cut])
         self.bhmmin = bhmmin
         self.bhmmax = bhmmax
-        
+
         additional_keys = ['kinetic_energy','number_of_events','mass_in_remnants']
         names = additional_keys + self.elements # not sure if all elements should be taken (might be easier to add the 3 tables in order to get total yield)
         base = np.zeros(len(self.t))
@@ -822,10 +825,10 @@ class SSP(object):
         for i in range(len(names)):
             list_of_arrays.append(base)
         self.bh_table = np.core.records.fromarrays(list_of_arrays,names=names)
-        
+
         self.table['mass_in_remnants'][1] += percentage_of_bh_mass*weight
         self.bh_table['mass_in_remnants'][1] += percentage_of_bh_mass*weight
-        
+
         ####### counting the BH events
         for i,item in enumerate(self.inverse_imf[:-1]):
             lower_cut = max(self.inverse_imf[i+1],self.bhmmin)
@@ -834,16 +837,16 @@ class SSP(object):
             self.bh_table['number_of_events'][i+1] += imf_mass_fraction_non_nativ(self.dn,self.x,lower_cut,upper_cut)
             if upper_cut<lower_cut and self.inverse_imf[i+1]<self.bhmmin:
                 break
-        
+
         for i,item in enumerate(element_list):
             self.table[item][1] += (1 - percentage_of_bh_mass)*weight*fractions_in_gas[i]
             self.bh_table[item][1] += (1-percentage_of_bh_mass)*weight*fractions_in_gas[i]
-        self.table['bh'][1] = imf_mass_fraction_non_nativ(self.dn,self.x,bhmmin,bhmmax)	
+        self.table['bh'][1] = imf_mass_fraction_non_nativ(self.dn,self.x,bhmmin,bhmmax)
 
 
 ## old declarations, the above ones are improved and should be used. BH and PAGB feedback are dummies for feeding back wind without enrichment
 
-    def sn2_feedback_IRA(self, sn2_elements, sn2_yields, sn2_metallicities, sn2_mmin, sn2_mmax,fractions_in_gas):	
+    def sn2_feedback_IRA(self, sn2_elements, sn2_yields, sn2_metallicities, sn2_mmin, sn2_mmax,fractions_in_gas):
         '''
         The mass fraction of the IMF between sn2_mmin and sn2_mmax is fed back instantaneously
         to the ISM according to the relative yields of sn2. The interpolation is linear in mass and metallicity
@@ -860,7 +863,7 @@ class SSP(object):
         for i in range(len(names)):
             list_of_arrays.append(base)
         self.sn2_table = np.core.records.fromarrays(list_of_arrays,names=names)
-        
+
 
         #from pycallgraph import PyCallGraph
         #from pycallgraph.output import GraphvizOutput
@@ -896,14 +899,14 @@ class SSP(object):
         tables_to_interpolate = []
         for s,metallicity_key in enumerate(metallicity_list):
             tables_to_interpolate.append(np.zeros_like(self.table[1]))
-            ################################## loop which is metallicity independent		
+            ################################## loop which is metallicity independent
             ##### yield table is cut down such that only yields for masses between sn2_mmin and sn2_mmax are left in
             self.sn2[metallicity_key] = self.sn2[metallicity_key][np.where(np.logical_and(self.sn2[metallicity_key]['Mass']>=self.sn2_mmin,self.sn2[metallicity_key]['Mass']<=self.sn2_mmax))]
 
             tmp_masses = self.sn2[metallicity_key]['Mass']
             support = []
             support.append(self.sn2_mmin)
-            for i in range(len(tmp_masses)-1): 
+            for i in range(len(tmp_masses)-1):
                 support.append(np.mean(tmp_masses[i:i+2]))
             support.append(self.sn2_mmax)
             support = np.array(support)
@@ -912,9 +915,9 @@ class SSP(object):
             weights = np.zeros_like(tmp_masses)
             for i in range(len(tmp_masses)):
                 cut = np.where(np.logical_and(self.x>=support[i],self.x<support[i+1]))
-                weights[i] = sum(self.dm[cut]) 
+                weights[i] = sum(self.dm[cut])
                 # weights hold the weights with which each mass_range of the yield set needs to be multiplied
-            
+
             ###### here the feedback of the elements is calculated
             for item in list(set(self.elements).intersection(self.sn2_elements))+['mass_in_remnants']:
                 tables_to_interpolate[s][item] = sum(self.sn2[metallicity_key][item]*weights)
@@ -947,7 +950,7 @@ class SSP(object):
         self.table['sn2'][1] = imf_mass_fraction_non_nativ(self.dn,self.x,sn2_mmin,sn2_mmax)
         self.sn2_table['number_of_events'][1] = imf_mass_fraction_non_nativ(self.dn,self.x,sn2_mmin,sn2_mmax)
 
-    
+
     def post_agb_feedback(self,mmin,mmax,element_list,fractions_in_gas,percentage_to_remnant):
         '''
         just to produce no new elements for stars between agb and sn2, like in kobayashi 2011
@@ -959,5 +962,4 @@ class SSP(object):
             self.table['mass_in_remnants'][2] += percentage_to_remnant*weight
             for i,item in enumerate(element_list):
                 self.table[item][2] += (1 - percentage_to_remnant)*weight*fractions_in_gas[i]
-            self.table['pn'][2] += imf_mass_fraction_non_nativ(self.dn,self.x,mmin,mmax)	
-
+            self.table['pn'][2] += imf_mass_fraction_non_nativ(self.dn,self.x,mmin,mmax)

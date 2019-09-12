@@ -30,6 +30,17 @@ class SN1a_feedback(object):
         """
 
 
+    def linear_fit(self):
+        """ Load the linear model of the SN1a yields of TNG.
+        (This is just equal to TNG yields since it is a 1-parameter model)"""
+        dat = np.load(localpath+'input/tng_fit_sn1a.npz',allow_pickle=True) # load in data-file
+
+        self.metallicities = dat.f.metallicities
+        self.mnasses = dat.f.masses
+        self.table = dat.f.table.item()
+        self.elements = dat.f.elements
+
+
     def TNG(self):
         """ IllustrisTNG yield tables from Pillepich et al. 2017.
         These are the 1997 Nomoto W7 models, and sum all isotopes (not just stable)"""
