@@ -63,18 +63,18 @@ class SSP_wrap():
         time_steps = the time-steps for which the enrichment of the SSP should be calculated (usually the time-steps until the end of the chempy simulation)
         '''
         basic_ssp = SSP(False, float(z), np.copy(self.imf.x), np.copy(self.imf.dm), np.copy(self.imf.dn), np.copy(time_steps), list(elements), str(self.a.stellar_lifetimes), str(self.a.interpolation_scheme), bool(self.a.only_net_yields_in_process_tables))
-        #basic_ssp.sn2_feedback(list(self.sn2.elements), dict(self.sn2.table), np.copy(self.sn2.metallicities), float(self.a.sn2mmin), float(self.a.sn2mmax),list(element_fractions))
-        #basic_ssp.agb_feedback(list(self.agb.elements), dict(self.agb.table), list(self.agb.metallicities), float(self.a.agbmmin), float(self.a.agbmmax),np.hstack(element_fractions))
+        basic_ssp.sn2_feedback(list(self.sn2.elements), dict(self.sn2.table), np.copy(self.sn2.metallicities), float(self.a.sn2mmin), float(self.a.sn2mmax),list(element_fractions))
+        basic_ssp.agb_feedback(list(self.agb.elements), dict(self.agb.table), list(self.agb.metallicities), float(self.a.agbmmin), float(self.a.agbmmax),np.hstack(element_fractions))
         basic_ssp.sn1a_feedback(list(self.sn1a.elements), list(self.sn1a.metallicities), dict(self.sn1a.table), str(self.a.time_delay_functional_form), float(self.a.sn1ammin), float(self.a.sn1ammax), self.a.sn1a_parameter, float(self.a.total_mass), bool(self.a.stochastic_IMF))
-        #basic_ssp.bh_feedback(float(self.a.bhmmin),float(self.a.bhmmax),list(elements), np.hstack(element_fractions) , float(self.a.percentage_of_bh_mass))
+        basic_ssp.bh_feedback(float(self.a.bhmmin),float(self.a.bhmmax),list(elements), np.hstack(element_fractions) , float(self.a.percentage_of_bh_mass))
 
         # exposing these tables to the outside wrapper
         self.table = basic_ssp.table
-        print("ONLY WITH 1a FEEDBACK - update table names")
-        self.sn2_table = basic_ssp.sn1a_table
-        self.agb_table = basic_ssp.sn1a_table#agb_table
-        self.sn1a_table = basic_ssp.sn1a_table#sn1a_table
-        self.bh_table = basic_ssp.sn1a_table#bh_table
+        print("ONLY USING 1a FEEDBACK")
+        self.sn2_table = basic_ssp.sn2_table
+        self.agb_table = basic_ssp.agb_table
+        self.sn1a_table = basic_ssp.sn1a_table
+        self.bh_table = basic_ssp.bh_table
         self.inverse_imf = basic_ssp.inverse_imf
 
 def initialise_stuff(a):
@@ -98,8 +98,7 @@ def initialise_stuff(a):
     elif a.basic_sfr_name == 'doubly_peaked':
         basic_sfr.doubly_peaked(S0 = a.mass_factor*a.S_0, peak_ratio = a.peak_ratio, decay = a.sfr_decay, t0 = a.sfr_t0, peak1t0 = a.peak1t0, peak1sigma = a.peak1sigma)
 
-    basic_sfr.sfr = np.divide(basic_sfr.sfr,sum(basic_sfr.sfr))
-
+    basic_sfr.sfr = np.divide(basic_sfr.sfr,sum(basic_sfr.sfr))*a.shortened_sfr_rescaling
 
     basic_infall = INFALL(np.copy(basic_sfr.t),np.copy(basic_sfr.sfr))
     if a.basic_infall_name == 'exponential':
@@ -231,12 +230,14 @@ def Chempy_all_times(a):
 
         time_steps = np.copy(basic_sfr.t[:j])
         basic_ssp.calculate_feedback(float(metallicity), list(elements_to_trace), list(element_fractions), np.copy(time_steps))
-
-        print("agb table for first two time steps")
-        for el in a.elements_to_trace:
-            print(el,basic_ssp.table[el][:2])
-
         cube.advance_one_step(i+1,np.copy(basic_ssp.table),np.copy(basic_ssp.sn2_table),np.copy(basic_ssp.agb_table),np.copy(basic_ssp.sn1a_table),np.copy(basic_ssp.bh_table))
+
+        if i==len(basic_sfr.t)-2:
+            print('ism-gas',cube.cube['gas'])
+            print('ism-Z',cube.cube['Z'])
+            print('ism-O',cube.cube['O'])
+            print('corona-Z',cube.gas_reservoir['Z'])
+            print('corona-gas',cube.gas_reservoir['gas'])
 
         for item in elements_to_trace:
             if cube.cube[item][i]<0:

@@ -640,17 +640,23 @@ class SSP(object):
             #number_of_stars_in_mass_range_for_remnant = imf_mass_fraction_non_nativ(self.dn,self.x,self.sn1a_min,self.sn1a_max) ##Analytic result for Chabrier IMF and sn1a min max 1,8: 0.182189794774
             #mass_of_stars_in_mass_range_for_remnant = imf_mass_fraction_non_nativ(self.dm,self.x,self.sn1a_min,self.sn1a_max) ##Analytic result for Chabrier IMF and sn1a min max 1,8: 0.398074766434
 
-            full_time = list(self.t)
-            while full_time[-1] < end_of_time:
-                full_time.append(full_time[-1]+self.dt)
-            full_time = np.array(full_time)
-            feedback_number = np.zeros_like(full_time)
-            for i in range(len(full_time)):
-                if full_time[i]>=tau_8:
-                    feedback_number[i] = np.power(np.divide(full_time[i],tau_8),-1*s_exponent) * np.divide(s_exponent-1,tau_8)# * N_0 * number_of_stars_in_mass_range_for_remnant
-            feedback_number = np.divide(feedback_number,sum(feedback_number)) * N_0# * number_of_stars_in_mass_range_for_remnant
 
-            print(full_time,feedback_number)
+            # NB: We now normalize DTD by the integrated function over the universe age rather than a discrete sum
+
+            # full_time = list(self.t)
+            # while full_time[-1] < end_of_time:
+            #     full_time.append(full_time[-1]+self.dt)
+            # full_time = np.array(full_time)
+
+            feedback_number = np.zeros_like(self.t)
+            feedback_number[self.t>=tau_8] = N_0*np.power(self.t[self.t>=tau_8],-1.*s_exponent)*(1.-s_exponent)*self.dt/(end_of_time**(1.-s_exponent)-tau_8**(1.-s_exponent))
+            # feedback_number = np.zeros_like(full_time)
+            # for i in range(len(full_time)):
+            #     if full_time[i]>=tau_8:
+            #         feedback_number[i] = np.power(np.divide(full_time[i],tau_8),-1*s_exponent) * np.divide(s_exponent-1,tau_8)# * N_0 * number_of_stars_in_mass_range_for_remnant
+            # feedback_number = np.divide(feedback_number,sum(feedback_number)) * N_0# * number_of_stars_in_mass_range_for_remnant
+            #
+            # print(full_time,feedback_number)
 
             #N_0 now is the number of SN1a per 1Msun
             if stochastic_IMF:
@@ -680,7 +686,7 @@ class SSP(object):
             #=1.19
             self.mean_accretion_mass = self.mean_mass_of_feedback - self.mean_remnant_mass ## This comes from Hydrogen feedback following the single degenerate prescription
             #=0.18
-            feedback_number = feedback_number[:len(self.t)]
+            #feedback_number = feedback_number[:len(self.t)]
             feedback_mass = feedback_number * self.mean_mass_of_feedback
             #feedback_number = np.interp(self.t,full_time,feedback_number)
             self.sn1a_feedback_mass = feedback_mass
@@ -769,7 +775,6 @@ class SSP(object):
                     except KeyError:
                         tables_to_interpolate[s][element_name] = np.inf
                         print("SN Ia Key error")
-
             #tables_to_interpolate[s]['mass_in_remnants'] = self.sn1a_yields[metallicity_key]['mass_in_remnants']
             ########## end of loop which is metallicity independent
 
@@ -780,7 +785,6 @@ class SSP(object):
                 self.table[element_name] += self.sn1a_feedback_mass * tables_to_interpolate[0][element_name]
                 self.sn1a_table[element_name] += self.sn1a_feedback_mass * tables_to_interpolate[0][element_name]
             #tables_to_interpolate[0]['mass_in_remnants']
-
         else:
             if self.interpolation_scheme == 'linear':
                 distance = metallicity_list[1]-metallicity_list[0]
