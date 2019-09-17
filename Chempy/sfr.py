@@ -8,15 +8,15 @@ class SFR(object):
                Upon initialization the time steps need to be provided
 
                INPUT:
-               
+
                   start = beginning of the simulation
-               
+
                   end = end of the simulation
-               
+
                   time_steps = number of time_steps
 
                OUTPUT:
-               
+
                   dt, timespan and t will be exposed by the class.
                '''
                self.start = start
@@ -31,7 +31,7 @@ class SFR(object):
                This was the method to load the Just Jahreiss 2010 Model A from txt
                '''
                #Model A SFR from Just & Jahreiss 2010
-               
+
                ## this function can be used to read in the model A at different radii
                def read_model(time,r):
                      radius = sum(r) * 0.5
@@ -45,7 +45,7 @@ class SFR(object):
                      return np.interp(time,time_model,age_distribution_model)
                self.sfr = (self.t + t0)/(self.t**2 + t1**2)**2
                self.sfr = np.divide(self.sfr,sum(self.sfr)/(np.divide(1.,self.dt)*S0))
-  
+
         def doubly_peaked(self,S0 = 45.07488, peak_ratio = 1., decay = 2., t0 = 2., peak1t0 = 0.5, peak1sigma = 0.5):
                '''
                a doubly peaked SFR with quite a few parameters
@@ -89,4 +89,3 @@ class SFR(object):
                self.sfr = np.interp(self.t,time_temp/1e9,sfr)
                self.sfr = np.divide(self.sfr * total_sfr, sum(self.sfr))[::-1]
                self.sfr /= 10000
-

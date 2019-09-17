@@ -167,7 +167,7 @@ def shorten_sfr(a,age=None):
     cut_sfr_mass = gammainc(a.a_parameter,star_time/a.sfr_scale)
     full_sfr_mass = gammainc(a.a_parameter,init_end/a.sfr_scale)
     a.shortened_sfr_rescaling = cut_sfr_mass/full_sfr_mass
-    
+
     if fraction_of_mean_sfr<0.05:
         return np.inf
     else:

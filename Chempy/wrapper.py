@@ -70,7 +70,6 @@ class SSP_wrap():
 
         # exposing these tables to the outside wrapper
         self.table = basic_ssp.table
-        print("ONLY USING 1a FEEDBACK")
         self.sn2_table = basic_ssp.sn2_table
         self.agb_table = basic_ssp.agb_table
         self.sn1a_table = basic_ssp.sn1a_table
@@ -232,12 +231,12 @@ def Chempy_all_times(a):
         basic_ssp.calculate_feedback(float(metallicity), list(elements_to_trace), list(element_fractions), np.copy(time_steps))
         cube.advance_one_step(i+1,np.copy(basic_ssp.table),np.copy(basic_ssp.sn2_table),np.copy(basic_ssp.agb_table),np.copy(basic_ssp.sn1a_table),np.copy(basic_ssp.bh_table))
 
-        if i==len(basic_sfr.t)-2:
-            print('ism-gas',cube.cube['gas'])
-            print('ism-Z',cube.cube['Z'])
-            print('ism-O',cube.cube['O'])
-            print('corona-Z',cube.gas_reservoir['Z'])
-            print('corona-gas',cube.gas_reservoir['gas'])
+        # if i==len(basic_sfr.t)-2:
+        #     print('ism-gas',cube.cube['gas'])
+        #     print('ism-Z',cube.cube['Z'])
+        #     print('ism-O',cube.cube['O'])
+        #     print('corona-Z',cube.gas_reservoir['Z'])
+        #     print('corona-gas',cube.gas_reservoir['gas'])
 
         for item in elements_to_trace:
             if cube.cube[item][i]<0:
