@@ -1,3 +1,5 @@
+[![DOI](https://zenodo.org/badge/162767887.svg)](https://zenodo.org/badge/latestdoi/162767887)
+
 # ChempyMulti - Multi-Star Bayesian Inference with Chempy
 This is an updated version of the [*Chempy*](http://github.com/jan-rybizki/Chempy) software, including yield table scoring as described in Philcox, Rybizki & Gutke (2018, *ApJ*, [arXiv](https://arxiv.org/abs/1712.05686)), and multi-star Bayesian inference as described in Philcox & Rybizki (2019, submitted to *ApJ*, [arXiv](https://arxiv.org/abs/1909.00812)). This replaces the [*ChempyScoring*](https://github.com/oliverphilcox/ChempyScoring) package.
 
