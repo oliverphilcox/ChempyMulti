@@ -33,7 +33,7 @@ class SN1a_feedback(object):
     def linear_fit(self):
         """ Load the linear model of the SN1a yields of TNG.
         (This is just equal to TNG yields since it is a 1-parameter model)"""
-        dat = np.load(localpath+'input/tng_fit_sn1a.npz',allow_pickle=True) # load in data-file
+        dat = np.load(localpath+'input/tng_fit_sn1a_centered.npz',allow_pickle=True) # load in data-file
 
         self.metallicities = dat.f.metallicities
         self.mnasses = dat.f.masses
@@ -314,7 +314,7 @@ class SN2_feedback(object):
 
     def linear_fit(self):
         """ Load a linear fit to the SN2 yields of TNG"""
-        dat = np.load(localpath+'input/tng_fit_sn2.npz',allow_pickle=True) # load in data-file
+        dat = np.load(localpath+'input/tng_fit_sn2_centered.npz',allow_pickle=True) # load in data-file
 
         self.metallicities = dat.f.metallicities
         self.mnasses = dat.f.masses
@@ -1416,7 +1416,7 @@ class AGB_feedback(object):
 
     def linear_fit(self):
         """ Load a linear fit to the AGB yields of TNG"""
-        dat = np.load(localpath+'input/tng_fit_agb.npz',allow_pickle=True) # load in data-file
+        dat = np.load(localpath+'input/tng_fit_agb_centered.npz',allow_pickle=True) # load in data-file
 
         self.metallicities = dat.f.metallicities
         self.mnasses = dat.f.masses
